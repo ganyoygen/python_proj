@@ -132,9 +132,9 @@ if __name__ == "__main__":
         try:
             # print('Conecting to server...')
             db = mysql.connector.connect(
-                host="192.168.10.5",
+                host="127.0.0.1",
                 user="root",
-                passwd="",
+                passwd="root",
                 database="pares_staff"
                 )
             #   cursor = db.cursor()
