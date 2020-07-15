@@ -1,0 +1,10 @@
+git config --global user.name "ganyoygen"
+git config --global user.name "ganyoy.gen@gmail.com"
+git init
+git remote add origin https://github.com/ganyoygen/python_proj.git
+git pull origin master
+
+
+git add <./file> 		# add file 
+git commit -m "" 		# commit new update
+git push origin master 		# sync to github
