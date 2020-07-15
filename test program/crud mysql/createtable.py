@@ -3,9 +3,9 @@
 import mysql.connector
 
 db = mysql.connector.connect(
-  host="127.0.0.1",
+  host="192.168.10.5",
   user="root",
-  passwd="root",
+  passwd="",
   database='pares_staff'
 )
 

@@ -31,6 +31,13 @@ box_input = (Entry(
 
 def do_it():
     print("Input data:",inputan.get())
+    label2 = (Label(
+    root,
+    text = inputan.get(),    
+    font =('arial,',20,'bold'),    
+    fg="black")
+    .place(x=10, y=250)    
+    )
 
 startbutton = (Button(
     root,
