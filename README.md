@@ -1,1 +1,1 @@
-# python_proj
+Belajar python untuk project
