@@ -2,9 +2,11 @@ import tkinter
 from tkinter import *
 from tkinter import ttk
 from tkinter.scrolledtext import ScrolledText
+from tkinter import messagebox
 import mysql.connector
 import datetime
 import time
+
 
 
 root = Tk()
@@ -218,10 +220,10 @@ class Petugas:
                 sqlkode = "SELECT max(petugas_kode) FROM petugas"
                 sql = "SELECT petugas_kode FROM petugas"
                 cur.execute(sqlkode)
-                cuv.execute(sql)
+                # cuv.execute(sql)
                 maxkode = cur.fetchone()
                 
-                if cuv.rowcount> 0:      
+                if cuv.rowcount < 0:      
                     autohit = int(maxkode[0])+1
                     hits = "000"+str(autohit)
                     if len(hits) == 4:
