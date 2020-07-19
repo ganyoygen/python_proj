@@ -34,10 +34,10 @@ class SplashScreen:
         
     def start(self):
         self.progress["value"] = 0
-        self.maxbytes = 50000
-        self.progress["maximum"] = 50000
+        self.maxbytes = 10000
+        self.progress["maximum"] = 10000
         self.read_bytes()
-        if self.progress["value"] == 60000:
+        if self.progress["value"] == 10000:
             self.parent.destroy()
             if self.parent.destroy:
                 import login
