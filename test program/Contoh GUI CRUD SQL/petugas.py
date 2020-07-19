@@ -176,9 +176,12 @@ class Petugas:
                 self.trvTabel.bind("<Double-1>", self.OnDoubleClick)
                 sbVer = Scrollbar(self.fr_data, orient='vertical',command=self.trvTabel.yview)
                 sbVer.pack(side=RIGHT, fill=Y)
-                
+                sbVer = Scrollbar(self.fr_data, orient='horizontal',command=self.trvTabel.xview)
+                sbVer.pack(side=BOTTOM, fill=X)
+
                 self.trvTabel.pack(side=TOP, fill=BOTH)
                 self.trvTabel.configure(yscrollcommand=sbVer.set)
+                self.trvTabel.configure(xscrollcommand=sbVer.set)
                 self.table()
                 
         def table(self):
