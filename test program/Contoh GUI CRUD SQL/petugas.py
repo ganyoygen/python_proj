@@ -64,7 +64,7 @@ class Petugas:
                 con = mysql.connector.connect(db="db_petugas", user="root", passwd="root", host="127.0.0.1", port=3306,autocommit=True)
                 cur = con.cursor()
                 sql = "SELECT petugas_nama, petugas_tgl_lahir, petugas_alamat,petugas_no_hp FROM petugas WHERE petugas_kode = %s"
-                cur.execute(sql,cKode)
+                cur.execute(sql,(cKode,))
                 data = cur.fetchone()
                 
         
@@ -260,7 +260,7 @@ class Petugas:
                 self.entKode.config(state="normal")
                 cKode = self.entKode.get()
                 sql = "DELETE FROM petugas WHERE petugas_kode =%s"
-                cur.execute(sql,cKode)
+                cur.execute(sql,(cKode,))
                 self.onClear()
                 messagebox.showinfo(title="Informasi", \
                                     message="Data sudah di hapus.")
