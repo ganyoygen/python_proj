@@ -209,8 +209,7 @@ class Petugas:
                 self.trvTabel.tag_configure("ganjil", background="#FFFFFF")
                 self.trvTabel.tag_configure("genap", background="whitesmoke")
                 cur.close()
-                con.close()        
-                       
+                con.close()                              
 
         def auto(self):
                 con = mysql.connector.connect(db='db_petugas', user='root', passwd='root', host='127.0.0.1', port=3306,autocommit=True)
@@ -251,9 +250,9 @@ class Petugas:
                     self.entNama.focus_set()
                     
                 self.entKode.config(state="readonly")
+        
         def onClose(self, event=None):
                 self.parent.destroy()
-
 
         def onDelete(self):
                 con = mysql.connector.connect(db='db_petugas', user='root', passwd='root', host='127.0.0.1', port=3306,autocommit=True)
@@ -268,7 +267,6 @@ class Petugas:
                 
                 cur.close()
                 con.close()
-
 
         def onClear(self):
                 self.btnSave.config(state="normal")
@@ -287,7 +285,6 @@ class Petugas:
         
                 self.auto()
                 self.entNama.focus_set()
-
                         
         def onSave(self):
         
