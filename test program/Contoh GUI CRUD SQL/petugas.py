@@ -41,7 +41,6 @@ class Petugas:
                 setTengahX = (self.parent.winfo_screenwidth()-lebar)//2
                 setTengahY = (self.parent.winfo_screenheight()-tinggi)//2
                 self.parent.geometry("%ix%i+%i+%i" %(lebar, tinggi,setTengahX, setTengahY))
-                self.parent.overrideredirect(1)
                 self.aturKomponen()
                 self.auto()
                 
@@ -101,7 +100,10 @@ class Petugas:
                 Label(frameWin, text='PETUGAS',bg="#666",fg="white").pack(side=LEFT,padx=20)
                 buttonx = Button(frameWin, text="X",fg="white", bg="#FA8072", width=6, height=2,bd=0,\
                                  activebackground="#FB8072",activeforeground="white", command=self.onClose, relief=FLAT)
-                buttonx.pack(side=RIGHT)
+                # Menghilangkan Frame windows
+                # self.parent.overrideredirect(1) 
+                # buttonx.pack(side=RIGHT)
+                #
                 mainFrame = Frame(self.parent)
                 mainFrame.pack(side=TOP,fill=X)
                 btnFrame = Frame(self.parent)
