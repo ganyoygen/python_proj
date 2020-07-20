@@ -1,0 +1,32 @@
+--
+-- Database: `proj_pares`
+--
+CREATE DATABASE IF NOT EXISTS `proj_pares` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `proj_pares`;
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `logbook`
+--
+
+CREATE TABLE IF NOT EXISTS `logbook` (
+  `no` INT AUTO_INCREMENT,
+  `no_wo` varchar(7) NOT NULL,
+  `no_ifca` varchar(10) NOT NULL,
+  `date_creat` date NOT NULL,
+  `unit` varchar(12) NOT NULL,
+  `work_req` varchar(100) NOT NULL,
+  `staff` varchar(16) NOT NULL,
+  `work_act` varchar(100) NOT NULL,
+  `date_done` date NOT NULL,
+  `time_done` varchar(10) NOT NULL,
+  `received` BOOLEAN,
+  `wo_receiver` varchar(16) NOT NULL,
+  `date_received` date NOT NULL,
+  PRIMARY KEY (`no`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data untuk tabel `logbook`
+--
