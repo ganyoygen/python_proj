@@ -66,7 +66,7 @@ class Petugas:
                 cKode = self.entWo.get()
                 con = mysql.connector.connect(db="proj_pares", user="root", passwd="", host="192.168.10.5", port=3306,autocommit=True)
                 cur = con.cursor()
-                sql = "SELECT no_wo, no_ifca, date_creat, unit, work_req, staff FROM logbook WHERE no_wo = %s"
+                sql = "SELECT no_wo, no_ifca, date_creat, unit, work_req, staff, date_done, time_done, work_act FROM logbook WHERE no_wo = %s"
                 cur.execute(sql,(cKode,))
                 data = cur.fetchone()
                 
@@ -87,12 +87,12 @@ class Petugas:
                 self.entHari.insert(END, pecahHari)
                 self.entBulan.insert(END, pecahBulan)
                 self.entTahun.insert(END, pecahTahun)
-                
                 self.entUnit.insert(END, data[3])
                 self.entWorkReq.insert(END, data[4])
                 self.entStaff.insert(END, data[5])
-                # self.entWorkAct.insert(END, data[6]) #ERROR TUPPLE
-                # self.entJamdone.insert(END, data[8])
+                self.entHaridone.insert(END, data[6])
+                self.entJamdone.insert(END, data[7])
+                self.entWorkAct.insert(END, data[8]) 
                 self.entWo.config(state="disable")
                 self.btnSave.config(state="disable")
                 self.btnUpdate.config(state="normal")
