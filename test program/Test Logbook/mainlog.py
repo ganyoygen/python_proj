@@ -37,7 +37,7 @@ class Petugas:
                 self.parent = parent
                 self.parent.protocol("WM_DELETE_WINDOWS", self.keluar)
                 lebar=950
-                tinggi=700
+                tinggi=600
                 setTengahX = (self.parent.winfo_screenwidth()-lebar)//2
                 setTengahY = (self.parent.winfo_screenheight()-tinggi)//2
                 self.parent.geometry("%ix%i+%i+%i" %(lebar, tinggi,setTengahX, setTengahY))
@@ -48,7 +48,6 @@ class Petugas:
                 self.parent.destroy()
                 
         def OnDoubleClick(self, event):
-
                 self.entWo.config(state="normal")
                 self.entWo.delete(0, END)
                 self.entIfca.delete(0, END)
@@ -56,12 +55,14 @@ class Petugas:
                 self.entUnit.delete(0, END)
                 self.entWorkReq.delete('1.0', 'end')
                 self.entStaff.delete(0, END)
+                self.entHaridone.delete(0, END)
+                self.entJamdone.delete(0, END)
+                self.entWorkAct.delete('1.0', 'end')
             
                 it = self.trvTabel.selection()[0]
                 ck = str(self.trvTabel.item(it,"values"))[2:8]
                     
                 self.entWo.insert(END, ck)
-                
                 cKode = self.entWo.get()
                 con = mysql.connector.connect(db="proj_pares", user="root", passwd="", host="192.168.10.5", port=3306,autocommit=True)
                 cur = con.cursor()
@@ -72,7 +73,7 @@ class Petugas:
         
                 self.entIfca.insert(END, data[1])
                 
-                #TGL Lahir
+                #TGL buat
                 self.entHari.insert(END, data[2])
                 cTglLahir = self.entHari.get()
                 
@@ -90,6 +91,8 @@ class Petugas:
                 self.entUnit.insert(END, data[3])
                 self.entWorkReq.insert(END, data[4])
                 self.entStaff.insert(END, data[5])
+                # self.entWorkAct.insert(END, data[6]) #ERROR TUPPLE
+                # self.entJamdone.insert(END, data[8])
                 self.entWo.config(state="disable")
                 self.btnSave.config(state="disable")
                 self.btnUpdate.config(state="normal")
@@ -112,10 +115,11 @@ class Petugas:
                 btnFrame.pack(side=TOP, fill=X)
                 tabelFrame = Frame(self.parent)
                 tabelFrame.pack( expand=YES, side=TOP,fill=Y)
-       
-                Label(mainFrame, text='  ').grid(row=0, column=0)
-                Label(btnFrame, text='  ').grid(row=1, column=0)
 
+                Label(mainFrame, text=' ').grid(row=0, column=0)
+                Label(btnFrame, text=' ').grid(row=1, column=0)
+
+                #samping kiri
                 Label(mainFrame, text='No WO').grid(row=1, column=0, sticky=W,padx=20)
                 Label(mainFrame, text=':').grid(row=1, column=1, sticky=W,pady=5,padx=10)
                 self.entWo = Entry(mainFrame, width=20)
@@ -125,20 +129,20 @@ class Petugas:
                 Label(mainFrame, text=':').grid(row=2, column=1, sticky=W,pady=5,padx=10)
                 self.entIfca = Entry(mainFrame, width=20)
                 self.entIfca.grid(row=2, column=2,sticky=W)
-
+                
+                #tglbuat
                 Label(mainFrame, text="Tanggal").grid(row=3, column=0, sticky=W,padx=20)
                 Label(mainFrame, text=':').grid(row=3, column=1, sticky=W,pady=5,padx=10)
-
-                #tgl
-                tgl = Frame(mainFrame)
-                tgl.grid(row=3,column=2,sticky=W)
-                self.entHari = Entry(tgl, width=5)
+              
+                tglbuat = Frame(mainFrame)
+                tglbuat.grid(row=3,column=2,sticky=W)
+                self.entHari = Entry(tglbuat, width=5)
                 self.entHari.grid(row=1, column=0,sticky=W)
-                self.entBulan = Entry(tgl, width=5)
+                self.entBulan = Entry(tglbuat, width=5)
                 self.entBulan.grid(row=1, column=1,sticky=W,padx=2)
-                self.entTahun = Entry(tgl, width=10)
+                self.entTahun = Entry(tglbuat, width=10)
                 self.entTahun.grid(row=1, column=2,sticky=W,padx=2)
-                Label(tgl, text='(dd/mm/yyyy)').grid(row=1, column=3, sticky=E,padx=5)
+                Label(tglbuat, text='(dd/mm/yyyy)').grid(row=1, column=3, sticky=E,padx=5)
                 
                 Label(mainFrame, text="Unit").grid(row=4, column=0, sticky=W,padx=20)
                 Label(mainFrame, text=':').grid(row=4, column=1, sticky=W,pady=5,padx=10)             
@@ -155,7 +159,31 @@ class Petugas:
                 self.entStaff = Entry(mainFrame, width=20)
                 self.entStaff.grid(row=6, column=2,sticky=W)
 
+                #samping kanan
+                #tgldone
+                Label(mainFrame, text="Tanggal Selesai").grid(row=3, column=3, sticky=W,padx=20)
+                Label(mainFrame, text=':').grid(row=3, column=4, sticky=W,pady=5,padx=10)
+                tgldone = Frame(mainFrame)
+                tgldone.grid(row=3,column=5,sticky=W)
+                self.entHaridone = Entry(tgldone, width=5)
+                self.entHaridone.grid(row=1, column=0,sticky=W)
+                self.entBulandone = Entry(tgldone, width=5)
+                self.entBulandone.grid(row=1, column=1,sticky=W,padx=2)
+                self.entTahundone = Entry(tgldone, width=10)
+                self.entTahundone.grid(row=1, column=2,sticky=W,padx=2)
+                Label(tgldone, text='(dd/mm/yyyy)').grid(row=1, column=3, sticky=E,padx=5)
 
+                Label(mainFrame, text="Jam Selesai").grid(row=4, column=3, sticky=W,padx=20)
+                Label(mainFrame, text=':').grid(row=4, column=4, sticky=W,pady=5,padx=10)             
+                self.entJamdone = Entry(mainFrame, width=10)
+                self.entJamdone.grid(row=4, column=5,sticky=W)
+
+                Label(mainFrame, text="Work Action").grid(row=5, column=3, sticky=NW,padx=20)
+                Label(mainFrame, text=':').grid(row=5, column=4, sticky=NW,padx=10,pady=6)
+                self.entWorkAct = ScrolledText(mainFrame,height=4,width=35)
+                self.entWorkAct.grid(row=5, column=5,sticky=W)
+
+                #panel button
                 self.btnSave = Button(btnFrame, text='Save',\
                                         command=self.onSave, width=10,\
                                         relief=FLAT, bd=2, bg="#666", fg="white",activebackground="#444",activeforeground="white" )
@@ -191,9 +219,7 @@ class Petugas:
                 self.trvTabel.configure(xscrollcommand=sbVer.set)
                 self.table()
                 
-        def table(self):
-
-        
+        def table(self):    
                 con = mysql.connector.connect(db="proj_pares", user="root", passwd="", host="192.168.10.5", port=3306,autocommit=True)
                 cur = con.cursor()
                 cur.execute("SELECT * FROM logbook")
@@ -202,18 +228,17 @@ class Petugas:
                 for kolom in judul_kolom:
                     self.trvTabel.heading(kolom,text=kolom)
 
-                self.trvTabel.column("No WO", width=80,anchor="w")
+                self.trvTabel.column("No WO", width=50,anchor="w")
                 self.trvTabel.column("No IFCA", width=80,anchor="w")
                 self.trvTabel.column("Tanggal", width=80,anchor="w")
                 self.trvTabel.column("UNIT", width=80,anchor="w")
                 self.trvTabel.column("Work Request", width=120,anchor="w")
-                self.trvTabel.column("Staff", width=80,anchor="w")
+                self.trvTabel.column("Staff", width=70,anchor="w")
                 self.trvTabel.column("Work Action", width=120,anchor="w")
                 self.trvTabel.column("Tanggal Done", width=80,anchor="w")
                 self.trvTabel.column("Jam Done", width=40,anchor="w")
                 self.trvTabel.column("Received", width=40,anchor="w")
             
-
                 i=0
                 for dat in data_table:
                     if(i%2):
@@ -306,6 +331,11 @@ class Petugas:
                 self.entUnit.delete(0, END)
                 self.entWorkReq.delete('1.0', 'end')
                 self.entStaff.delete(0, END)
+                self.entHaridone.delete(0, END)
+                self.entBulandone.delete(0, END)
+                self.entTahundone.delete(0, END)
+                self.entJamdone.delete(0, END)
+                self.entWorkAct.delete('1.0', 'end')
                 self.trvTabel.delete(*self.trvTabel.get_children())
                 self.fr_data.after(0, self.table())
         
@@ -313,7 +343,6 @@ class Petugas:
                 self.entWo.focus_set()
                         
         def onSave(self):
-        
                 con = mysql.connector.connect(db='proj_pares', user='root', passwd='', host='192.168.10.5', port=3306,autocommit=True)
  
                 cKode = self.entWo.get()
@@ -344,28 +373,33 @@ class Petugas:
                 
         def onUpdate(self):
                 cKode = self.entWo.get()
-                
                 if len(cKode) == 0:
                         messagebox.showwarning(title="Peringatan",message="Kode kosong.")
                         self.entWo.focus_set()
-
                 else:
                         con = mysql.connector.connect(db='proj_pares', user='root', passwd='', host="192.168.10.5",\
                                       port=3306, autocommit=True)
                         cur = con.cursor()
+                        #panel kiri
                         cKode = self.entWo.get()
                         cIfca = self.entIfca.get()
-
-                        ####
                         cHari = self.entHari.get()
                         cBulan = self.entBulan.get()
                         cTahun = self.entTahun.get()
-                        dLahir = datetime.date(int(cTahun),int(cBulan),int(cHari))
+                        ctglbuat = datetime.date(int(cTahun),int(cBulan),int(cHari))
                         cWorkReq = self.entWorkReq.get('1.0', 'end')
                         cStaff = self.entStaff.get()
                         
-                        sql = "UPDATE logbook SET no_ifca=%s, date_creat=%s, work_req=%s,staff=%s WHERE no_wo =%s"
-                        cur.execute(sql,(cIfca,dLahir,cWorkReq,cStaff,cKode))
+                        #panel kanan
+                        dHari = self.entHaridone.get()
+                        dBulan = self.entBulandone.get()
+                        dTahun = self.entTahundone.get()
+                        tgldone = datetime.date(int(dHari),int(dBulan),int(dTahun))
+                        jamdone = self.entJamdone.get()
+                        cWorkAct = self.entWorkAct.get('1.0', 'end')
+
+                        sql = "UPDATE logbook SET no_ifca=%s,date_creat=%s,work_req=%s,staff=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_wo =%s"
+                        cur.execute(sql,(cIfca,ctglbuat,cWorkReq,cStaff,tgldone,jamdone,cWorkAct,cKode))
                         self.onClear()
                         messagebox.showinfo(title="Informasi", \
                                     message="Data sudah di terupdate.")
