@@ -48,7 +48,22 @@ class Petugas:
                 self.parent.destroy()
                 
         def onReceived(self):
-                messagebox.showinfo(title="Informasi",message="Received diclick.")
+                cKode = self.entWo.get()
+                if len(cKode) == 0:
+                        messagebox.showwarning(title="Peringatan",message="Kode kosong.")
+                        self.entWo.focus_set()
+                else:
+                        from datetime import datetime
+                        con = mysql.connector.connect(db='proj_pares', user='root', passwd='', host="192.168.10.5",\
+                                      port=3306, autocommit=True)
+                        cur = con.cursor()
+                        setreceived = True
+                        tsekarang = datetime.now()
+                        sql = "UPDATE logbook SET date_received=%s,received=%s WHERE no_wo =%s"
+                        cur.execute(sql,(tsekarang,setreceived,cKode))
+                        self.onClear()
+                        messagebox.showinfo(title="Informasi", \
+                                    message="Wo {} sudah diterima.".format(cKode))                
 
         def OnDoubleClick(self, event):
                 self.entWo.config(state="normal")
