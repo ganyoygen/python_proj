@@ -104,7 +104,7 @@ class Petugas:
                 WindowDraggable(frameWin)
                 Label(frameWin, text='PETUGAS',bg="#666",fg="white").pack(side=LEFT,padx=20)
                 buttonx = Button(frameWin, text="X",fg="white", bg="#FA8072", width=6, height=2,bd=0,\
-                                 activebackground="#FB8072",activeforeground="white", command=self.onClose, relief=FLAT)
+                                 activebackground="#FB8072",activeforeground="white", command=self.keluar, relief=FLAT)
                 # Menghilangkan Frame windows
                 # self.parent.overrideredirect(1) 
                 # buttonx.pack(side=RIGHT)
@@ -301,9 +301,6 @@ class Petugas:
                     
                 self.entWo.config(state="readonly")
         
-        def onClose(self, event=None):
-                self.parent.destroy()
-
         def onDelete(self):
                 con = mysql.connector.connect(db='proj_pares', user='root', passwd='', host='192.168.10.5', port=3306,autocommit=True)
                 cur = con.cursor()
