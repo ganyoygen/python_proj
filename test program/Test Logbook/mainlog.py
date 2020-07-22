@@ -76,6 +76,11 @@ class Petugas:
                 self.entTgldone.delete(0, END)
                 self.entJamdone.delete(0, END)
                 self.entWorkAct.delete('1.0', 'end')
+
+                self.btnSave.config(state="disable")
+                self.btnUpdate.config(state="normal")
+                self.btnDelete.config(state="normal")
+                self.btnReceived.config(state="normal")
             
                 it = self.trvTabel.selection()[0]
                 ck = str(self.trvTabel.item(it,"values"))[2:8]
@@ -118,11 +123,7 @@ class Petugas:
 
                 self.entJamdone.insert(END, data[7])
                 self.entWorkAct.insert(END, data[8]) 
-                self.entWo.config(state="readonly")
-                self.btnSave.config(state="disable")
-                self.btnUpdate.config(state="normal")
-                self.btnDelete.config(state="normal")
-                self.btnReceived.config(state="normal")
+                
                 
         def aturKomponen(self):
                 frameWin = Frame(self.parent, bg="#666")
