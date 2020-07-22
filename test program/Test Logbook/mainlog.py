@@ -3,7 +3,6 @@ from tkinter import *
 from tkinter import ttk
 from tkinter.scrolledtext import ScrolledText
 from tkinter import messagebox
-from datetime import datetime
 import mysql.connector
 import datetime
 import time
@@ -13,7 +12,6 @@ import os
 
 root = Tk()
 class WindowDraggable():
-
         def __init__(self, label):
                 self.label = label
                 label.bind('<ButtonPress-1>', self.StartMove)
@@ -34,7 +32,7 @@ class WindowDraggable():
                 root.geometry("+%s+%s" % (x, y))
                 
 judul_kolom = ("No WO","No IFCA","Tanggal","UNIT","Work Request","Staff","Work Action","Tanggal Done","Jam Done","Received")
-class Petugas:
+class Petugas:    
         def __init__(self, parent):
                 self.parent = parent
                 self.parent.protocol("WM_DELETE_WINDOWS", self.keluar)
@@ -59,6 +57,7 @@ class Petugas:
                                       port=3306, autocommit=True)
                         cur = con.cursor()
                         setreceived = True
+                        from datetime import datetime
                         tsekarang = datetime.now()
                         sql = "UPDATE logbook SET date_received=%s,received=%s WHERE no_wo =%s"
                         cur.execute(sql,(tsekarang,setreceived,cKode))
@@ -365,6 +364,7 @@ class Petugas:
         
                 self.auto()
                 self.entWo.focus_set()
+                os.system("cls")
                         
         def onSave(self):
                 con = mysql.connector.connect(db='proj_pares', user='root', passwd='', host='192.168.10.5', port=3306,autocommit=True)
