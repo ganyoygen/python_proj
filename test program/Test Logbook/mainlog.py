@@ -3,9 +3,11 @@ from tkinter import *
 from tkinter import ttk
 from tkinter.scrolledtext import ScrolledText
 from tkinter import messagebox
+from datetime import datetime
 import mysql.connector
 import datetime
 import time
+import os
 
 
 
@@ -53,7 +55,6 @@ class Petugas:
                         messagebox.showwarning(title="Peringatan",message="Kode kosong.")
                         self.entWo.focus_set()
                 else:
-                        from datetime import datetime
                         con = mysql.connector.connect(db='proj_pares', user='root', passwd='', host="192.168.10.5",\
                                       port=3306, autocommit=True)
                         cur = con.cursor()
@@ -73,7 +74,7 @@ class Petugas:
                 self.entUnit.delete(0, END)
                 self.entWorkReq.delete('1.0', 'end')
                 self.entStaff.delete(0, END)
-                self.entHaridone.delete(0, END)
+                self.entTgldone.delete(0, END)
                 self.entJamdone.delete(0, END)
                 self.entWorkAct.delete('1.0', 'end')
             
@@ -93,11 +94,11 @@ class Petugas:
                 
                 #TGL buat
                 self.entHari.insert(END, data[2])
-                cTglLahir = self.entHari.get()
+                getTgl = self.entHari.get()
                 
-                pecahTahun = str(cTglLahir[0]+cTglLahir[1]+cTglLahir[2]+cTglLahir[3])
-                pecahBulan = str(cTglLahir[5]+cTglLahir[6])
-                pecahHari = str(cTglLahir[8]+cTglLahir[9])
+                pecahTahun = str(getTgl[0]+getTgl[1]+getTgl[2]+getTgl[3])
+                pecahBulan = str(getTgl[5]+getTgl[6])
+                pecahHari = str(getTgl[8]+getTgl[9])
         
                 self.entHari.delete(0, END)
                 self.entBulan.delete(0, END)
@@ -108,10 +109,17 @@ class Petugas:
                 self.entUnit.insert(END, data[3])
                 self.entWorkReq.insert(END, data[4])
                 self.entStaff.insert(END, data[5])
-                self.entHaridone.insert(END, data[6])
+
+                self.entTgldone.insert(END, data[6])
+                getTgldone = self.entTgldone.get() #dari mysql YYYY-MM-DD
+                #balikin menjadi DD-MM-YYYY
+                showtgldone = str(getTgldone)[8:] + '-' + str(getTgldone)[5:7] +'-' + str(getTgldone)[:4]
+                self.entTgldone.delete(0, END)
+                self.entTgldone.insert(END, showtgldone)
+
                 self.entJamdone.insert(END, data[7])
                 self.entWorkAct.insert(END, data[8]) 
-                self.entWo.config(state="disable")
+                self.entWo.config(state="readonly")
                 self.btnSave.config(state="disable")
                 self.btnUpdate.config(state="normal")
                 self.btnDelete.config(state="normal")
@@ -184,12 +192,8 @@ class Petugas:
                 Label(mainFrame, text=':').grid(row=3, column=4, sticky=W,pady=5,padx=10)
                 tgldone = Frame(mainFrame)
                 tgldone.grid(row=3,column=5,sticky=W)
-                self.entHaridone = Entry(tgldone, width=5)
-                self.entHaridone.grid(row=1, column=0,sticky=W)
-                self.entBulandone = Entry(tgldone, width=5)
-                self.entBulandone.grid(row=1, column=1,sticky=W,padx=2)
-                self.entTahundone = Entry(tgldone, width=10)
-                self.entTahundone.grid(row=1, column=2,sticky=W,padx=2)
+                self.entTgldone = Entry(tgldone, width=15)
+                self.entTgldone.grid(row=1, column=0,sticky=W)
                 Label(tgldone, text='(dd/mm/yyyy)').grid(row=1, column=3, sticky=E,padx=5)
 
                 Label(mainFrame, text="Jam Selesai").grid(row=4, column=3, sticky=W,padx=20)
@@ -353,9 +357,7 @@ class Petugas:
                 self.entUnit.delete(0, END)
                 self.entWorkReq.delete('1.0', 'end')
                 self.entStaff.delete(0, END)
-                self.entHaridone.delete(0, END)
-                self.entBulandone.delete(0, END)
-                self.entTahundone.delete(0, END)
+                self.entTgldone.delete(0, END)
                 self.entJamdone.delete(0, END)
                 self.entWorkAct.delete('1.0', 'end')
                 self.trvTabel.delete(*self.trvTabel.get_children())
@@ -413,24 +415,32 @@ class Petugas:
                         cStaff = self.entStaff.get()
                         
                         #panel kanan
-                        dHari = self.entHaridone.get()
-                        dBulan = self.entBulandone.get()
-                        dTahun = self.entTahundone.get()
-                        tgldone = datetime.date(int(dHari),int(dBulan),int(dTahun))
-                        jamdone = self.entJamdone.get()
-                        cWorkAct = self.entWorkAct.get('1.0', 'end')
+                        dtglDone = self.entTgldone.get()
+                        str(dtglDone)
+                        if len(str(dtglDone)) == 10:
+                                dHari = str(dtglDone)[0:2]
+                                dBulan = str(dtglDone)[3:5]
+                                dTahun = str(dtglDone)[6:]
+                                tgldone = datetime.date(int(dTahun),int(dBulan),int(dHari))
+                                
+                                jamdone = self.entJamdone.get()
+                                cWorkAct = self.entWorkAct.get('1.0', 'end')
 
-                        sql = "UPDATE logbook SET no_ifca=%s,date_creat=%s,work_req=%s,staff=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_wo =%s"
-                        cur.execute(sql,(cIfca,ctglbuat,cWorkReq,cStaff,tgldone,jamdone,cWorkAct,cKode))
-                        self.onClear()
-                        messagebox.showinfo(title="Informasi", \
-                                    message="Data sudah di terupdate.")
+                                sql = "UPDATE logbook SET no_ifca=%s,date_creat=%s,work_req=%s,staff=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_wo =%s"
+                                cur.execute(sql,(cIfca,ctglbuat,cWorkReq,cStaff,tgldone,jamdone,cWorkAct,cKode))
+                                self.onClear()
+                                messagebox.showinfo(title="Informasi", \
+                                        message="Data sudah di terupdate.")
 
-                        cur.close()
-                        con.close()   
+                                cur.close()
+                                con.close()
+                        else:
+                                messagebox.showwarning(title="Warning", \
+                                        message="Format tanggal salah")
                      
 
 def main():
+    os.system("cls")
     Petugas(root)
     root.mainloop()
 main()
