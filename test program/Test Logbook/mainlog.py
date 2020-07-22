@@ -47,6 +47,9 @@ class Petugas:
         def keluar(self,event=None):
                 self.parent.destroy()
                 
+        def onReceived(self):
+                messagebox.showinfo(title="Informasi",message="Received diclick.")
+
         def OnDoubleClick(self, event):
                 self.entWo.config(state="normal")
                 self.entWo.delete(0, END)
@@ -97,6 +100,7 @@ class Petugas:
                 self.btnSave.config(state="disable")
                 self.btnUpdate.config(state="normal")
                 self.btnDelete.config(state="normal")
+                self.btnReceived.config(state="normal")
                 
         def aturKomponen(self):
                 frameWin = Frame(self.parent, bg="#666")
@@ -203,6 +207,11 @@ class Petugas:
                                         command=self.onDelete,state="disable", width=10,\
                                         relief=FLAT, bd=2, bg="#FC6042", fg="white",activebackground="#444",activeforeground="white")
                 self.btnDelete.grid(row=0,column=4,pady=10, padx=5)
+
+                self.btnReceived = Button(btnFrame, text='Received',\
+                                        command=self.onReceived,state="disable", width=10,\
+                                       relief=FLAT, bd=2, bg="#667", fg="white",activebackground="#444",activeforeground="white")
+                self.btnReceived.grid(row=0,column=5,pady=10, padx=5)
 
 
                 self.fr_data = Frame(tabelFrame, bd=10)
@@ -319,6 +328,7 @@ class Petugas:
                 self.btnSave.config(state="normal")
                 self.btnUpdate.config(state="disable")
                 self.btnDelete.config(state="disable")
+                self.btnReceived.config(state="disable")
                 self.entWo.config(state="normal")
                 self.entWo.delete(0, END)
                 self.entIfca.delete(0, END)
