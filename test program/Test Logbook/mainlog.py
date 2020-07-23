@@ -69,7 +69,7 @@ class Petugas:
                 self.entWo.config(state="normal")
                 self.entWo.delete(0, END)
                 self.entIfca.delete(0, END)
-                self.entHari.delete(0, END)
+                self.entTglbuat.delete(0, END)
                 self.entUnit.delete(0, END)
                 self.entWorkReq.delete('1.0', 'end')
                 self.entStaff.delete(0, END)
@@ -92,28 +92,33 @@ class Petugas:
                 sql = "SELECT no_wo, no_ifca, date_creat, unit, work_req, staff, date_done, time_done, work_act FROM logbook WHERE no_wo = %s"
                 cur.execute(sql,(cKode,))
                 data = cur.fetchone()
-                
         
                 self.entIfca.insert(END, data[1])
                 
                 #TGL buat
-                self.entHari.insert(END, data[2])
-                getTgl = self.entHari.get()
-                
-                pecahTahun = str(getTgl[0]+getTgl[1]+getTgl[2]+getTgl[3])
-                pecahBulan = str(getTgl[5]+getTgl[6])
-                pecahHari = str(getTgl[8]+getTgl[9])
-        
-                self.entHari.delete(0, END)
-                self.entBulan.delete(0, END)
-                self.entTahun.delete(0, END)
-                self.entHari.insert(END, pecahHari)
-                self.entBulan.insert(END, pecahBulan)
-                self.entTahun.insert(END, pecahTahun)
+                try:
+                        self.entTglbuat.insert(END, data[2])
+                        getTgl = self.entTglbuat.get() #dari mysql YYYY-MM-DD
+                        #balikin menjadi DD-MM-YYYY
+                        showtgl = str(getTgl)[8:] + '-' + str(getTgl)[5:7] +'-' + str(getTgl)[:4]
+                        self.entTglbuat.delete(0, END)
+                        self.entTglbuat.insert(END, showtgl)
+                except:
+                        pass
+                # pecahTahun = str(getTgl[0]+getTgl[1]+getTgl[2]+getTgl[3])
+                # pecahBulan = str(getTgl[5]+getTgl[6])
+                # pecahHari = str(getTgl[8]+getTgl[9])
+                # self.entTglbuat.delete(0, END)
+                # self.entBulan.delete(0, END)
+                # self.entTahun.delete(0, END)
+                # self.entTglbuat.insert(END, pecahHari)
+                # self.entBulan.insert(END, pecahBulan)
+                # self.entTahun.insert(END, pecahTahun)
                 self.entUnit.insert(END, data[3])
                 self.entWorkReq.insert(END, data[4])
                 self.entStaff.insert(END, data[5])
 
+                #TGL done
                 try: 
                         self.entTgldone.insert(END, data[6])
                         getTgldone = self.entTgldone.get() #dari mysql YYYY-MM-DD
@@ -162,20 +167,21 @@ class Petugas:
                 #tglbuat
                 Label(mainFrame, text="Tanggal").grid(row=3, column=0, sticky=W,padx=20)
                 Label(mainFrame, text=':').grid(row=3, column=1, sticky=W,pady=5,padx=10)
-              
                 tglbuat = Frame(mainFrame)
                 tglbuat.grid(row=3,column=2,sticky=W)
-                self.entHari = Entry(tglbuat, width=5)
-                self.entHari.grid(row=1, column=0,sticky=W)
-                self.entBulan = Entry(tglbuat, width=5)
-                self.entBulan.grid(row=1, column=1,sticky=W,padx=2)
-                self.entTahun = Entry(tglbuat, width=10)
-                self.entTahun.grid(row=1, column=2,sticky=W,padx=2)
+                self.entTglbuat = Entry(tglbuat, width=15)
+                self.entTglbuat.grid(row=1, column=0,sticky=W)
+                # self.entHari = Entry(tglbuat, width=5)
+                # self.entHari.grid(row=1, column=0,sticky=W)
+                # self.entBulan = Entry(tglbuat, width=5)
+                # self.entBulan.grid(row=1, column=1,sticky=W,padx=2)
+                # self.entTahun = Entry(tglbuat, width=10)
+                # self.entTahun.grid(row=1, column=2,sticky=W,padx=2)
                 Label(tglbuat, text='(dd/mm/yyyy)').grid(row=1, column=3, sticky=E,padx=5)
                 
                 Label(mainFrame, text="Unit").grid(row=4, column=0, sticky=W,padx=20)
                 Label(mainFrame, text=':').grid(row=4, column=1, sticky=W,pady=5,padx=10)             
-                self.entUnit = Entry(mainFrame, width=20)
+                self.entUnit = Entry(mainFrame, width=15)
                 self.entUnit.grid(row=4, column=2,sticky=W)
 
                 Label(mainFrame, text="Work Request").grid(row=5, column=0, sticky=NW,padx=20)
@@ -233,7 +239,6 @@ class Petugas:
                                         command=self.onReceived,state="disable", width=10,\
                                        relief=FLAT, bd=2, bg="#667", fg="white",activebackground="#444",activeforeground="white")
                 self.btnReceived.grid(row=0,column=5,pady=10, padx=5)
-
 
                 self.fr_data = Frame(tabelFrame, bd=10)
                 self.fr_data.pack(fill=BOTH, expand=YES)
@@ -353,9 +358,7 @@ class Petugas:
                 self.entWo.config(state="normal")
                 self.entWo.delete(0, END)
                 self.entIfca.delete(0, END)
-                self.entHari.delete(0, END)
-                self.entBulan.delete(0, END)
-                self.entTahun.delete(0, END)
+                self.entTglbuat.delete(0, END)
                 self.entUnit.delete(0, END)
                 self.entWorkReq.delete('1.0', 'end')
                 self.entStaff.delete(0, END)
@@ -374,29 +377,30 @@ class Petugas:
  
                 cKode = self.entWo.get()
                 cIfca = self.entIfca.get()
-
-                ####
-                cHari = self.entHari.get()
-                cBulan = self.entBulan.get()
-                cTahun = self.entTahun.get()
-                dCreate = datetime.date(int(cTahun),int(cBulan),int(cHari))
+                cTglBuat = self.entTglbuat.get()
+                str(cTglBuat)
+                if len(str(cTglBuat)) == 10:
+                        cHari = str(cTglBuat)[0:2]
+                        cBulan = str(cTglBuat)[3:5]
+                        cTahun = str(cTglBuat)[6:]
+                        dCreate = datetime.date(int(cTahun),int(cBulan),int(cHari))
+                else:
+                        dCreate = None
                 cUnit = self.entUnit.get()
                 cWorkReq = self.entWorkReq.get('1.0', 'end')
                 cStaff = self.entStaff.get()
-                if len(cHari) == 0 and len(cBulan) == 0 and len(cTahun):
-                        messagebox.showwarning(title="Peringatan",message="Tanggal Tidak boleh kosong")    
+                if dCreate == None:
+                        messagebox.showwarning(title="Peringatan",message="Format tanggal salah")    
                 else:
-                        
                         cur = con.cursor()
                         sql = "INSERT INTO logbook (no_wo, no_ifca, date_creat, unit, work_req, staff)"+\
                               "VALUES(%s,%s,%s,%s,%s,%s)"
                         cur.execute(sql,(cKode,cIfca,dCreate,cUnit,cWorkReq,cStaff))
-                        self.onClear()
                         messagebox.showinfo(title="Informasi", \
                                             message="Data sudah di tersimpan.")
-                        
                         cur.close()
                         con.close()
+                        self.onClear()
                 
         def onUpdate(self):
                 cKode = self.entWo.get()
@@ -410,16 +414,21 @@ class Petugas:
                         #panel kiri
                         cKode = self.entWo.get()
                         cIfca = self.entIfca.get()
-                        cHari = self.entHari.get()
-                        cBulan = self.entBulan.get()
-                        cTahun = self.entTahun.get()
-                        ctglbuat = datetime.date(int(cTahun),int(cBulan),int(cHari))
+                        dTglBuat = self.entTglbuat.get()
+                        str(dTglBuat)
+                        if len(str(dTglBuat)) == 10:
+                                cHari = str(dTglBuat)[0:2]
+                                cBulan = str(dTglBuat)[3:5]
+                                cTahun = str(dTglBuat)[6:]
+                                tglbuat = datetime.date(int(cTahun),int(cBulan),int(cHari))
+                        else:
+                                tglbuat = None
                         cWorkReq = self.entWorkReq.get('1.0', 'end')
                         cStaff = self.entStaff.get()
-                        cWorkAct = self.entWorkAct.get('1.0', 'end')
-                        jamdone = self.entJamdone.get()
                         
                         #panel kanan
+                        cWorkAct = self.entWorkAct.get('1.0', 'end')
+                        jamdone = self.entJamdone.get()
                         dtglDone = self.entTgldone.get()
                         str(dtglDone)
                         if len(str(dtglDone)) == 10:
@@ -431,14 +440,12 @@ class Petugas:
                                 tgldone = None
                         
                         sql = "UPDATE logbook SET no_ifca=%s,date_creat=%s,work_req=%s,staff=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_wo =%s"
-                        cur.execute(sql,(cIfca,ctglbuat,cWorkReq,cStaff,tgldone,jamdone,cWorkAct,cKode))
-                        self.onClear()
-
+                        cur.execute(sql,(cIfca,tglbuat,cWorkReq,cStaff,tgldone,jamdone,cWorkAct,cKode))
                         messagebox.showinfo(title="Informasi", \
                                 message="Data sudah di terupdate.")
-
                         cur.close()
                         con.close()
+                        self.onClear()
                      
 
 def main():
