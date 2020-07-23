@@ -32,7 +32,7 @@ class WindowDraggable():
                 y = (event.y_root - self.y - self.label.winfo_rooty() + self.label.winfo_rooty())
                 root.geometry("+%s+%s" % (x, y))
                 
-judul_kolom = ("No WO","No IFCA","Tanggal","UNIT","Work Request","Staff","Work Action","Tanggal Done","Jam Done","Received")
+judul_kolom = ("No","WO","IFCA","Tanggal","UNIT","Work Request","Staff","Work Action","Tanggal Done","Jam Done","Received")
 class Petugas:    
         def __init__(self, parent):
                 self.parent = parent
@@ -79,7 +79,10 @@ class Petugas:
                 if cur.rowcount < 0:
                         pass
                 else:
-                        return hasil[1]
+                        if (data.upper() == hasil[2].upper()):
+                                return "tolak"
+                        if (data == 0): #belum fungsi
+                                return "tolak"
                 cur.close()
                 con.close()
                                 
@@ -114,7 +117,7 @@ class Petugas:
                 Label(btnFrame, text=' ').grid(row=1, column=0)
 
                 #samping kiri
-                Label(mainFrame, text='No WO').grid(row=1, column=0, sticky=W,padx=20)
+                Label(mainFrame, text='WO').grid(row=1, column=0, sticky=W,padx=20)
                 Label(mainFrame, text=':').grid(row=1, column=1, sticky=W,pady=5,padx=10)
                 self.entWo = Entry(mainFrame, width=20)
                 self.entWo.grid(row=1, column=2,sticky=W)
@@ -261,7 +264,7 @@ class Petugas:
                     
                 self.entWo.config(state="readonly")
        
-        def table(self):    
+        def table(self):
                 db_config = self.read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
@@ -271,8 +274,9 @@ class Petugas:
                 for kolom in judul_kolom:
                     self.trvTabel.heading(kolom,text=kolom)
 
-                self.trvTabel.column("No WO", width=50,anchor="w")
-                self.trvTabel.column("No IFCA", width=80,anchor="w")
+                self.trvTabel.column("No", width=10,anchor="w")
+                self.trvTabel.column("WO", width=50,anchor="w")
+                self.trvTabel.column("IFCA", width=80,anchor="w")
                 self.trvTabel.column("Tanggal", width=80,anchor="w")
                 self.trvTabel.column("UNIT", width=80,anchor="w")
                 self.trvTabel.column("Work Request", width=120,anchor="w")
@@ -312,7 +316,9 @@ class Petugas:
                         cur.execute(sql,(tsekarang,setreceived,cIfca))
                         self.onClear()
                         messagebox.showinfo(title="Informasi", \
-                                    message="Wo {} sudah diterima.".format(cIfca))                
+                                    message="Wo {} sudah diterima.".format(cIfca))
+                        cur.close()
+                        con.close()               
 
         def OnDoubleClick(self, event):
                 self.entWo.config(state="normal")
@@ -331,20 +337,22 @@ class Petugas:
                 self.btnDelete.config(state="normal")
                 self.btnReceived.config(state="normal")
             
-                it = self.trvTabel.selection()[0]
-                ck = str(self.trvTabel.item(it,"values"))[2:8]
-                    
-                self.entWo.insert(END, ck)
-                cKode = self.entWo.get()
+                # it = self.trvTabel.selection()[0]
+                # ck = str(self.trvTabel.item(it,"values"))#[2:]
+
+                curItem = self.trvTabel.item(self.trvTabel.focus())
+                ifca_value = curItem['values'][2]
+                self.entIfca.insert(END, ifca_value)
+
+                cIfca = self.entIfca.get()
                 db_config = self.read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
-                sql = "SELECT no_wo, no_ifca, date_creat, unit, work_req, staff, date_done, time_done, work_act FROM logbook WHERE no_wo = %s"
-                cur.execute(sql,(cKode,))
+                sql = "SELECT no_wo, no_ifca, date_creat, unit, work_req, staff, date_done, time_done, work_act FROM logbook WHERE no_ifca = %s"
+                cur.execute(sql,(cIfca,))
                 data = cur.fetchone()
         
-                self.entIfca.insert(END, data[1])
-                
+                self.entWo.insert(END, data[0])
                 #TGL buat
                 try:
                         self.entTglbuat.insert(END, data[2])
@@ -364,6 +372,7 @@ class Petugas:
                 # self.entTglbuat.insert(END, pecahHari)
                 # self.entBulan.insert(END, pecahBulan)
                 # self.entTahun.insert(END, pecahTahun)
+                
                 self.entUnit.insert(END, data[3])
                 self.entWorkReq.insert(END, data[4])
                 self.entStaff.insert(END, data[5])
@@ -390,9 +399,9 @@ class Petugas:
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
                 self.entWo.config(state="normal")
-                cKode = self.entWo.get()
-                sql = "DELETE FROM logbook WHERE no_wo =%s"
-                cur.execute(sql,(cKode,))
+                cIfca = self.entIfca.get()
+                sql = "DELETE FROM logbook WHERE no_ifca =%s"
+                cur.execute(sql,(cIfca,))
                 self.onClear()
                 messagebox.showinfo(title="Informasi", \
                                     message="Data sudah di hapus.")
@@ -426,7 +435,7 @@ class Petugas:
                 db_config = self.read_db_config()
                 con = mysql.connector.connect(**db_config)
  
-                cKode = self.entWo.get()
+                cWo = self.entWo.get()
                 cIfca = self.entIfca.get()
                 cTglBuat = self.entTglbuat.get()
                 cUnit = self.entUnit.get()
@@ -434,14 +443,14 @@ class Petugas:
                 cStaff = self.entStaff.get()
                 if self.checktgl(cTglBuat) == None: #check tgl jika kosong, batalkan save
                         messagebox.showwarning(title="Peringatan",message="Format tanggal salah")    
-                elif self.checkifca(cIfca) == cIfca:
+                elif self.checkifca(cIfca) == "tolak": #check IFCA
                         messagebox.showwarning(title="Informasi", \
                                 message="Wo {} sudah terdaftar.".format(cIfca))
                 else:
                         cur = con.cursor()
                         sql = "INSERT INTO logbook (no_wo, no_ifca, date_creat, unit, work_req, staff)"+\
                               "VALUES(%s,%s,%s,%s,%s,%s)"
-                        cur.execute(sql,(cKode,cIfca,self.checktgl(cTglBuat),cUnit,cWorkReq,cStaff))
+                        cur.execute(sql,(cWo,cIfca.upper(),self.checktgl(cTglBuat),cUnit,cWorkReq,cStaff))
                         messagebox.showinfo(title="Informasi", \
                                             message="Data sudah di tersimpan.")
                         cur.close()
