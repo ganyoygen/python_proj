@@ -46,7 +46,16 @@ class Petugas:
                 
         def keluar(self,event=None):
                 self.parent.destroy()
-                
+                        
+        def checktgl(self,data):
+                if len(str(data)) == 10:
+                        cHari = str(data)[0:2]
+                        cBulan = str(data)[3:5]
+                        cTahun = str(data)[6:]
+                        return datetime.date(int(cTahun),int(cBulan),int(cHari))
+                else:
+                        return None
+
         def onReceived(self):
                 cKode = self.entWo.get()
                 if len(cKode) == 0:
@@ -371,31 +380,23 @@ class Petugas:
                 self.auto()
                 self.entWo.focus_set()
                 os.system("cls")
-                        
+        
         def onSave(self):
                 con = mysql.connector.connect(db='proj_pares', user='root', passwd='', host='192.168.10.5', port=3306,autocommit=True)
  
                 cKode = self.entWo.get()
                 cIfca = self.entIfca.get()
                 cTglBuat = self.entTglbuat.get()
-                str(cTglBuat)
-                if len(str(cTglBuat)) == 10:
-                        cHari = str(cTglBuat)[0:2]
-                        cBulan = str(cTglBuat)[3:5]
-                        cTahun = str(cTglBuat)[6:]
-                        dCreate = datetime.date(int(cTahun),int(cBulan),int(cHari))
-                else:
-                        dCreate = None
                 cUnit = self.entUnit.get()
                 cWorkReq = self.entWorkReq.get('1.0', 'end')
                 cStaff = self.entStaff.get()
-                if dCreate == None:
+                if self.checktgl(cTglBuat) == None: #check tgl jika kosong, batalkan save
                         messagebox.showwarning(title="Peringatan",message="Format tanggal salah")    
                 else:
                         cur = con.cursor()
                         sql = "INSERT INTO logbook (no_wo, no_ifca, date_creat, unit, work_req, staff)"+\
                               "VALUES(%s,%s,%s,%s,%s,%s)"
-                        cur.execute(sql,(cKode,cIfca,dCreate,cUnit,cWorkReq,cStaff))
+                        cur.execute(sql,(cKode,cIfca,self.checktgl(cTglBuat),cUnit,cWorkReq,cStaff))
                         messagebox.showinfo(title="Informasi", \
                                             message="Data sudah di tersimpan.")
                         cur.close()
@@ -414,33 +415,18 @@ class Petugas:
                         #panel kiri
                         cKode = self.entWo.get()
                         cIfca = self.entIfca.get()
-                        dTglBuat = self.entTglbuat.get()
-                        str(dTglBuat)
-                        if len(str(dTglBuat)) == 10:
-                                cHari = str(dTglBuat)[0:2]
-                                cBulan = str(dTglBuat)[3:5]
-                                cTahun = str(dTglBuat)[6:]
-                                tglbuat = datetime.date(int(cTahun),int(cBulan),int(cHari))
-                        else:
-                                tglbuat = None
+                        getTglBuat = self.checktgl(self.entTglbuat.get()) #check tgl dulu
                         cWorkReq = self.entWorkReq.get('1.0', 'end')
                         cStaff = self.entStaff.get()
                         
                         #panel kanan
                         cWorkAct = self.entWorkAct.get('1.0', 'end')
                         jamdone = self.entJamdone.get()
-                        dtglDone = self.entTgldone.get()
-                        str(dtglDone)
-                        if len(str(dtglDone)) == 10:
-                                dHari = str(dtglDone)[0:2]
-                                dBulan = str(dtglDone)[3:5]
-                                dTahun = str(dtglDone)[6:]
-                                tgldone = datetime.date(int(dTahun),int(dBulan),int(dHari))  
-                        else:
-                                tgldone = None
-                        
+                        getTglDone = self.checktgl(self.entTgldone.get()) #check tgl dulu
+
+                        #eksekusi sql
                         sql = "UPDATE logbook SET no_ifca=%s,date_creat=%s,work_req=%s,staff=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_wo =%s"
-                        cur.execute(sql,(cIfca,tglbuat,cWorkReq,cStaff,tgldone,jamdone,cWorkAct,cKode))
+                        cur.execute(sql,(cIfca,getTglBuat,cWorkReq,cStaff,getTglDone,jamdone,cWorkAct,cKode))
                         messagebox.showinfo(title="Informasi", \
                                 message="Data sudah di terupdate.")
                         cur.close()
