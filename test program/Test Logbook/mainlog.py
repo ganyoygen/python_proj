@@ -136,6 +136,7 @@ class Petugas:
                         self.entTgldone.delete(0, END)
                         self.entTgldone.insert(END, showtgldone)
                 except:
+                        self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
                         pass
 
                 self.entJamdone.insert(END, data[7])
