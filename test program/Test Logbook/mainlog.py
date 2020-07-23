@@ -416,6 +416,8 @@ class Petugas:
                         ctglbuat = datetime.date(int(cTahun),int(cBulan),int(cHari))
                         cWorkReq = self.entWorkReq.get('1.0', 'end')
                         cStaff = self.entStaff.get()
+                        cWorkAct = self.entWorkAct.get('1.0', 'end')
+                        jamdone = self.entJamdone.get()
                         
                         #panel kanan
                         dtglDone = self.entTgldone.get()
@@ -424,22 +426,19 @@ class Petugas:
                                 dHari = str(dtglDone)[0:2]
                                 dBulan = str(dtglDone)[3:5]
                                 dTahun = str(dtglDone)[6:]
-                                tgldone = datetime.date(int(dTahun),int(dBulan),int(dHari))
-                                
-                                jamdone = self.entJamdone.get()
-                                cWorkAct = self.entWorkAct.get('1.0', 'end')
-
-                                sql = "UPDATE logbook SET no_ifca=%s,date_creat=%s,work_req=%s,staff=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_wo =%s"
-                                cur.execute(sql,(cIfca,ctglbuat,cWorkReq,cStaff,tgldone,jamdone,cWorkAct,cKode))
-                                self.onClear()
-                                messagebox.showinfo(title="Informasi", \
-                                        message="Data sudah di terupdate.")
-
-                                cur.close()
-                                con.close()
+                                tgldone = datetime.date(int(dTahun),int(dBulan),int(dHari))  
                         else:
-                                messagebox.showwarning(title="Warning", \
-                                        message="Format tanggal salah")
+                                tgldone = None
+                        
+                        sql = "UPDATE logbook SET no_ifca=%s,date_creat=%s,work_req=%s,staff=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_wo =%s"
+                        cur.execute(sql,(cIfca,ctglbuat,cWorkReq,cStaff,tgldone,jamdone,cWorkAct,cKode))
+                        self.onClear()
+
+                        messagebox.showinfo(title="Informasi", \
+                                message="Data sudah di terupdate.")
+
+                        cur.close()
+                        con.close()
                      
 
 def main():
