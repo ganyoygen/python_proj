@@ -46,7 +46,21 @@ class Petugas:
                 
         def keluar(self,event=None):
                 self.parent.destroy()
-                        
+        
+        def checkifca(self,data):
+                con = mysql.connector.connect(db='proj_pares', user='root', passwd='', host="192.168.10.5",\
+                                      port=3306, autocommit=True)
+                cur = con.cursor()
+                sql = ("SELECT * FROM logbook where no_ifca LIKE %s")
+                cur.execute(sql,(data,))
+                hasil = cur.fetchone()
+                if cur.rowcount < 0:
+                        pass
+                else:
+                        return hasil[1]
+                cur.close()
+                con.close()
+                                
         def checktgl(self,data):
                 if len(str(data)) == 10:
                         cHari = str(data)[0:2]
@@ -141,6 +155,8 @@ class Petugas:
 
                 self.entJamdone.insert(END, data[7])
                 self.entWorkAct.insert(END, data[8]) 
+                cur.close()
+                con.close()
                 
         def aturKomponen(self):
                 frameWin = Frame(self.parent, bg="#666")
@@ -393,6 +409,9 @@ class Petugas:
                 cStaff = self.entStaff.get()
                 if self.checktgl(cTglBuat) == None: #check tgl jika kosong, batalkan save
                         messagebox.showwarning(title="Peringatan",message="Format tanggal salah")    
+                elif self.checkifca(cIfca) == cIfca:
+                        messagebox.showwarning(title="Informasi", \
+                                message="Wo {} sudah terdaftar.".format(cIfca))
                 else:
                         cur = con.cursor()
                         sql = "INSERT INTO logbook (no_wo, no_ifca, date_creat, unit, work_req, staff)"+\
