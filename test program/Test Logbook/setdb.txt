@@ -11,6 +11,7 @@ USE `proj_pares`;
 --
 
 CREATE TABLE IF NOT EXISTS `logbook` (
+  `id` INT AUTO_INCREMENT,
   `no_wo` varchar(7) NOT NULL,
   `no_ifca` varchar(10) NOT NULL,
   `date_creat` date NOT NULL,
@@ -23,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `logbook` (
   `received` BOOLEAN,
   `wo_receiver` varchar(16) NOT NULL,
   `date_received` date NOT NULL,
-  PRIMARY KEY (`no_wo`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
