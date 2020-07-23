@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter import ttk
 from tkinter.scrolledtext import ScrolledText
 from tkinter import messagebox
+from configparser import ConfigParser
 import mysql.connector
 import datetime
 import time
@@ -47,9 +48,30 @@ class Petugas:
         def keluar(self,event=None):
                 self.parent.destroy()
         
+        def read_db_config(self,filename='C:\\config.ini', section='mysql'):
+                """ Read database configuration file and return a dictionary object
+                :param filename: name of the configuration file
+                :param section: section of database configuration
+                :return: a dictionary of database parameters
+                """
+                # create parser and read ini configuration file
+                parser = ConfigParser()
+                parser.read(filename)
+
+                # get section, default to mysql
+                db = {}
+                if parser.has_section(section):
+                    items = parser.items(section)
+                    for item in items:
+                        db[item[0]] = item[1]
+                else:
+                    raise Exception('{0} not found in the {1} file'.format(section, filename))
+            
+                return db
+
         def checkifca(self,data):
-                con = mysql.connector.connect(db='proj_pares', user='root', passwd='', host="192.168.10.5",\
-                                      port=3306, autocommit=True)
+                db_config = self.read_db_config()
+                con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
                 sql = ("SELECT * FROM logbook where no_ifca LIKE %s")
                 cur.execute(sql,(data,))
@@ -69,94 +91,6 @@ class Petugas:
                         return datetime.date(int(cTahun),int(cBulan),int(cHari))
                 else:
                         return None
-
-        def onReceived(self):
-                cIfca = self.entIfca.get()
-                if len(cIfca) == 0:
-                        messagebox.showwarning(title="Peringatan",message="No IFCA Kosong.")
-                        self.entIfca.focus_set()
-                else:
-                        con = mysql.connector.connect(db='proj_pares', user='root', passwd='', host="192.168.10.5",\
-                                      port=3306, autocommit=True)
-                        cur = con.cursor()
-                        setreceived = True
-                        from datetime import datetime
-                        tsekarang = datetime.now()
-                        sql = "UPDATE logbook SET date_received=%s,received=%s WHERE no_ifca =%s"
-                        cur.execute(sql,(tsekarang,setreceived,cIfca))
-                        self.onClear()
-                        messagebox.showinfo(title="Informasi", \
-                                    message="Wo {} sudah diterima.".format(cIfca))                
-
-        def OnDoubleClick(self, event):
-                self.entWo.config(state="normal")
-                self.entWo.delete(0, END)
-                self.entIfca.delete(0, END)
-                self.entTglbuat.delete(0, END)
-                self.entUnit.delete(0, END)
-                self.entWorkReq.delete('1.0', 'end')
-                self.entStaff.delete(0, END)
-                self.entTgldone.delete(0, END)
-                self.entJamdone.delete(0, END)
-                self.entWorkAct.delete('1.0', 'end')
-
-                self.btnSave.config(state="disable")
-                self.btnUpdate.config(state="normal")
-                self.btnDelete.config(state="normal")
-                self.btnReceived.config(state="normal")
-            
-                it = self.trvTabel.selection()[0]
-                ck = str(self.trvTabel.item(it,"values"))[2:8]
-                    
-                self.entWo.insert(END, ck)
-                cKode = self.entWo.get()
-                con = mysql.connector.connect(db="proj_pares", user="root", passwd="", host="192.168.10.5", port=3306,autocommit=True)
-                cur = con.cursor()
-                sql = "SELECT no_wo, no_ifca, date_creat, unit, work_req, staff, date_done, time_done, work_act FROM logbook WHERE no_wo = %s"
-                cur.execute(sql,(cKode,))
-                data = cur.fetchone()
-        
-                self.entIfca.insert(END, data[1])
-                
-                #TGL buat
-                try:
-                        self.entTglbuat.insert(END, data[2])
-                        getTgl = self.entTglbuat.get() #dari mysql YYYY-MM-DD
-                        #balikin menjadi DD-MM-YYYY
-                        showtgl = str(getTgl)[8:] + '-' + str(getTgl)[5:7] +'-' + str(getTgl)[:4]
-                        self.entTglbuat.delete(0, END)
-                        self.entTglbuat.insert(END, showtgl)
-                except:
-                        pass
-                # pecahTahun = str(getTgl[0]+getTgl[1]+getTgl[2]+getTgl[3])
-                # pecahBulan = str(getTgl[5]+getTgl[6])
-                # pecahHari = str(getTgl[8]+getTgl[9])
-                # self.entTglbuat.delete(0, END)
-                # self.entBulan.delete(0, END)
-                # self.entTahun.delete(0, END)
-                # self.entTglbuat.insert(END, pecahHari)
-                # self.entBulan.insert(END, pecahBulan)
-                # self.entTahun.insert(END, pecahTahun)
-                self.entUnit.insert(END, data[3])
-                self.entWorkReq.insert(END, data[4])
-                self.entStaff.insert(END, data[5])
-
-                #TGL done
-                try: 
-                        self.entTgldone.insert(END, data[6])
-                        getTgldone = self.entTgldone.get() #dari mysql YYYY-MM-DD
-                        #balikin menjadi DD-MM-YYYY
-                        showtgldone = str(getTgldone)[8:] + '-' + str(getTgldone)[5:7] +'-' + str(getTgldone)[:4]
-                        self.entTgldone.delete(0, END)
-                        self.entTgldone.insert(END, showtgldone)
-                except:
-                        self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
-                        pass
-
-                self.entJamdone.insert(END, data[7])
-                self.entWorkAct.insert(END, data[8]) 
-                cur.close()
-                con.close()
                 
         def aturKomponen(self):
                 frameWin = Frame(self.parent, bg="#666")
@@ -279,9 +213,57 @@ class Petugas:
                 self.trvTabel.configure(yscrollcommand=sbVer.set)
                 self.trvTabel.configure(xscrollcommand=sbVer.set)
                 self.table()
-                
+
+        def auto(self):
+                db_config = self.read_db_config()
+                con = mysql.connector.connect(**db_config)
+                cur = con.cursor()
+                cuv = con.cursor()
+                sqlkode = "SELECT max(no_wo) FROM logbook"
+                sql = "SELECT no_wo FROM logbook"
+                cur.execute(sqlkode)
+                # cuv.execute(sql)
+                maxkode = cur.fetchone()
+                try:     
+                    autohit = int(maxkode[0])+1
+                    hits = "00000"+str(autohit)
+                    if len(hits) == 6:
+                        self.entWo.insert(0, hits)
+                        self.entIfca.focus_set()
+                    elif len(hits) == 7:
+                        hit = "0000"+str(autohit)
+                        self.entWo.insert(0, hit)
+                        self.entIfca.focus_set()
+                    elif len(hits) == 8:
+                        hit = "000"+str(autohit)
+                        self.entWo.insert(0, hit)
+                        self.entIfca.focus_set()
+                    elif len(hits) == 9:
+                        hit = "00"+str(autohit)
+                        self.entWo.insert(0, hit)
+                        self.entIfca.focus_set()
+                    elif len(hits) == 10:
+                        hit = "0"+str(autohit)
+                        self.entWo.insert(0, hit)
+                        self.entIfca.focus_set()
+                    elif len(hits) == 11:
+                        hit = ""+str(autohit)
+                        self.entWo.insert(0, hit)
+                        self.entIfca.focus_set()
+                    
+                    else:
+                        messagebox.showwarning(title="Peringatan", \
+                                    message="maaf lebar data hanya sampai 6 digit")
+                except:        
+                    hit = "000001"
+                    self.entWo.insert(0, hit)
+                    self.entIfca.focus_set()
+                    
+                self.entWo.config(state="readonly")
+       
         def table(self):    
-                con = mysql.connector.connect(db="proj_pares", user="root", passwd="", host="192.168.10.5", port=3306,autocommit=True)
+                db_config = self.read_db_config()
+                con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
                 cur.execute("SELECT * FROM logbook")
                 data_table = cur.fetchall()
@@ -313,57 +295,99 @@ class Petugas:
                 self.trvTabel.tag_configure("genap", background="whitesmoke")
                 cur.close()
                 con.close()                              
-
-        def auto(self):
-                con = mysql.connector.connect(db='proj_pares', user='root', passwd='', host='192.168.10.5', port=3306,autocommit=True)
-                cur = con.cursor()
-                cuv = con.cursor()
-                sqlkode = "SELECT max(no_wo) FROM logbook"
-                sql = "SELECT no_wo FROM logbook"
-                cur.execute(sqlkode)
-                # cuv.execute(sql)
-                maxkode = cur.fetchone()
-                
-                if cur.rowcount > 0:      
-                    autohit = int(maxkode[0])+1
-                    hits = "00000"+str(autohit)
-                    if len(hits) == 6:
-                        self.entWo.insert(0, hits)
+    
+        def onReceived(self):
+                cIfca = self.entIfca.get()
+                if len(cIfca) == 0:
+                        messagebox.showwarning(title="Peringatan",message="No IFCA Kosong.")
                         self.entIfca.focus_set()
-                    elif len(hits) == 7:
-                        hit = "0000"+str(autohit)
-                        self.entWo.insert(0, hit)
-                        self.entIfca.focus_set()
-                    elif len(hits) == 8:
-                        hit = "000"+str(autohit)
-                        self.entWo.insert(0, hit)
-                        self.entIfca.focus_set()
-                    elif len(hits) == 9:
-                        hit = "00"+str(autohit)
-                        self.entWo.insert(0, hit)
-                        self.entIfca.focus_set()
-                    elif len(hits) == 10:
-                        hit = "0"+str(autohit)
-                        self.entWo.insert(0, hit)
-                        self.entIfca.focus_set()
-                    elif len(hits) == 11:
-                        hit = ""+str(autohit)
-                        self.entWo.insert(0, hit)
-                        self.entIfca.focus_set()
-                    
-                    else:
-                        messagebox.showwarning(title="Peringatan", \
-                                    message="maaf lebar data hanya sampai 6 digit")
-                        
                 else:
-                    hit = "000001"
-                    self.entWo.insert(0, hit)
-                    self.entIfca.focus_set()
+                        db_config = self.read_db_config()
+                        con = mysql.connector.connect(**db_config)
+                        cur = con.cursor()
+                        setreceived = True
+                        from datetime import datetime
+                        tsekarang = datetime.now()
+                        sql = "UPDATE logbook SET date_received=%s,received=%s WHERE no_ifca =%s"
+                        cur.execute(sql,(tsekarang,setreceived,cIfca))
+                        self.onClear()
+                        messagebox.showinfo(title="Informasi", \
+                                    message="Wo {} sudah diterima.".format(cIfca))                
+
+        def OnDoubleClick(self, event):
+                self.entWo.config(state="normal")
+                self.entWo.delete(0, END)
+                self.entIfca.delete(0, END)
+                self.entTglbuat.delete(0, END)
+                self.entUnit.delete(0, END)
+                self.entWorkReq.delete('1.0', 'end')
+                self.entStaff.delete(0, END)
+                self.entTgldone.delete(0, END)
+                self.entJamdone.delete(0, END)
+                self.entWorkAct.delete('1.0', 'end')
+
+                self.btnSave.config(state="disable")
+                self.btnUpdate.config(state="normal")
+                self.btnDelete.config(state="normal")
+                self.btnReceived.config(state="normal")
+            
+                it = self.trvTabel.selection()[0]
+                ck = str(self.trvTabel.item(it,"values"))[2:8]
                     
-                self.entWo.config(state="readonly")
+                self.entWo.insert(END, ck)
+                cKode = self.entWo.get()
+                db_config = self.read_db_config()
+                con = mysql.connector.connect(**db_config)
+                cur = con.cursor()
+                sql = "SELECT no_wo, no_ifca, date_creat, unit, work_req, staff, date_done, time_done, work_act FROM logbook WHERE no_wo = %s"
+                cur.execute(sql,(cKode,))
+                data = cur.fetchone()
         
+                self.entIfca.insert(END, data[1])
+                
+                #TGL buat
+                try:
+                        self.entTglbuat.insert(END, data[2])
+                        getTgl = self.entTglbuat.get() #dari mysql YYYY-MM-DD
+                        #balikin menjadi DD-MM-YYYY
+                        showtgl = str(getTgl)[8:] + '-' + str(getTgl)[5:7] +'-' + str(getTgl)[:4]
+                        self.entTglbuat.delete(0, END)
+                        self.entTglbuat.insert(END, showtgl)
+                except:
+                        pass
+                # pecahTahun = str(getTgl[0]+getTgl[1]+getTgl[2]+getTgl[3])
+                # pecahBulan = str(getTgl[5]+getTgl[6])
+                # pecahHari = str(getTgl[8]+getTgl[9])
+                # self.entTglbuat.delete(0, END)
+                # self.entBulan.delete(0, END)
+                # self.entTahun.delete(0, END)
+                # self.entTglbuat.insert(END, pecahHari)
+                # self.entBulan.insert(END, pecahBulan)
+                # self.entTahun.insert(END, pecahTahun)
+                self.entUnit.insert(END, data[3])
+                self.entWorkReq.insert(END, data[4])
+                self.entStaff.insert(END, data[5])
+
+                #TGL done
+                try: 
+                        self.entTgldone.insert(END, data[6])
+                        getTgldone = self.entTgldone.get() #dari mysql YYYY-MM-DD
+                        #balikin menjadi DD-MM-YYYY
+                        showtgldone = str(getTgldone)[8:] + '-' + str(getTgldone)[5:7] +'-' + str(getTgldone)[:4]
+                        self.entTgldone.delete(0, END)
+                        self.entTgldone.insert(END, showtgldone)
+                except:
+                        self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
+                        pass
+
+                self.entJamdone.insert(END, data[7])
+                self.entWorkAct.insert(END, data[8]) 
+                cur.close()
+                con.close()
+       
         def onDelete(self):
-                con = mysql.connector.connect(db='proj_pares', user='root', passwd='', host='192.168.10.5', port=3306,autocommit=True)
+                db_config = self.read_db_config()
+                con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
                 self.entWo.config(state="normal")
                 cKode = self.entWo.get()
@@ -399,7 +423,8 @@ class Petugas:
                 os.system("cls")
         
         def onSave(self):
-                con = mysql.connector.connect(db='proj_pares', user='root', passwd='', host='192.168.10.5', port=3306,autocommit=True)
+                db_config = self.read_db_config()
+                con = mysql.connector.connect(**db_config)
  
                 cKode = self.entWo.get()
                 cIfca = self.entIfca.get()
@@ -429,8 +454,8 @@ class Petugas:
                         messagebox.showwarning(title="Peringatan",message="No IFCA Kosong.")
                         self.entIfca.focus_set()
                 else:
-                        con = mysql.connector.connect(db='proj_pares', user='root', passwd='', host="192.168.10.5",\
-                                      port=3306, autocommit=True)
+                        db_config = self.read_db_config()
+                        con = mysql.connector.connect(**db_config)
                         cur = con.cursor()
                         #panel kiri
                         cWo = self.entWo.get()
