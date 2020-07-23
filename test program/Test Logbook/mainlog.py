@@ -71,10 +71,10 @@ class Petugas:
                         return None
 
         def onReceived(self):
-                cKode = self.entWo.get()
-                if len(cKode) == 0:
-                        messagebox.showwarning(title="Peringatan",message="Kode kosong.")
-                        self.entWo.focus_set()
+                cIfca = self.entIfca.get()
+                if len(cIfca) == 0:
+                        messagebox.showwarning(title="Peringatan",message="No IFCA Kosong.")
+                        self.entIfca.focus_set()
                 else:
                         con = mysql.connector.connect(db='proj_pares', user='root', passwd='', host="192.168.10.5",\
                                       port=3306, autocommit=True)
@@ -82,11 +82,11 @@ class Petugas:
                         setreceived = True
                         from datetime import datetime
                         tsekarang = datetime.now()
-                        sql = "UPDATE logbook SET date_received=%s,received=%s WHERE no_wo =%s"
-                        cur.execute(sql,(tsekarang,setreceived,cKode))
+                        sql = "UPDATE logbook SET date_received=%s,received=%s WHERE no_ifca =%s"
+                        cur.execute(sql,(tsekarang,setreceived,cIfca))
                         self.onClear()
                         messagebox.showinfo(title="Informasi", \
-                                    message="Wo {} sudah diterima.".format(cKode))                
+                                    message="Wo {} sudah diterima.".format(cIfca))                
 
         def OnDoubleClick(self, event):
                 self.entWo.config(state="normal")
