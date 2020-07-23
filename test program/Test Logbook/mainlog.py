@@ -424,16 +424,16 @@ class Petugas:
                         self.onClear()
                 
         def onUpdate(self):
-                cKode = self.entWo.get()
-                if len(cKode) == 0:
-                        messagebox.showwarning(title="Peringatan",message="Kode kosong.")
-                        self.entWo.focus_set()
+                cIfca = self.entIfca.get()
+                if len(cIfca) == 0:
+                        messagebox.showwarning(title="Peringatan",message="No IFCA Kosong.")
+                        self.entIfca.focus_set()
                 else:
                         con = mysql.connector.connect(db='proj_pares', user='root', passwd='', host="192.168.10.5",\
                                       port=3306, autocommit=True)
                         cur = con.cursor()
                         #panel kiri
-                        cKode = self.entWo.get()
+                        cWo = self.entWo.get()
                         cIfca = self.entIfca.get()
                         getTglBuat = self.checktgl(self.entTglbuat.get()) #check tgl dulu
                         cWorkReq = self.entWorkReq.get('1.0', 'end')
@@ -445,8 +445,8 @@ class Petugas:
                         getTglDone = self.checktgl(self.entTgldone.get()) #check tgl dulu
 
                         #eksekusi sql
-                        sql = "UPDATE logbook SET no_ifca=%s,date_creat=%s,work_req=%s,staff=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_wo =%s"
-                        cur.execute(sql,(cIfca,getTglBuat,cWorkReq,cStaff,getTglDone,jamdone,cWorkAct,cKode))
+                        sql = "UPDATE logbook SET no_wo=%s,no_ifca=%s,date_creat=%s,work_req=%s,staff=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_ifca =%s"
+                        cur.execute(sql,(cWo,cIfca,getTglBuat,cWorkReq,cStaff,getTglDone,jamdone,cWorkAct,cIfca))
                         messagebox.showinfo(title="Informasi", \
                                 message="Data sudah di terupdate.")
                         cur.close()
