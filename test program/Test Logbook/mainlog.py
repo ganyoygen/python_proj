@@ -114,16 +114,18 @@ class Petugas:
                 self.entWorkReq.insert(END, data[4])
                 self.entStaff.insert(END, data[5])
 
-                self.entTgldone.insert(END, data[6])
-                getTgldone = self.entTgldone.get() #dari mysql YYYY-MM-DD
-                #balikin menjadi DD-MM-YYYY
-                showtgldone = str(getTgldone)[8:] + '-' + str(getTgldone)[5:7] +'-' + str(getTgldone)[:4]
-                self.entTgldone.delete(0, END)
-                self.entTgldone.insert(END, showtgldone)
+                try: 
+                        self.entTgldone.insert(END, data[6])
+                        getTgldone = self.entTgldone.get() #dari mysql YYYY-MM-DD
+                        #balikin menjadi DD-MM-YYYY
+                        showtgldone = str(getTgldone)[8:] + '-' + str(getTgldone)[5:7] +'-' + str(getTgldone)[:4]
+                        self.entTgldone.delete(0, END)
+                        self.entTgldone.insert(END, showtgldone)
+                except:
+                        pass
 
                 self.entJamdone.insert(END, data[7])
                 self.entWorkAct.insert(END, data[8]) 
-                
                 
         def aturKomponen(self):
                 frameWin = Frame(self.parent, bg="#666")
