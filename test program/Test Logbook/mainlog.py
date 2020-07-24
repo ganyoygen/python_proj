@@ -31,7 +31,7 @@ class WindowDraggable():
                 x = (event.x_root - self.x - self.label.winfo_rootx() + self.label.winfo_rootx())
                 y = (event.y_root - self.y - self.label.winfo_rooty() + self.label.winfo_rooty())
                 root.geometry("+%s+%s" % (x, y))
-                
+
 judul_kolom = ("No","WO","IFCA","Tanggal","UNIT","Work Request","Staff","Work Action","Tanggal Done","Jam Done","Received")
 class Petugas:    
         def __init__(self, parent):
@@ -44,58 +44,12 @@ class Petugas:
                 self.parent.geometry("%ix%i+%i+%i" %(lebar, tinggi,setTengahX, setTengahY))
                 self.aturKomponen()
                 self.auto()
-                
+
         def keluar(self,event=None):
                 self.parent.destroy()
-        
-        def read_db_config(self,filename='C:\\config.ini', section='mysql'):
-                """ Read database configuration file and return a dictionary object
-                :param filename: name of the configuration file
-                :param section: section of database configuration
-                :return: a dictionary of database parameters
-                """
-                # create parser and read ini configuration file
-                parser = ConfigParser()
-                parser.read(filename)
 
-                # get section, default to mysql
-                db = {}
-                if parser.has_section(section):
-                    items = parser.items(section)
-                    for item in items:
-                        db[item[0]] = item[1]
-                else:
-                    raise Exception('{0} not found in the {1} file'.format(section, filename))
-            
-                return db
-
-        def checkifca(self,data):
-                db_config = self.read_db_config()
-                con = mysql.connector.connect(**db_config)
-                cur = con.cursor()
-                sql = ("SELECT * FROM logbook where no_ifca LIKE %s")
-                cur.execute(sql,(data,))
-                hasil = cur.fetchone()
-                if cur.rowcount < 0:
-                        pass
-                else:
-                        if (data.upper() == hasil[2].upper()):
-                                return "tolak"
-                        if (data == 0): #belum fungsi
-                                return "tolak"
-                cur.close()
-                con.close()
-                                
-        def checktgl(self,data):
-                if len(str(data)) == 10:
-                        cHari = str(data)[0:2]
-                        cBulan = str(data)[3:5]
-                        cTahun = str(data)[6:]
-                        return datetime.date(int(cTahun),int(cBulan),int(cHari))
-                else:
-                        return None
-                
         def aturKomponen(self):
+                # Note: padx(horizontal), pady(vertical)
                 frameWin = Frame(self.parent, bg="#666")
                 frameWin.pack(fill=X,side=TOP)
                 WindowDraggable(frameWin)
@@ -111,7 +65,7 @@ class Petugas:
                 btnFrame = Frame(self.parent)
                 btnFrame.pack(side=TOP, fill=X)
                 tabelFrame = Frame(self.parent)
-                tabelFrame.pack( expand=YES, side=TOP,fill=Y)
+                tabelFrame.pack(expand=YES, side=TOP,fill=Y)
 
                 Label(mainFrame, text=' ').grid(row=0, column=0)
                 Label(btnFrame, text=' ').grid(row=1, column=0)
@@ -180,29 +134,39 @@ class Petugas:
                 #panel button
                 self.btnSave = Button(btnFrame, text='Save',\
                                         command=self.onSave, width=10,\
-                                        relief=FLAT, bd=2, bg="#666", fg="white",activebackground="#444",activeforeground="white" )
-                self.btnSave.grid(row=0, column=1,padx=5)
+                                        relief=RAISED, bd=2, bg="#666", fg="white",activebackground="#444",activeforeground="white" )
+                self.btnSave.grid(row=0, column=1,pady=10,padx=5)
 
                 self.btnUpdate = Button(btnFrame, text='Update',\
                                         command=self.onUpdate,state="disable", width=10,\
-                                        relief=FLAT, bd=2, bg="#666", fg="white",activebackground="#444",activeforeground="white")
-                self.btnUpdate.grid(row=0,column=2,pady=10, padx=5)
+                                        relief=RAISED, bd=2, bg="#666", fg="white",activebackground="#444",activeforeground="white")
+                self.btnUpdate.grid(row=0,column=2,pady=10,padx=5)
                 
                 self.btnClear = Button(btnFrame, text='Clear',\
                                         command=self.onClear, width=10,\
-                                       relief=FLAT, bd=2, bg="#666", fg="white",activebackground="#444",activeforeground="white")
-                self.btnClear.grid(row=0,column=3,pady=10, padx=5)
+                                       relief=RAISED, bd=2, bg="#666", fg="white",activebackground="#444",activeforeground="white")
+                self.btnClear.grid(row=0,column=3,pady=10,padx=5)
 
                 self.btnDelete = Button(btnFrame, text='Delete',\
                                         command=self.onDelete,state="disable", width=10,\
-                                        relief=FLAT, bd=2, bg="#FC6042", fg="white",activebackground="#444",activeforeground="white")
-                self.btnDelete.grid(row=0,column=4,pady=10, padx=5)
+                                        relief=RAISED, bd=2, bg="#FC6042", fg="white",activebackground="#444",activeforeground="white")
+                self.btnDelete.grid(row=0,column=4,pady=10,padx=5)
 
                 self.btnReceived = Button(btnFrame, text='Received',\
                                         command=self.onReceived,state="disable", width=10,\
-                                       relief=FLAT, bd=2, bg="#667", fg="white",activebackground="#444",activeforeground="white")
-                self.btnReceived.grid(row=0,column=5,pady=10, padx=5)
+                                       relief=RAISED, bd=2, bg="#667", fg="white",activebackground="#444",activeforeground="white")
+                self.btnReceived.grid(row=0,column=5,pady=10,padx=5)
 
+                Label(btnFrame, text="Search :").grid(row=1, column=1, sticky=E,padx=20)
+                self.entCari = Entry(btnFrame, width=20)
+                self.entCari.grid(row=1, column=2,sticky=W)
+                self.btnSearch = Button(btnFrame, text='Search',\
+                                        command=self.onSearch,\
+                                        state="normal", width=10,\
+                                       relief=RAISED, bd=2, bg="#667", fg="white",activebackground="#444",activeforeground="white")
+                self.btnSearch.grid(row=1,column=3,pady=10,padx=5)
+
+                #tabel
                 self.fr_data = Frame(tabelFrame, bd=10)
                 self.fr_data.pack(fill=BOTH, expand=YES)
                 self.trvTabel = ttk.Treeview(self.fr_data, columns=judul_kolom,show='headings')
@@ -216,6 +180,106 @@ class Petugas:
                 self.trvTabel.configure(yscrollcommand=sbVer.set)
                 self.trvTabel.configure(xscrollcommand=sbVer.set)
                 self.table()
+
+        def read_db_config(self,filename='C:\\config.ini', section='mysql'):
+                """ Read database configuration file and return a dictionary object
+                :param filename: name of the configuration file
+                :param section: section of database configuration
+                :return: a dictionary of database parameters
+                """
+                # create parser and read ini configuration file
+                parser = ConfigParser()
+                parser.read(filename)
+
+                # get section, default to mysql
+                db = {}
+                if parser.has_section(section):
+                    items = parser.items(section)
+                    for item in items:
+                        db[item[0]] = item[1]
+                else:
+                    raise Exception('{0} not found in the {1} file'.format(section, filename))
+            
+                return db
+
+        def checkifca(self,data):
+                db_config = self.read_db_config()
+                con = mysql.connector.connect(**db_config)
+                cur = con.cursor()
+                sql = ("SELECT * FROM logbook where no_ifca LIKE %s")
+                cur.execute(sql,(data,))
+                hasil = cur.fetchone()
+                if cur.rowcount < 0:
+                        pass
+                else:
+                        if (data.upper() == hasil[2].upper()):
+                                return "tolak"
+                        if (data == 0): #belum fungsi
+                                return "tolak"
+                cur.close()
+                con.close()
+
+        def checktgl(self,data):
+                if len(str(data)) == 10:
+                        cHari = str(data)[0:2]
+                        cBulan = str(data)[3:5]
+                        cTahun = str(data)[6:]
+                        return datetime.date(int(cTahun),int(cBulan),int(cHari))
+                else:
+                        return None
+
+        def search_data(self,data):
+            try:
+                db_config = self.read_db_config()
+                con = mysql.connector.connect(**db_config)
+                cur = con.cursor()
+                sql = "SELECT * FROM logbook WHERE no_ifca LIKE %s"
+                val = ("%{}%".format(data),)
+                cur.execute(sql, val)
+                results = cur.fetchall()
+                # if cur.rowcount < 0:   
+                #     print("Tidak ada data")
+                # else:
+                #     for data in results:
+                #         print(data)
+                print('---',cur.rowcount,'ditemukan ---')
+
+                self.trvTabel.delete(*self.trvTabel.get_children())
+                for kolom in judul_kolom:
+                    self.trvTabel.heading(kolom,text=kolom)
+
+                self.trvTabel.column("No", width=10,anchor="w")
+                self.trvTabel.column("WO", width=50,anchor="w")
+                self.trvTabel.column("IFCA", width=80,anchor="w")
+                self.trvTabel.column("Tanggal", width=80,anchor="w")
+                self.trvTabel.column("UNIT", width=80,anchor="w")
+                self.trvTabel.column("Work Request", width=120,anchor="w")
+                self.trvTabel.column("Staff", width=70,anchor="w")
+                self.trvTabel.column("Work Action", width=120,anchor="w")
+                self.trvTabel.column("Tanggal Done", width=80,anchor="w")
+                self.trvTabel.column("Jam Done", width=40,anchor="w")
+                self.trvTabel.column("Received", width=40,anchor="w")
+            
+                i=0
+                for dat in results:
+                    if(i%2):
+                        baris="genap"
+                    else:
+                        baris="ganjil"
+                    self.trvTabel.insert('', 'end', values=dat, tags=baris)
+                    i+=1
+
+                self.trvTabel.tag_configure("ganjil", background="#FFFFFF")
+                self.trvTabel.tag_configure("genap", background="whitesmoke")
+                cur.close()
+                con.close() 
+
+            except mysql.connector.Error as err:
+                print("SQL Log: {}".format(err))
+
+        def onSearch(self):
+                cari = self.entCari.get()
+                self.search_data(cari)
 
         def auto(self):
                 db_config = self.read_db_config()
@@ -263,7 +327,7 @@ class Petugas:
                     self.entIfca.focus_set()
                     
                 self.entWo.config(state="readonly")
-       
+
         def table(self):
                 db_config = self.read_db_config()
                 con = mysql.connector.connect(**db_config)
@@ -299,7 +363,7 @@ class Petugas:
                 self.trvTabel.tag_configure("genap", background="whitesmoke")
                 cur.close()
                 con.close()                              
-    
+
         def onReceived(self):
                 cIfca = self.entIfca.get()
                 if len(cIfca) == 0:
@@ -314,7 +378,8 @@ class Petugas:
                         tsekarang = datetime.now()
                         sql = "UPDATE logbook SET date_received=%s,received=%s WHERE no_ifca =%s"
                         cur.execute(sql,(tsekarang,setreceived,cIfca))
-                        self.onClear()
+                        # self.onClear()
+                        self.onSearch() #update received sesuai tabel yg dicari
                         messagebox.showinfo(title="Informasi", \
                                     message="Wo {} sudah diterima.".format(cIfca))
                         cur.close()
@@ -393,7 +458,7 @@ class Petugas:
                 self.entWorkAct.insert(END, data[8]) 
                 cur.close()
                 con.close()
-       
+
         def onDelete(self):
                 db_config = self.read_db_config()
                 con = mysql.connector.connect(**db_config)
@@ -430,7 +495,7 @@ class Petugas:
                 self.auto()
                 self.entWo.focus_set()
                 os.system("cls")
-        
+
         def onSave(self):
                 db_config = self.read_db_config()
                 con = mysql.connector.connect(**db_config)
@@ -456,7 +521,7 @@ class Petugas:
                         cur.close()
                         con.close()
                         self.onClear()
-                
+
         def onUpdate(self):
                 cIfca = self.entIfca.get()
                 if len(cIfca) == 0:
