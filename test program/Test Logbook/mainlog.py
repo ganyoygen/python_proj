@@ -32,7 +32,7 @@ class WindowDraggable():
                 y = (event.y_root - self.y - self.label.winfo_rooty() + self.label.winfo_rooty())
                 root.geometry("+%s+%s" % (x, y))
 
-judul_kolom = ("No","WO","IFCA","Tanggal","UNIT","Work Request","Staff","Work Action","Tanggal Done","Jam Done","Received")
+judul_kolom = ("WO","IFCA","Tanggal","UNIT","Work Request","Staff","Work Action","Tanggal Done","Jam Done","Received")
 class Petugas:    
         def __init__(self, parent):
                 self.parent = parent
@@ -233,7 +233,8 @@ class Petugas:
                 db_config = self.read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
-                sql = "SELECT * FROM logbook WHERE no_ifca LIKE %s"
+                # sql = "SELECT * FROM logbook WHERE no_ifca LIKE %s"
+                sql = "SELECT no_wo, no_ifca, date_creat, unit, work_req, staff, work_act, date_done, time_done, received FROM logbook WHERE no_ifca LIKE %s"
                 val = ("%{}%".format(data),)
                 cur.execute(sql, val)
                 results = cur.fetchall()
@@ -248,7 +249,7 @@ class Petugas:
                 for kolom in judul_kolom:
                     self.trvTabel.heading(kolom,text=kolom)
 
-                self.trvTabel.column("No", width=10,anchor="w")
+                # self.trvTabel.column("No", width=10,anchor="w")
                 self.trvTabel.column("WO", width=50,anchor="w")
                 self.trvTabel.column("IFCA", width=80,anchor="w")
                 self.trvTabel.column("Tanggal", width=80,anchor="w")
@@ -332,13 +333,14 @@ class Petugas:
                 db_config = self.read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
-                cur.execute("SELECT * FROM logbook")
+                # cur.execute("SELECT `no_wo` FROM logbook")
+                cur.execute("SELECT no_wo, no_ifca, date_creat, unit, work_req, staff, work_act, date_done, time_done, received FROM logbook")
                 data_table = cur.fetchall()
 
                 for kolom in judul_kolom:
                     self.trvTabel.heading(kolom,text=kolom)
 
-                self.trvTabel.column("No", width=10,anchor="w")
+                # self.trvTabel.column("No", width=10,anchor="w")
                 self.trvTabel.column("WO", width=50,anchor="w")
                 self.trvTabel.column("IFCA", width=80,anchor="w")
                 self.trvTabel.column("Tanggal", width=80,anchor="w")
@@ -406,7 +408,7 @@ class Petugas:
                 # ck = str(self.trvTabel.item(it,"values"))#[2:]
 
                 curItem = self.trvTabel.item(self.trvTabel.focus())
-                ifca_value = curItem['values'][2]
+                ifca_value = curItem['values'][1]
                 self.entIfca.insert(END, ifca_value)
 
                 cIfca = self.entIfca.get()
