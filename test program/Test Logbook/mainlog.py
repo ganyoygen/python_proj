@@ -157,9 +157,14 @@ class Petugas:
                                        relief=RAISED, bd=2, bg="#667", fg="white",activebackground="#444",activeforeground="white")
                 self.btnReceived.grid(row=0,column=5,pady=10,padx=5)
 
-                Label(btnFrame, text="Search :").grid(row=1, column=1, sticky=E,padx=20)
+                # Label(btnFrame, text="Search :").grid(row=1, column=1, sticky=E,padx=20)
+                self.opsicari = ttk.Combobox(btnFrame, values = ["IFCA","Tanggal", "Unit", "Work Req."],\
+                                                state="readonly", width=10)
+                self.opsicari.current(1)
+                self.opsicari.grid(row=1, column=1,sticky=W)
                 self.entCari = Entry(btnFrame, width=20)
                 self.entCari.grid(row=1, column=2,sticky=W)
+                # self.entCari.bind('<KeyRelease>',self.onSearch) #cari saat input apapun
                 self.btnSearch = Button(btnFrame, text='Search',\
                                         command=self.onSearch,\
                                         state="normal", width=10,\
@@ -179,7 +184,15 @@ class Petugas:
                 self.trvTabel.pack(side=TOP, fill=BOTH)
                 self.trvTabel.configure(yscrollcommand=sbVer.set)
                 self.trvTabel.configure(xscrollcommand=sbVer.set)
-                self.search_ifca("")
+
+                # list wo hari ini
+                from datetime import date
+                today = date.today()
+                self.entCari.insert(END,today.strftime("%d-%m-%Y"))
+                self.onSearch()
+
+                # tanggal otomatis hari ini
+                self.entTglbuat.insert(END,today.strftime("%d-%m-%Y"))
 
         def read_db_config(self,filename='C:\\config.ini', section='mysql'):
                 """ Read database configuration file and return a dictionary object
@@ -228,15 +241,17 @@ class Petugas:
                 else:
                         return None
 
-        def search_ifca(self,data):
+        def search_data(self,opsi,data):
                 try:
                     db_config = self.read_db_config()
                     con = mysql.connector.connect(**db_config)
                     cur = con.cursor()
                     # sql = "SELECT * FROM logbook WHERE no_ifca LIKE %s"
-                    sql = "SELECT no_wo, no_ifca, date_creat, unit, work_req, staff, work_act, date_done, time_done, received FROM logbook WHERE no_ifca LIKE %s"
-                    val = ("%{}%".format(data),)
-                    cur.execute(sql, val)
+                #     sql = "SELECT no_wo, no_ifca, date_creat, unit, work_req, staff, work_act, date_done, time_done, received FROM logbook WHERE %s LIKE %s"
+                #     val = (opsi,data)
+                #     val = ("%{}%".format(opsi),"%{}%".format(data))
+                    cur.execute(opsi, data)
+                #     cur.execute(sql, val)
                     results = cur.fetchall()
 
                     print('---',cur.rowcount,'ditemukan ---')
@@ -250,8 +265,34 @@ class Petugas:
                     print("SQL Log: {}".format(err))
 
         def onSearch(self):
+                opsi = self.opsicari.get()
                 cari = self.entCari.get()
-                self.search_ifca(cari)
+                if opsi == "Tanggal":
+                        cari = self.checktgl(cari)
+                        sql = "SELECT no_wo, no_ifca, date_creat, unit, \
+                                work_req, staff, work_act, date_done, \
+                                time_done, received FROM logbook WHERE date_creat LIKE %s"
+                        val = ("%{}%".format(cari),)
+                        self.search_data(sql,val)
+
+                elif opsi == "IFCA":
+                        sql = "SELECT no_wo, no_ifca, date_creat, unit, \
+                                work_req, staff, work_act, date_done, \
+                                time_done, received FROM logbook WHERE no_ifca LIKE %s"
+                        val = ("%{}%".format(cari),)
+                        self.search_data(sql,val)
+                elif opsi == "Unit":
+                        sql = "SELECT no_wo, no_ifca, date_creat, unit, \
+                                work_req, staff, work_act, date_done, \
+                                time_done, received FROM logbook WHERE unit LIKE %s"
+                        val = ("%{}%".format(cari),)
+                        self.search_data(sql,val)
+                elif opsi == "Work Req.":
+                        sql = "SELECT no_wo, no_ifca, date_creat, unit, \
+                                work_req, staff, work_act, date_done, \
+                                time_done, received FROM logbook WHERE work_req LIKE %s"
+                        val = ("%{}%".format(cari),)
+                        self.search_data(sql,val)
 
         def auto(self):
                 db_config = self.read_db_config()
@@ -426,10 +467,10 @@ class Petugas:
                 self.entWorkAct.insert(END, data[8])
 
                 # jangan update ifca, tgl, unit
-                self.entWo.config(state="disable")
-                self.entIfca.config(state="disable")
-                self.entTglbuat.config(state="disable")
-                self.entUnit.config(state="disable")
+                self.entWo.config(state="readonly")
+                self.entIfca.config(state="readonly")
+                self.entTglbuat.config(state="readonly")
+                self.entUnit.config(state="readonly")
                 cur.close()
                 con.close()
 
@@ -468,8 +509,18 @@ class Petugas:
                 self.entWorkAct.delete('1.0', 'end')
                 self.entCari.delete(0, END)
                 self.trvTabel.delete(*self.trvTabel.get_children())
-                self.fr_data.after(0, self.search_ifca(""))
-        
+
+                # list wo hari ini
+                self.opsicari.current(1)
+                from datetime import date
+                today = date.today()
+                self.entCari.insert(END,today.strftime("%d-%m-%Y"))
+                self.onSearch()
+                # self.fr_data.after(0, self.search_data("no_ifca",""))
+
+                # tanggal otomatis hari ini
+                self.entTglbuat.insert(END,today.strftime("%d-%m-%Y"))
+
                 self.auto()
                 self.entWo.focus_set()
                 os.system("cls")
@@ -485,9 +536,9 @@ class Petugas:
                 cWorkReq = self.entWorkReq.get('1.0', 'end')
                 cStaff = self.entStaff.get()
                 if self.checktgl(cTglBuat) == None: #check tgl jika kosong, batalkan save
-                        messagebox.showwarning(title="Peringatan",message="Format tanggal salah")    
+                        messagebox.showerror(title="Peringatan",message="Format tanggal salah")    
                 elif self.checkifca(cIfca) == "tolak": #check IFCA
-                        messagebox.showwarning(title="Informasi", \
+                        messagebox.showerror(title="Informasi", \
                                 message="Wo {} sudah terdaftar.".format(cIfca))
                 else:
                         cur = con.cursor()
