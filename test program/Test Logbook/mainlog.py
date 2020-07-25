@@ -301,6 +301,7 @@ class Petugas:
                 self.entWo.config(state="readonly")
 
         def showtable(self,data):
+                self.trvTabel.delete(*self.trvTabel.get_children()) #refresh, hapus dulu tabel lama
                 for kolom in judul_kolom:
                     self.trvTabel.heading(kolom,text=kolom)
 
@@ -351,6 +352,9 @@ class Petugas:
 
         def OnDoubleClick(self, event):
                 self.entWo.config(state="normal")
+                self.entIfca.config(state="normal")
+                self.entTglbuat.config(state="normal")
+                self.entUnit.config(state="normal")
                 self.entWo.delete(0, END)
                 self.entIfca.delete(0, END)
                 self.entTglbuat.delete(0, END)
@@ -419,7 +423,13 @@ class Petugas:
                         pass
 
                 self.entJamdone.insert(END, data[7])
-                self.entWorkAct.insert(END, data[8]) 
+                self.entWorkAct.insert(END, data[8])
+
+                # jangan update ifca, tgl, unit
+                self.entWo.config(state="disable")
+                self.entIfca.config(state="disable")
+                self.entTglbuat.config(state="disable")
+                self.entUnit.config(state="disable")
                 cur.close()
                 con.close()
 
@@ -444,6 +454,9 @@ class Petugas:
                 self.btnDelete.config(state="disable")
                 self.btnReceived.config(state="disable")
                 self.entWo.config(state="normal")
+                self.entIfca.config(state="normal")
+                self.entTglbuat.config(state="normal")
+                self.entUnit.config(state="normal")
                 self.entWo.delete(0, END)
                 self.entIfca.delete(0, END)
                 self.entTglbuat.delete(0, END)
