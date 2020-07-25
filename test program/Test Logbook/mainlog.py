@@ -246,19 +246,11 @@ class Petugas:
                     db_config = self.read_db_config()
                     con = mysql.connector.connect(**db_config)
                     cur = con.cursor()
-                    # sql = "SELECT * FROM logbook WHERE no_ifca LIKE %s"
-                #     sql = "SELECT no_wo, no_ifca, date_creat, unit, work_req, staff, work_act, date_done, time_done, received FROM logbook WHERE %s LIKE %s"
-                #     val = (opsi,data)
-                #     val = ("%{}%".format(opsi),"%{}%".format(data))
                     cur.execute(opsi, data)
-                #     cur.execute(sql, val)
                     results = cur.fetchall()
-
                     print('---',cur.rowcount,'ditemukan ---')
-
                     cur.close()
                     con.close() 
-                    
                     self.showtable(results)
 
                 except mysql.connector.Error as err:
@@ -269,28 +261,19 @@ class Petugas:
                 cari = self.entCari.get()
                 if opsi == "Tanggal":
                         cari = self.checktgl(cari)
-                        sql = "SELECT no_wo, no_ifca, date_creat, unit, \
-                                work_req, staff, work_act, date_done, \
-                                time_done, received FROM logbook WHERE date_creat LIKE %s"
+                        sql = "SELECT * FROM logbook WHERE date_creat LIKE %s"
                         val = ("%{}%".format(cari),)
                         self.search_data(sql,val)
-
                 elif opsi == "IFCA":
-                        sql = "SELECT no_wo, no_ifca, date_creat, unit, \
-                                work_req, staff, work_act, date_done, \
-                                time_done, received FROM logbook WHERE no_ifca LIKE %s"
+                        sql = "SELECT * FROM logbook WHERE no_ifca LIKE %s"
                         val = ("%{}%".format(cari),)
                         self.search_data(sql,val)
                 elif opsi == "Unit":
-                        sql = "SELECT no_wo, no_ifca, date_creat, unit, \
-                                work_req, staff, work_act, date_done, \
-                                time_done, received FROM logbook WHERE unit LIKE %s"
+                        sql = "SELECT * FROM logbook WHERE unit LIKE %s"
                         val = ("%{}%".format(cari),)
                         self.search_data(sql,val)
                 elif opsi == "Work Req.":
-                        sql = "SELECT no_wo, no_ifca, date_creat, unit, \
-                                work_req, staff, work_act, date_done, \
-                                time_done, received FROM logbook WHERE work_req LIKE %s"
+                        sql = "SELECT * FROM logbook WHERE work_req LIKE %s"
                         val = ("%{}%".format(cari),)
                         self.search_data(sql,val)
 
@@ -304,42 +287,54 @@ class Petugas:
                 cur.execute(sqlkode)
                 # cuv.execute(sql)
                 maxkode = cur.fetchone()
-                try:     
-                    autohit = int(maxkode[0])+1
-                    hits = "00000"+str(autohit)
-                    if len(hits) == 6:
-                        self.entWo.insert(0, hits)
-                        self.entIfca.focus_set()
-                    elif len(hits) == 7:
-                        hit = "0000"+str(autohit)
-                        self.entWo.insert(0, hit)
-                        self.entIfca.focus_set()
-                    elif len(hits) == 8:
-                        hit = "000"+str(autohit)
-                        self.entWo.insert(0, hit)
-                        self.entIfca.focus_set()
-                    elif len(hits) == 9:
-                        hit = "00"+str(autohit)
-                        self.entWo.insert(0, hit)
-                        self.entIfca.focus_set()
-                    elif len(hits) == 10:
-                        hit = "0"+str(autohit)
-                        self.entWo.insert(0, hit)
-                        self.entIfca.focus_set()
-                    elif len(hits) == 11:
-                        hit = ""+str(autohit)
-                        self.entWo.insert(0, hit)
-                        self.entIfca.focus_set()
+    
+                autohit = int(maxkode[0])+1
+                if len(str(autohit)) <= 6:
+                    self.entWo.insert(0, autohit)
+                    self.entUnit.focus_set()
+                else:
+                    messagebox.showwarning(title="Peringatan", \
+                            message="maaf lebar data untuk no WO hanya sampai 6 digit")
+  
+
+                # try:     
+                #     autohit = int(maxkode[0])+1
+                #     hits = "00000"+str(autohit)
+                #     if len(hits) == 6:
+                #         self.entWo.insert(0, hits)
+                #         self.entIfca.focus_set()
+                #     elif len(hits) == 7:
+                #         hit = "0000"+str(autohit)
+                #         self.entWo.insert(0, hit)
+                #         self.entIfca.focus_set()
+                #     elif len(hits) == 8:
+                #         hit = "000"+str(autohit)
+                #         self.entWo.insert(0, hit)
+                #         self.entIfca.focus_set()
+                #     elif len(hits) == 9:
+                #         hit = "00"+str(autohit)
+                #         self.entWo.insert(0, hit)
+                #         self.entIfca.focus_set()
+                #     elif len(hits) == 10:
+                #         hit = "0"+str(autohit)
+                #         self.entWo.insert(0, hit)
+                #         self.entIfca.focus_set()
+                #     elif len(hits) == 11:
+                #         hit = ""+str(autohit)
+                #         self.entWo.insert(0, hit)
+                #         self.entIfca.focus_set()
                     
-                    else:
-                        messagebox.showwarning(title="Peringatan", \
-                                    message="maaf lebar data hanya sampai 6 digit")
-                except:        
-                    hit = "000001"
-                    self.entWo.insert(0, hit)
-                    self.entIfca.focus_set()
+                #     else:
+                #         messagebox.showwarning(title="Peringatan", \
+                #                     message="maaf lebar data hanya sampai 6 digit")
+                # except:        
+                #     hit = "000001"
+                #     self.entWo.insert(0, hit)
+                #     self.entIfca.focus_set()
                     
-                self.entWo.config(state="readonly")
+                self.entWo.config(state="normal")
+                cur.close()
+                con.close()
 
         def showtable(self,data):
                 self.trvTabel.delete(*self.trvTabel.get_children()) #refresh, hapus dulu tabel lama
@@ -359,12 +354,13 @@ class Petugas:
                 self.trvTabel.column("Received", width=40,anchor="w")
             
                 i=0
-                for dat in data:
+                for dat in data: 
                     if(i%2):
                         baris="genap"
                     else:
                         baris="ganjil"
-                    self.trvTabel.insert('', 'end', values=dat, tags=baris)
+                    #hilangkan nomor mulai dari kolom wo dat[1:]
+                    self.trvTabel.insert('', 'end', values=dat[1:], tags=baris)
                     i+=1
 
                 self.trvTabel.tag_configure("ganjil", background="#FFFFFF")
