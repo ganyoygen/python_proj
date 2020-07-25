@@ -179,7 +179,7 @@ class Petugas:
                 self.trvTabel.pack(side=TOP, fill=BOTH)
                 self.trvTabel.configure(yscrollcommand=sbVer.set)
                 self.trvTabel.configure(xscrollcommand=sbVer.set)
-                self.table()
+                self.search_ifca("")
 
         def read_db_config(self,filename='C:\\config.ini', section='mysql'):
                 """ Read database configuration file and return a dictionary object
@@ -228,59 +228,30 @@ class Petugas:
                 else:
                         return None
 
-        def search_data(self,data):
-            try:
-                db_config = self.read_db_config()
-                con = mysql.connector.connect(**db_config)
-                cur = con.cursor()
-                # sql = "SELECT * FROM logbook WHERE no_ifca LIKE %s"
-                sql = "SELECT no_wo, no_ifca, date_creat, unit, work_req, staff, work_act, date_done, time_done, received FROM logbook WHERE no_ifca LIKE %s"
-                val = ("%{}%".format(data),)
-                cur.execute(sql, val)
-                results = cur.fetchall()
-                # if cur.rowcount < 0:   
-                #     print("Tidak ada data")
-                # else:
-                #     for data in results:
-                #         print(data)
-                print('---',cur.rowcount,'ditemukan ---')
+        def search_ifca(self,data):
+                try:
+                    db_config = self.read_db_config()
+                    con = mysql.connector.connect(**db_config)
+                    cur = con.cursor()
+                    # sql = "SELECT * FROM logbook WHERE no_ifca LIKE %s"
+                    sql = "SELECT no_wo, no_ifca, date_creat, unit, work_req, staff, work_act, date_done, time_done, received FROM logbook WHERE no_ifca LIKE %s"
+                    val = ("%{}%".format(data),)
+                    cur.execute(sql, val)
+                    results = cur.fetchall()
 
-                self.trvTabel.delete(*self.trvTabel.get_children())
-                for kolom in judul_kolom:
-                    self.trvTabel.heading(kolom,text=kolom)
+                    print('---',cur.rowcount,'ditemukan ---')
 
-                # self.trvTabel.column("No", width=10,anchor="w")
-                self.trvTabel.column("WO", width=50,anchor="w")
-                self.trvTabel.column("IFCA", width=80,anchor="w")
-                self.trvTabel.column("Tanggal", width=80,anchor="w")
-                self.trvTabel.column("UNIT", width=80,anchor="w")
-                self.trvTabel.column("Work Request", width=120,anchor="w")
-                self.trvTabel.column("Staff", width=70,anchor="w")
-                self.trvTabel.column("Work Action", width=120,anchor="w")
-                self.trvTabel.column("Tanggal Done", width=80,anchor="w")
-                self.trvTabel.column("Jam Done", width=40,anchor="w")
-                self.trvTabel.column("Received", width=40,anchor="w")
-            
-                i=0
-                for dat in results:
-                    if(i%2):
-                        baris="genap"
-                    else:
-                        baris="ganjil"
-                    self.trvTabel.insert('', 'end', values=dat, tags=baris)
-                    i+=1
+                    cur.close()
+                    con.close() 
+                    
+                    self.showtable(results)
 
-                self.trvTabel.tag_configure("ganjil", background="#FFFFFF")
-                self.trvTabel.tag_configure("genap", background="whitesmoke")
-                cur.close()
-                con.close() 
-
-            except mysql.connector.Error as err:
-                print("SQL Log: {}".format(err))
+                except mysql.connector.Error as err:
+                    print("SQL Log: {}".format(err))
 
         def onSearch(self):
                 cari = self.entCari.get()
-                self.search_data(cari)
+                self.search_ifca(cari)
 
         def auto(self):
                 db_config = self.read_db_config()
@@ -329,14 +300,7 @@ class Petugas:
                     
                 self.entWo.config(state="readonly")
 
-        def table(self):
-                db_config = self.read_db_config()
-                con = mysql.connector.connect(**db_config)
-                cur = con.cursor()
-                # cur.execute("SELECT `no_wo` FROM logbook")
-                cur.execute("SELECT no_wo, no_ifca, date_creat, unit, work_req, staff, work_act, date_done, time_done, received FROM logbook")
-                data_table = cur.fetchall()
-
+        def showtable(self,data):
                 for kolom in judul_kolom:
                     self.trvTabel.heading(kolom,text=kolom)
 
@@ -353,7 +317,7 @@ class Petugas:
                 self.trvTabel.column("Received", width=40,anchor="w")
             
                 i=0
-                for dat in data_table:
+                for dat in data:
                     if(i%2):
                         baris="genap"
                     else:
@@ -362,9 +326,7 @@ class Petugas:
                     i+=1
 
                 self.trvTabel.tag_configure("ganjil", background="#FFFFFF")
-                self.trvTabel.tag_configure("genap", background="whitesmoke")
-                cur.close()
-                con.close()                              
+                self.trvTabel.tag_configure("genap", background="whitesmoke")                              
 
         def onReceived(self):
                 cIfca = self.entIfca.get()
@@ -491,8 +453,9 @@ class Petugas:
                 self.entTgldone.delete(0, END)
                 self.entJamdone.delete(0, END)
                 self.entWorkAct.delete('1.0', 'end')
+                self.entCari.delete(0, END)
                 self.trvTabel.delete(*self.trvTabel.get_children())
-                self.fr_data.after(0, self.table())
+                self.fr_data.after(0, self.search_ifca(""))
         
                 self.auto()
                 self.entWo.focus_set()
@@ -553,7 +516,7 @@ class Petugas:
                         cur.close()
                         con.close()
                         self.onClear()
-                     
+
 
 def main():
     os.system("cls")
