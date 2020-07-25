@@ -54,8 +54,8 @@ class Petugas:
                 frameWin.pack(fill=X,side=TOP)
                 WindowDraggable(frameWin)
                 Label(frameWin, text='PETUGAS',bg="#666",fg="white").pack(side=LEFT,padx=20)
-                buttonx = Button(frameWin, text="X",fg="white", bg="#FA8072", width=6, height=2,bd=0,\
-                                 activebackground="#FB8072",activeforeground="white", command=self.keluar, relief=FLAT)
+                # buttonx = Button(frameWin, text="X",fg="white", bg="#FA8072", width=6, height=2,bd=0,\
+                #                  activebackground="#FB8072",activeforeground="white", command=self.keluar, relief=FLAT)
                 # Menghilangkan Frame windows
                 # self.parent.overrideredirect(1) 
                 # buttonx.pack(side=RIGHT)
@@ -71,15 +71,23 @@ class Petugas:
                 Label(btnFrame, text=' ').grid(row=1, column=0)
 
                 #samping kiri
-                Label(mainFrame, text='WO').grid(row=1, column=0, sticky=W,padx=20)
+                Label(mainFrame, text='No WO').grid(row=1, column=0, sticky=W,padx=20)
                 Label(mainFrame, text=':').grid(row=1, column=1, sticky=W,pady=5,padx=10)
                 self.entWo = Entry(mainFrame, width=20)
                 self.entWo.grid(row=1, column=2,sticky=W)
 
-                Label(mainFrame, text="No IFCA").grid(row=2, column=0, sticky=W,padx=20)
+                Label(mainFrame, text="IFCA").grid(row=2, column=0, sticky=W,padx=20)
                 Label(mainFrame, text=':').grid(row=2, column=1, sticky=W,pady=5,padx=10)
                 self.entIfca = Entry(mainFrame, width=20)
                 self.entIfca.grid(row=2, column=2,sticky=W)
+                radiobtn = Frame(mainFrame)
+                radiobtn.grid(row=2,column=2)
+                btnselect = IntVar()
+                self.rbtnTN = Radiobutton(radiobtn, text="TN", variable=btnselect, value=1, command=self.auto_ifca)
+                self.rbtnTN.grid(row=0, column=0,sticky=E)
+                self.rbtnBM = Radiobutton(radiobtn, text="BM", variable=btnselect, value=2, command=self.auto_ifca)
+                Label(radiobtn, text="/").grid(row=0,column=1,sticky=E)
+                self.rbtnBM.grid(row=0, column=2,sticky=E)
                 
                 #tglbuat
                 Label(mainFrame, text="Tanggal").grid(row=3, column=0, sticky=W,padx=20)
@@ -336,6 +344,9 @@ class Petugas:
                 cur.close()
                 con.close()
 
+        def auto_ifca(self):
+                print(str(btnselect.get()))
+
         def showtable(self,data):
                 self.trvTabel.delete(*self.trvTabel.get_children()) #refresh, hapus dulu tabel lama
                 for kolom in judul_kolom:
@@ -518,7 +529,7 @@ class Petugas:
                 self.entTglbuat.insert(END,today.strftime("%d-%m-%Y"))
 
                 self.auto()
-                self.entWo.focus_set()
+                self.entUnit.focus_set()
                 os.system("cls")
 
         def onSave(self):
