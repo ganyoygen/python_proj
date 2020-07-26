@@ -32,6 +32,7 @@ class WindowDraggable():
                 y = (event.y_root - self.y - self.label.winfo_rooty() + self.label.winfo_rooty())
                 root.geometry("+%s+%s" % (x, y))
 
+btnselect = StringVar(value="TN")
 judul_kolom = ("WO","IFCA","Tanggal","UNIT","Work Request","Staff","Work Action","Tanggal Done","Jam Done","Received")
 class Petugas:    
         def __init__(self, parent):
@@ -82,13 +83,13 @@ class Petugas:
                 self.entIfca.grid(row=2, column=2,sticky=W)
                 radiobtn = Frame(mainFrame)
                 radiobtn.grid(row=2,column=2)
-                btnselect = IntVar()
-                self.rbtnTN = Radiobutton(radiobtn, text="TN", variable=btnselect, value=1, command=self.auto_ifca)
-                self.rbtnTN.grid(row=0, column=0,sticky=E)
-                self.rbtnBM = Radiobutton(radiobtn, text="BM", variable=btnselect, value=2, command=self.auto_ifca)
-                Label(radiobtn, text="/").grid(row=0,column=1,sticky=E)
-                self.rbtnBM.grid(row=0, column=2,sticky=E)
                 
+                self.rbtnTN = Radiobutton(radiobtn, text="TN", variable=btnselect, value="TN", command=self.auto_ifca,anchor = W)
+                self.rbtnTN.grid(row=0, column=0,sticky=W)
+                self.rbtnBM = Radiobutton(radiobtn, text="BM", variable=btnselect, value="BM", command=self.auto_ifca,anchor = W)
+                Label(radiobtn, text="/").grid(row=0,column=1,sticky=E)
+                self.rbtnBM.grid(row=0, column=2,sticky=W)
+
                 #tglbuat
                 Label(mainFrame, text="Tanggal").grid(row=3, column=0, sticky=W,padx=20)
                 Label(mainFrame, text=':').grid(row=3, column=1, sticky=W,pady=5,padx=10)
@@ -289,11 +290,8 @@ class Petugas:
                 db_config = self.read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
-                cuv = con.cursor()
                 sqlkode = "SELECT max(no_wo) FROM logbook"
-                sql = "SELECT no_wo FROM logbook"
                 cur.execute(sqlkode)
-                # cuv.execute(sql)
                 maxkode = cur.fetchone()
     
                 autohit = int(maxkode[0])+1
@@ -303,49 +301,33 @@ class Petugas:
                 else:
                     messagebox.showwarning(title="Peringatan", \
                             message="maaf lebar data untuk no WO hanya sampai 6 digit")
-  
 
-                # try:     
-                #     autohit = int(maxkode[0])+1
-                #     hits = "00000"+str(autohit)
-                #     if len(hits) == 6:
-                #         self.entWo.insert(0, hits)
-                #         self.entIfca.focus_set()
-                #     elif len(hits) == 7:
-                #         hit = "0000"+str(autohit)
-                #         self.entWo.insert(0, hit)
-                #         self.entIfca.focus_set()
-                #     elif len(hits) == 8:
-                #         hit = "000"+str(autohit)
-                #         self.entWo.insert(0, hit)
-                #         self.entIfca.focus_set()
-                #     elif len(hits) == 9:
-                #         hit = "00"+str(autohit)
-                #         self.entWo.insert(0, hit)
-                #         self.entIfca.focus_set()
-                #     elif len(hits) == 10:
-                #         hit = "0"+str(autohit)
-                #         self.entWo.insert(0, hit)
-                #         self.entIfca.focus_set()
-                #     elif len(hits) == 11:
-                #         hit = ""+str(autohit)
-                #         self.entWo.insert(0, hit)
-                #         self.entIfca.focus_set()
-                    
-                #     else:
-                #         messagebox.showwarning(title="Peringatan", \
-                #                     message="maaf lebar data hanya sampai 6 digit")
-                # except:        
-                #     hit = "000001"
-                #     self.entWo.insert(0, hit)
-                #     self.entIfca.focus_set()
-                    
                 self.entWo.config(state="normal")
                 cur.close()
                 con.close()
 
         def auto_ifca(self):
-                print(str(btnselect.get()))
+                tipe = str(btnselect.get())
+                db_config = self.read_db_config()
+                con = mysql.connector.connect(**db_config)
+                cur = con.cursor()
+                sql = "SELECT no_ifca FROM logbook WHERE no_ifca LIKE %s"
+                val = ("%{}%".format(tipe),)
+                cur.execute(sql, val)
+                hasil = cur.fetchall()
+
+                for get in hasil:  
+                        ifcalist = [get] # buat dulu daftar ifca
+                lastifca = max(ifcalist) # Max num ifca terakhir
+                print("Jumlah IFCA:",len(hasil)) # Jumlah ifca didapat
+                newIfcaNum = (int(max(lastifca)[2:])+1) # cari lastifca, hapus tipe(BM/TN) + 1
+                getNewIfca = tipe+str(newIfcaNum) # Ifca baru siap dipakai
+                print("Get new ifca:",getNewIfca) 
+                self.entIfca.delete(0, END)
+                self.entIfca.insert(0,getNewIfca)
+                self.entIfca.config(state="normal")
+                cur.close()
+                con.close()
 
         def showtable(self,data):
                 self.trvTabel.delete(*self.trvTabel.get_children()) #refresh, hapus dulu tabel lama
@@ -417,9 +399,8 @@ class Petugas:
                 self.btnUpdate.config(state="normal")
                 self.btnDelete.config(state="normal")
                 self.btnReceived.config(state="normal")
-            
-                # it = self.trvTabel.selection()[0]
-                # ck = str(self.trvTabel.item(it,"values"))#[2:]
+                self.rbtnBM.config(state="disable")
+                self.rbtnTN.config(state="disable")
 
                 curItem = self.trvTabel.item(self.trvTabel.focus())
                 ifca_value = curItem['values'][1]
@@ -501,6 +482,8 @@ class Petugas:
                 self.btnUpdate.config(state="disable")
                 self.btnDelete.config(state="disable")
                 self.btnReceived.config(state="disable")
+                self.rbtnBM.config(state="normal")
+                self.rbtnTN.config(state="normal")
                 self.entWo.config(state="normal")
                 self.entIfca.config(state="normal")
                 self.entTglbuat.config(state="normal")
