@@ -224,6 +224,24 @@ class Petugas:
             
                 return db
 
+        def checkwo(self,data):
+                db_config = self.read_db_config()
+                con = mysql.connector.connect(**db_config)
+                cur = con.cursor()
+                sql = ("SELECT * FROM logbook where no_wo LIKE %s")
+                cur.execute(sql,(data,))
+                hasil = cur.fetchone()
+                if cur.rowcount < 0:
+                        pass
+                else:
+                        if len(data) < 1: # Jika wo kosong
+                                return "terima" 
+                        if (data == hasil[1]):
+                                return "tolak"
+                print(len(data))
+                cur.close()
+                con.close()
+
         def checkifca(self,data):
                 db_config = self.read_db_config()
                 con = mysql.connector.connect(**db_config)
@@ -235,8 +253,6 @@ class Petugas:
                         pass
                 else:
                         if (data.upper() == hasil[2].upper()):
-                                return "tolak"
-                        if (data == 0): #belum fungsi
                                 return "tolak"
                 cur.close()
                 con.close()
@@ -525,16 +541,27 @@ class Petugas:
                 cUnit = self.entUnit.get()
                 cWorkReq = self.entWorkReq.get('1.0', 'end')
                 cStaff = self.entStaff.get()
-                if self.checktgl(cTglBuat) == None: #check tgl jika kosong, batalkan save
-                        messagebox.showerror(title="Peringatan",message="Format tanggal salah")    
+                cIfca = self.entIfca.get()
+                if self.checkwo(cWo) == "tolak": #check WO
+                        messagebox.showerror(title="Error", \
+                        message="Wo {} sudah terdaftar.".format(cWo))
+                elif len(cIfca) == 0:
+                        messagebox.showwarning(title="Peringatan",message="No IFCA Kosong.")
+                        self.entIfca.focus_set()
+                elif len(cUnit) == 0:
+                        messagebox.showwarning(title="Peringatan",message="Unit harus diisi.")
+                        self.entUnit.focus_set()
+                elif self.checktgl(cTglBuat) == None: #check tgl jika kosong, batalkan save
+                        messagebox.showerror(title="Error",message="Format tanggal salah")    
                 elif self.checkifca(cIfca) == "tolak": #check IFCA
-                        messagebox.showerror(title="Informasi", \
-                                message="Wo {} sudah terdaftar.".format(cIfca))
+                        messagebox.showerror(title="Error", \
+                        message="{} sudah terdaftar.".format(cIfca))
+                        self.entIfca.focus_set()
                 else:
                         cur = con.cursor()
                         sql = "INSERT INTO logbook (no_wo, no_ifca, date_creat, unit, work_req, staff)"+\
                               "VALUES(%s,%s,%s,%s,%s,%s)"
-                        cur.execute(sql,(cWo,cIfca.upper(),self.checktgl(cTglBuat),cUnit,cWorkReq,cStaff))
+                        cur.execute(sql,(cWo,cIfca.upper(),self.checktgl(cTglBuat),cUnit.upper(),cWorkReq,cStaff))
                         messagebox.showinfo(title="Informasi", \
                                             message="Data sudah di tersimpan.")
                         cur.close()
@@ -542,34 +569,28 @@ class Petugas:
                         self.onClear()
 
         def onUpdate(self):
+                db_config = self.read_db_config()
+                con = mysql.connector.connect(**db_config)
+                cur = con.cursor()
+                #panel kiri
+                cWo = self.entWo.get()
                 cIfca = self.entIfca.get()
-                if len(cIfca) == 0:
-                        messagebox.showwarning(title="Peringatan",message="No IFCA Kosong.")
-                        self.entIfca.focus_set()
-                else:
-                        db_config = self.read_db_config()
-                        con = mysql.connector.connect(**db_config)
-                        cur = con.cursor()
-                        #panel kiri
-                        cWo = self.entWo.get()
-                        cIfca = self.entIfca.get()
-                        getTglBuat = self.checktgl(self.entTglbuat.get()) #check tgl dulu
-                        cWorkReq = self.entWorkReq.get('1.0', 'end')
-                        cStaff = self.entStaff.get()
-                        
-                        #panel kanan
-                        cWorkAct = self.entWorkAct.get('1.0', 'end')
-                        jamdone = self.entJamdone.get()
-                        getTglDone = self.checktgl(self.entTgldone.get()) #check tgl dulu
-
-                        #eksekusi sql
-                        sql = "UPDATE logbook SET no_wo=%s,no_ifca=%s,date_creat=%s,work_req=%s,staff=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_ifca =%s"
-                        cur.execute(sql,(cWo,cIfca,getTglBuat,cWorkReq,cStaff,getTglDone,jamdone,cWorkAct,cIfca))
-                        messagebox.showinfo(title="Informasi", \
-                                message="Data sudah di terupdate.")
-                        cur.close()
-                        con.close()
-                        self.onClear()
+                getTglBuat = self.checktgl(self.entTglbuat.get()) #check tgl dulu
+                cWorkReq = self.entWorkReq.get('1.0', 'end')
+                cStaff = self.entStaff.get()
+                
+                #panel kanan
+                cWorkAct = self.entWorkAct.get('1.0', 'end')
+                jamdone = self.entJamdone.get()
+                getTglDone = self.checktgl(self.entTgldone.get()) #check tgl dulu
+                #eksekusi sql
+                sql = "UPDATE logbook SET no_wo=%s,no_ifca=%s,date_creat=%s,work_req=%s,staff=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_ifca =%s"
+                cur.execute(sql,(cWo,cIfca,getTglBuat,cWorkReq,cStaff,getTglDone,jamdone,cWorkAct,cIfca))
+                messagebox.showinfo(title="Informasi", \
+                        message="Data sudah di terupdate.")
+                cur.close()
+                con.close()
+                self.onClear()
 
 
 def main():
