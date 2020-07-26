@@ -34,7 +34,7 @@ class WindowDraggable():
 
 btnselect = StringVar(value="TN")
 judul_kolom = ("WO","IFCA","Tanggal","UNIT","Work Request","Staff","Work Action","Tanggal Done","Jam Done","Received")
-class Petugas:    
+class Petugas:
         def __init__(self, parent):
                 self.parent = parent
                 self.parent.protocol("WM_DELETE_WINDOWS", self.keluar)
@@ -44,7 +44,6 @@ class Petugas:
                 setTengahY = (self.parent.winfo_screenheight()-tinggi)//2
                 self.parent.geometry("%ix%i+%i+%i" %(lebar, tinggi,setTengahX, setTengahY))
                 self.aturKomponen()
-                self.auto()
 
         def keluar(self,event=None):
                 self.parent.destroy()
@@ -187,21 +186,15 @@ class Petugas:
                 self.trvTabel.bind("<Double-1>", self.OnDoubleClick)
                 sbVer = Scrollbar(self.fr_data, orient='vertical',command=self.trvTabel.yview)
                 sbVer.pack(side=RIGHT, fill=Y)
-                sbVer = Scrollbar(self.fr_data, orient='horizontal',command=self.trvTabel.xview)
-                sbVer.pack(side=BOTTOM, fill=X)
+                sbHor = Scrollbar(self.fr_data, orient='horizontal',command=self.trvTabel.xview)
+                sbHor.pack(side=BOTTOM, fill=X)
 
                 self.trvTabel.pack(side=TOP, fill=BOTH)
                 self.trvTabel.configure(yscrollcommand=sbVer.set)
-                self.trvTabel.configure(xscrollcommand=sbVer.set)
+                self.trvTabel.configure(xscrollcommand=sbHor.set)
 
-                # list wo hari ini
-                from datetime import date
-                today = date.today()
-                self.entCari.insert(END,today.strftime("%d-%m-%Y"))
-                self.onSearch()
-
-                # tanggal otomatis hari ini
-                self.entTglbuat.insert(END,today.strftime("%d-%m-%Y"))
+                # open table 
+                self.onClear()
 
         def read_db_config(self,filename='C:\\config.ini', section='mysql'):
                 """ Read database configuration file and return a dictionary object
@@ -389,7 +382,6 @@ class Petugas:
                         tsekarang = datetime.now()
                         sql = "UPDATE logbook SET date_received=%s,received=%s WHERE no_ifca =%s"
                         cur.execute(sql,(tsekarang,setreceived,cIfca))
-                        # self.onClear()
                         self.onSearch() #update received sesuai tabel yg dicari
                         messagebox.showinfo(title="Informasi", \
                                     message="Wo {} sudah diterima.".format(cIfca))
@@ -486,7 +478,7 @@ class Petugas:
                 cIfca = self.entIfca.get()
                 sql = "DELETE FROM logbook WHERE no_ifca =%s"
                 cur.execute(sql,(cIfca,))
-                self.onClear()
+                self.onSearch()
                 messagebox.showinfo(title="Informasi", \
                                     message="Data sudah di hapus.")
                 
@@ -590,7 +582,7 @@ class Petugas:
                         message="Data sudah di terupdate.")
                 cur.close()
                 con.close()
-                self.onClear()
+                self.onSearch()
 
 
 def main():
