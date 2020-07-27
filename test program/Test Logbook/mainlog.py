@@ -410,6 +410,9 @@ class Petugas:
                 self.rbtnBM.config(state="disable")
                 self.rbtnTN.config(state="disable")
 
+                # ada bug ketika double klik di tabel kosong, 
+                # menyebabkan bisa update/delete IFCA 
+                # yang ditulis manual di entry 
                 curItem = self.trvTabel.item(self.trvTabel.focus())
                 ifca_value = curItem['values'][1]
                 self.entIfca.insert(END, ifca_value)
