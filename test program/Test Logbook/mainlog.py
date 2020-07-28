@@ -389,89 +389,78 @@ class Petugas:
                         con.close()               
 
         def OnDoubleClick(self, event):
-                self.entWo.config(state="normal")
-                self.entIfca.config(state="normal")
-                self.entTglbuat.config(state="normal")
-                self.entUnit.config(state="normal")
-                self.entWo.delete(0, END)
-                self.entIfca.delete(0, END)
-                self.entTglbuat.delete(0, END)
-                self.entUnit.delete(0, END)
-                self.entWorkReq.delete('1.0', 'end')
-                self.entStaff.delete(0, END)
-                self.entTgldone.delete(0, END)
-                self.entJamdone.delete(0, END)
-                self.entWorkAct.delete('1.0', 'end')
-
-                self.btnSave.config(state="disable")
-                self.btnUpdate.config(state="normal")
-                self.btnDelete.config(state="normal")
-                self.btnReceived.config(state="normal")
-                self.rbtnBM.config(state="disable")
-                self.rbtnTN.config(state="disable")
-
-                # ada bug ketika double klik di tabel kosong, 
-                # menyebabkan bisa update/delete IFCA 
-                # yang ditulis manual di entry 
-                curItem = self.trvTabel.item(self.trvTabel.focus())
-                ifca_value = curItem['values'][1]
-                self.entIfca.insert(END, ifca_value)
-
-                cIfca = self.entIfca.get()
-                db_config = self.read_db_config()
-                con = mysql.connector.connect(**db_config)
-                cur = con.cursor()
-                sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, date_done, time_done, work_act FROM logbook WHERE no_ifca = %s"
-                cur.execute(sql,(cIfca,))
-                data = cur.fetchone()
-        
-                self.entWo.insert(END, data[0])
-                #TGL buat
                 try:
+                        curItem = self.trvTabel.item(self.trvTabel.focus())
+                        ifca_value = curItem['values'][1]  
+
+                        self.entWo.config(state="normal")
+                        self.entIfca.config(state="normal")
+                        self.entTglbuat.config(state="normal")
+                        self.entUnit.config(state="normal")
+                        self.entWo.delete(0, END)
+                        self.entIfca.delete(0, END)
+                        self.entTglbuat.delete(0, END)
+                        self.entUnit.delete(0, END)
+                        self.entWorkReq.delete('1.0', 'end')
+                        self.entStaff.delete(0, END)
+                        self.entTgldone.delete(0, END)
+                        self.entJamdone.delete(0, END)
+                        self.entWorkAct.delete('1.0', 'end')
+
+                        self.btnSave.config(state="disable")
+                        self.btnUpdate.config(state="normal")
+                        self.btnDelete.config(state="normal")
+                        self.btnReceived.config(state="normal")
+                        self.rbtnBM.config(state="disable")
+                        self.rbtnTN.config(state="disable")
+
+                        self.entIfca.insert(END, ifca_value)
+
+                        cIfca = self.entIfca.get()
+                        db_config = self.read_db_config()
+                        con = mysql.connector.connect(**db_config)
+                        cur = con.cursor()
+                        sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, date_done, time_done, work_act FROM logbook WHERE no_ifca = %s"
+                        cur.execute(sql,(cIfca,))
+                        data = cur.fetchone()
+
+                        self.entWo.insert(END, data[0])
+                        #TGL buat
                         self.entTglbuat.insert(END, data[2])
                         getTgl = self.entTglbuat.get() #dari mysql YYYY-MM-DD
                         #balikin menjadi DD-MM-YYYY
                         showtgl = str(getTgl)[8:] + '-' + str(getTgl)[5:7] +'-' + str(getTgl)[:4]
                         self.entTglbuat.delete(0, END)
                         self.entTglbuat.insert(END, showtgl)
+
+                        self.entUnit.insert(END, data[3])
+                        self.entWorkReq.insert(END, data[4])
+                        self.entStaff.insert(END, data[5])
+
+                        #TGL done
+                        try: 
+                                self.entTgldone.insert(END, data[6])
+                                getTgldone = self.entTgldone.get() #dari mysql YYYY-MM-DD
+                                #balikin menjadi DD-MM-YYYY
+                                showtgldone = str(getTgldone)[8:] + '-' + str(getTgldone)[5:7] +'-' + str(getTgldone)[:4]
+                                self.entTgldone.delete(0, END)
+                                self.entTgldone.insert(END, showtgldone)
+                        except:
+                                self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
+                                pass
+
+                        self.entJamdone.insert(END, data[7])
+                        self.entWorkAct.insert(END, data[8])
+
+                        # jangan update ifca, tgl, unit
+                        self.entWo.config(state="readonly")
+                        self.entIfca.config(state="readonly")
+                        self.entTglbuat.config(state="readonly")
+                        self.entUnit.config(state="readonly")
+                        cur.close()
+                        con.close()
                 except:
-                        pass
-                # pecahTahun = str(getTgl[0]+getTgl[1]+getTgl[2]+getTgl[3])
-                # pecahBulan = str(getTgl[5]+getTgl[6])
-                # pecahHari = str(getTgl[8]+getTgl[9])
-                # self.entTglbuat.delete(0, END)
-                # self.entBulan.delete(0, END)
-                # self.entTahun.delete(0, END)
-                # self.entTglbuat.insert(END, pecahHari)
-                # self.entBulan.insert(END, pecahBulan)
-                # self.entTahun.insert(END, pecahTahun)
-                
-                self.entUnit.insert(END, data[3])
-                self.entWorkReq.insert(END, data[4])
-                self.entStaff.insert(END, data[5])
-
-                #TGL done
-                try: 
-                        self.entTgldone.insert(END, data[6])
-                        getTgldone = self.entTgldone.get() #dari mysql YYYY-MM-DD
-                        #balikin menjadi DD-MM-YYYY
-                        showtgldone = str(getTgldone)[8:] + '-' + str(getTgldone)[5:7] +'-' + str(getTgldone)[:4]
-                        self.entTgldone.delete(0, END)
-                        self.entTgldone.insert(END, showtgldone)
-                except:
-                        self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
-                        pass
-
-                self.entJamdone.insert(END, data[7])
-                self.entWorkAct.insert(END, data[8])
-
-                # jangan update ifca, tgl, unit
-                self.entWo.config(state="readonly")
-                self.entIfca.config(state="readonly")
-                self.entTglbuat.config(state="readonly")
-                self.entUnit.config(state="readonly")
-                cur.close()
-                con.close()
+                        print('Tidak ada data di tabel')
 
         def onDelete(self):
                 db_config = self.read_db_config()
