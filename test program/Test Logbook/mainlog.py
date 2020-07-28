@@ -279,7 +279,7 @@ class Petugas:
                 cari = self.entCari.get()
                 if opsi == "Tanggal":
                         cari = self.checktgl(cari)
-                        sql = "SELECT * FROM logbook WHERE date_creat LIKE %s"
+                        sql = "SELECT * FROM logbook WHERE date_create LIKE %s"
                         val = ("%{}%".format(cari),)
                         self.search_data(sql,val)
                 elif opsi == "IFCA":
@@ -421,7 +421,7 @@ class Petugas:
                 db_config = self.read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
-                sql = "SELECT no_wo, no_ifca, date_creat, unit, work_req, staff, date_done, time_done, work_act FROM logbook WHERE no_ifca = %s"
+                sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, date_done, time_done, work_act FROM logbook WHERE no_ifca = %s"
                 cur.execute(sql,(cIfca,))
                 data = cur.fetchone()
         
@@ -554,7 +554,7 @@ class Petugas:
                         self.entIfca.focus_set()
                 else:
                         cur = con.cursor()
-                        sql = "INSERT INTO logbook (no_wo, no_ifca, date_creat, unit, work_req, staff)"+\
+                        sql = "INSERT INTO logbook (no_wo, no_ifca, date_create, unit, work_req, staff)"+\
                               "VALUES(%s,%s,%s,%s,%s,%s)"
                         cur.execute(sql,(cWo,cIfca.upper(),self.checktgl(cTglBuat),cUnit.upper(),cWorkReq,cStaff))
                         messagebox.showinfo(title="Informasi", \
@@ -579,7 +579,7 @@ class Petugas:
                 jamdone = self.entJamdone.get()
                 getTglDone = self.checktgl(self.entTgldone.get()) #check tgl dulu
                 #eksekusi sql
-                sql = "UPDATE logbook SET no_wo=%s,no_ifca=%s,date_creat=%s,work_req=%s,staff=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_ifca =%s"
+                sql = "UPDATE logbook SET no_wo=%s,no_ifca=%s,date_create=%s,work_req=%s,staff=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_ifca =%s"
                 cur.execute(sql,(cWo,cIfca,getTglBuat,cWorkReq,cStaff,getTglDone,jamdone,cWorkAct,cIfca))
                 messagebox.showinfo(title="Informasi", \
                         message="Data sudah di terupdate.")
