@@ -295,18 +295,26 @@ class Petugas:
                         val = ("%{}%".format(cari),)
                         self.search_data(sql,val)
 
-        def auto(self):
+        def auto_wo(self):
                 db_config = self.read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
-                sqlkode = "SELECT max(no_wo) FROM logbook"
-                cur.execute(sqlkode)
-                maxkode = cur.fetchone()
-    
-                autohit = int(maxkode[0])+1
-                if len(str(autohit)) <= 6:
-                    self.entWo.insert(0, autohit)
-                    self.entUnit.focus_set()
+                sql = "SELECT no_wo FROM logbook"
+                cur.execute(sql)
+                hasil = cur.fetchall()
+
+                for get in hasil:  
+                        wolist = [get] # buat dulu daftar wo
+                listwo = max(wolist) # Max num wo terakhir
+                print("Jumlah Wo:",len(hasil)) # Jumlah wo didapat
+                newWoNum = (int(max(listwo))+1) # cari wo, + 1
+                getNewWo = str(newWoNum) # Wo baru siap dipakai
+                print("Get new Wo:",getNewWo) 
+                self.entWo.delete(0, END)
+        
+                if len(str(getNewWo)) <= 6:
+                    self.entWo.insert(0, getNewWo)
+                    self.entIfca.focus_set()
                 else:
                     messagebox.showwarning(title="Peringatan", \
                             message="maaf lebar data untuk no WO hanya sampai 6 digit")
@@ -470,7 +478,7 @@ class Petugas:
                 cIfca = self.entIfca.get()
                 sql = "DELETE FROM logbook WHERE no_ifca =%s"
                 cur.execute(sql,(cIfca,))
-                self.onSearch()
+                self.onClear()
                 messagebox.showinfo(title="Informasi", \
                                     message="Data sudah di hapus.")
                 
@@ -511,7 +519,7 @@ class Petugas:
                 # tanggal otomatis hari ini
                 self.entTglbuat.insert(END,today.strftime("%d-%m-%Y"))
 
-                self.auto()
+                self.auto_wo()
                 self.entUnit.focus_set()
                 os.system("cls")
 
