@@ -90,19 +90,19 @@ class Petugas:
                 self.rbtnBM.grid(row=0, column=2,sticky=W)
 
                 #tglbuat
-                Label(mainFrame, text="Tanggal").grid(row=3, column=0, sticky=W,padx=20)
+                Label(mainFrame, text="Tanggal - Jam").grid(row=3, column=0, sticky=W,padx=20)
                 Label(mainFrame, text=':').grid(row=3, column=1, sticky=W,pady=5,padx=10)
                 tglbuat = Frame(mainFrame)
                 tglbuat.grid(row=3,column=2,sticky=W)
-                self.entTglbuat = Entry(tglbuat, width=15)
+                self.entTglbuat = Entry(tglbuat, width=12)
                 self.entTglbuat.grid(row=1, column=0,sticky=W)
-                # self.entHari = Entry(tglbuat, width=5)
-                # self.entHari.grid(row=1, column=0,sticky=W)
+                self.entJambuat = Entry(tglbuat, width=7)
+                self.entJambuat.grid(row=1, column=1,sticky=W)
                 # self.entBulan = Entry(tglbuat, width=5)
                 # self.entBulan.grid(row=1, column=1,sticky=W,padx=2)
                 # self.entTahun = Entry(tglbuat, width=10)
                 # self.entTahun.grid(row=1, column=2,sticky=W,padx=2)
-                Label(tglbuat, text='(dd/mm/yyyy)').grid(row=1, column=3, sticky=E,padx=5)
+                # Label(tglbuat, text='(dd/mm/yyyy)').grid(row=1, column=3, sticky=E,padx=5)
                 
                 Label(mainFrame, text="Unit").grid(row=4, column=0, sticky=W,padx=20)
                 Label(mainFrame, text=':').grid(row=4, column=1, sticky=W,pady=5,padx=10)             
@@ -404,10 +404,12 @@ class Petugas:
                         self.entWo.config(state="normal")
                         self.entIfca.config(state="normal")
                         self.entTglbuat.config(state="normal")
+                        self.entJambuat.config(state="normal")
                         self.entUnit.config(state="normal")
                         self.entWo.delete(0, END)
                         self.entIfca.delete(0, END)
                         self.entTglbuat.delete(0, END)
+                        self.entJambuat.delete(0, END)
                         self.entUnit.delete(0, END)
                         self.entWorkReq.delete('1.0', 'end')
                         self.entStaff.delete(0, END)
@@ -428,7 +430,7 @@ class Petugas:
                         db_config = self.read_db_config()
                         con = mysql.connector.connect(**db_config)
                         cur = con.cursor()
-                        sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, date_done, time_done, work_act FROM logbook WHERE no_ifca = %s"
+                        sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, date_done, time_done, work_act, time_create FROM logbook WHERE no_ifca = %s"
                         cur.execute(sql,(cIfca,))
                         data = cur.fetchone()
 
@@ -440,6 +442,7 @@ class Petugas:
                         showtgl = str(getTgl)[8:] + '-' + str(getTgl)[5:7] +'-' + str(getTgl)[:4]
                         self.entTglbuat.delete(0, END)
                         self.entTglbuat.insert(END, showtgl)
+                        self.entJambuat.insert(END, data[9])
 
                         self.entUnit.insert(END, data[3])
                         self.entWorkReq.insert(END, data[4])
@@ -453,17 +456,19 @@ class Petugas:
                                 showtgldone = str(getTgldone)[8:] + '-' + str(getTgldone)[5:7] +'-' + str(getTgldone)[:4]
                                 self.entTgldone.delete(0, END)
                                 self.entTgldone.insert(END, showtgldone)
+                                self.entJamdone.insert(END, data[7])
+                                self.entWorkAct.insert(END, data[8])
                         except:
                                 self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
                                 pass
 
-                        self.entJamdone.insert(END, data[7])
-                        self.entWorkAct.insert(END, data[8])
+                        
 
                         # jangan update ifca, tgl, unit
                         self.entWo.config(state="readonly")
                         self.entIfca.config(state="readonly")
                         self.entTglbuat.config(state="readonly")
+                        self.entJambuat.config(state="readonly")
                         self.entUnit.config(state="readonly")
                         cur.close()
                         con.close()
@@ -495,10 +500,12 @@ class Petugas:
                 self.entWo.config(state="normal")
                 self.entIfca.config(state="normal")
                 self.entTglbuat.config(state="normal")
+                self.entJambuat.config(state="normal")
                 self.entUnit.config(state="normal")
                 self.entWo.delete(0, END)
                 self.entIfca.delete(0, END)
                 self.entTglbuat.delete(0, END)
+                self.entJambuat.delete(0, END)
                 self.entUnit.delete(0, END)
                 self.entWorkReq.delete('1.0', 'end')
                 self.entStaff.delete(0, END)
@@ -530,6 +537,7 @@ class Petugas:
                 cWo = self.entWo.get()
                 cIfca = self.entIfca.get()
                 cTglBuat = self.entTglbuat.get()
+                cJamBuat = self.entJambuat.get()
                 cUnit = self.entUnit.get()
                 cWorkReq = self.entWorkReq.get('1.0', 'end')
                 cStaff = self.entStaff.get()
@@ -540,20 +548,23 @@ class Petugas:
                 elif len(cIfca) == 0:
                         messagebox.showwarning(title="Peringatan",message="No IFCA Kosong.")
                         self.entIfca.focus_set()
+                elif self.checktgl(cTglBuat) == None: #check tgl jika kosong, batalkan save
+                        messagebox.showerror(title="Error",message="Format tanggal salah")    
+                elif len(cJamBuat) == 0:
+                        messagebox.showwarning(title="Peringatan",message="Jam buat harus diisi.")
+                        self.entJambuat.focus_set()
                 elif len(cUnit) == 0:
                         messagebox.showwarning(title="Peringatan",message="Unit harus diisi.")
                         self.entUnit.focus_set()
-                elif self.checktgl(cTglBuat) == None: #check tgl jika kosong, batalkan save
-                        messagebox.showerror(title="Error",message="Format tanggal salah")    
                 elif self.checkifca(cIfca) == "tolak": #check IFCA
                         messagebox.showerror(title="Error", \
                         message="{} sudah terdaftar.".format(cIfca))
                         self.entIfca.focus_set()
                 else:
                         cur = con.cursor()
-                        sql = "INSERT INTO logbook (no_wo, no_ifca, date_create, unit, work_req, staff)"+\
-                              "VALUES(%s,%s,%s,%s,%s,%s)"
-                        cur.execute(sql,(cWo,cIfca.upper(),self.checktgl(cTglBuat),cUnit.upper(),cWorkReq,cStaff))
+                        sql = "INSERT INTO logbook (no_wo, no_ifca, date_create, time_create, unit, work_req, staff)"+\
+                              "VALUES(%s,%s,%s,%s,%s,%s,%s)"
+                        cur.execute(sql,(cWo,cIfca.upper(),self.checktgl(cTglBuat),cJamBuat,cUnit.upper(),cWorkReq,cStaff))
                         messagebox.showinfo(title="Informasi", \
                                             message="Data sudah di tersimpan.")
                         cur.close()
