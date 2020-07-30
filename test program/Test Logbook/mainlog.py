@@ -43,6 +43,14 @@ class Petugas:
                 setTengahX = (self.parent.winfo_screenwidth()-lebar)//2
                 setTengahY = (self.parent.winfo_screenheight()-tinggi)//2
                 self.parent.geometry("%ix%i+%i+%i" %(lebar, tinggi,setTengahX, setTengahY))
+                
+                tabControl = ttk.Notebook(root)
+                self.tabMain = ttk.Frame(tabControl)
+                tabControl.add(self.tabMain, text ='Main')
+                self.tabPending = ttk.Frame(tabControl)
+                tabControl.add(self.tabPending, text ='Pending')              
+                tabControl.pack(expand = 1, fill ="both")
+
                 self.aturKomponen()
 
         def keluar(self,event=None):
@@ -59,16 +67,19 @@ class Petugas:
                 # Menghilangkan Frame windows
                 # self.parent.overrideredirect(1) 
                 # buttonx.pack(side=RIGHT)
-                #
-                mainFrame = Frame(self.parent)
+
+                mainFrame = Frame(self.tabMain)
+                # mainFrame = Frame(self.parent)
                 mainFrame.pack(side=TOP,fill=X)
-                btnFrame = Frame(self.parent)
+                btnFrame = Frame(self.tabMain)
+                # tabelFrame = Frame(self.parent)
                 btnFrame.pack(side=TOP, fill=X)
-                tabelFrame = Frame(self.parent)
+                tabelFrame = Frame(self.tabMain)
+                # btnFrame = Frame(self.parent)
                 tabelFrame.pack(expand=YES, side=TOP,fill=Y)
 
-                Label(mainFrame, text=' ').grid(row=0, column=0)
-                Label(btnFrame, text=' ').grid(row=1, column=0)
+                Label(mainFrame, text='').grid(row=0, column=0)
+                Label(btnFrame, text='').grid(row=1, column=0)
 
                 #samping kiri
                 Label(mainFrame, text='No WO').grid(row=1, column=0, sticky=W,padx=20)
