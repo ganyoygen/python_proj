@@ -301,13 +301,11 @@ class Petugas:
                 cur = con.cursor()
                 sql = "SELECT no_wo FROM logbook"
                 cur.execute(sql)
-                hasil = cur.fetchall()
+                hasil = cur.fetchall() # buat dulu daftar wo
 
-                for get in hasil:  
-                        wolist = [get] # buat dulu daftar wo
-                listwo = max(wolist) # Max num wo terakhir
+                lastwo = hasil[len(hasil)-1] # Max num wo terakhir
                 print("Jumlah Wo:",len(hasil)) # Jumlah wo didapat
-                newWoNum = (int(max(listwo))+1) # cari wo, + 1
+                newWoNum = (int(max(lastwo))+1) # cari wo, + 1
                 getNewWo = str(newWoNum) # Wo baru siap dipakai
                 print("Get new Wo:",getNewWo) 
                 self.entWo.delete(0, END)
@@ -333,9 +331,9 @@ class Petugas:
                 cur.execute(sql, val)
                 hasil = cur.fetchall()
 
-                for get in hasil:  
-                        ifcalist = [get] # buat dulu daftar ifca
-                lastifca = max(ifcalist) # Max num ifca terakhir
+                # for get in hasil:  
+                        # ifcalist = [get] # buat dulu daftar ifca
+                lastifca = max(hasil) # Max num ifca terakhir
                 print("Jumlah IFCA:",len(hasil)) # Jumlah ifca didapat
                 newIfcaNum = (int(max(lastifca)[2:])+1) # cari lastifca, hapus tipe(BM/TN) + 1
                 getNewIfca = tipe+str(newIfcaNum) # Ifca baru siap dipakai
