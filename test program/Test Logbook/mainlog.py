@@ -121,18 +121,25 @@ class Petugas:
 
                 #samping kanan
                 #tgldone
-                Label(mainFrame, text="Tanggal Selesai").grid(row=3, column=3, sticky=W,padx=20)
+                Label(mainFrame, text="Status").grid(row=3, column=3, sticky=W,padx=20)
                 Label(mainFrame, text=':').grid(row=3, column=4, sticky=W,pady=5,padx=10)
-                tgldone = Frame(mainFrame)
-                tgldone.grid(row=3,column=5,sticky=W)
-                self.entTgldone = Entry(tgldone, width=15)
-                self.entTgldone.grid(row=1, column=0,sticky=W)
-                Label(tgldone, text='(dd/mm/yyyy)').grid(row=1, column=3, sticky=E,padx=5)
+                # self.statusIfca = Entry(mainFrame, width=15)
+                # self.statusIfca.grid(row=3, column=5,sticky=W)
 
-                Label(mainFrame, text="Jam Selesai").grid(row=4, column=3, sticky=W,padx=20)
+                self.opsiStatus = ttk.Combobox(mainFrame, values = ["","DONE","CANCEL","PENDING"],\
+                                                state="readonly", width=10)
+                self.opsiStatus.current(0)
+                self.opsiStatus.grid(row=3, column=5,sticky=W)
+                
+                Label(mainFrame, text="Tanggal - Jam").grid(row=4, column=3, sticky=W,padx=20)
                 Label(mainFrame, text=':').grid(row=4, column=4, sticky=W,pady=5,padx=10)             
-                self.entJamdone = Entry(mainFrame, width=10)
-                self.entJamdone.grid(row=4, column=5,sticky=W)
+                tgldone = Frame(mainFrame)
+                tgldone.grid(row=4,column=5,sticky=W)
+                self.entTgldone = Entry(tgldone, width=12)
+                self.entTgldone.grid(row=1, column=0,sticky=W)
+                self.entJamdone = Entry(tgldone, width=7)
+                self.entJamdone.grid(row=1, column=1,sticky=W)
+                # Label(tgldone, text='(dd/mm/yyyy)').grid(row=1, column=3, sticky=E,padx=5)
 
                 Label(mainFrame, text="Work Action").grid(row=5, column=3, sticky=NW,padx=20)
                 Label(mainFrame, text=':').grid(row=5, column=4, sticky=NW,padx=10,pady=6)
@@ -428,7 +435,7 @@ class Petugas:
                         db_config = self.read_db_config()
                         con = mysql.connector.connect(**db_config)
                         cur = con.cursor()
-                        sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, date_done, time_done, work_act, time_create FROM logbook WHERE no_ifca = %s"
+                        sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, date_done, time_done, work_act, time_create, status_ifca FROM logbook WHERE no_ifca = %s"
                         cur.execute(sql,(cIfca,))
                         data = cur.fetchone()
 
@@ -441,6 +448,15 @@ class Petugas:
                         self.entTglbuat.delete(0, END)
                         self.entTglbuat.insert(END, showtgl)
                         self.entJambuat.insert(END, data[9])
+                        
+                        if data[10] == "DONE":
+                                self.opsiStatus.current(1)
+                        elif data[10] == "CANCEL":
+                                self.opsiStatus.current(2)
+                        elif data[10] == "PENDING":
+                                self.opsiStatus.current(3)
+                        else:
+                                self.opsiStatus.current(0)
 
                         self.entUnit.insert(END, data[3])
                         self.entWorkReq.insert(END, data[4])
@@ -513,6 +529,8 @@ class Petugas:
                 self.entCari.delete(0, END)
                 self.trvTabel.delete(*self.trvTabel.get_children())
 
+                self.opsiStatus.current(0)
+
                 # list wo hari ini
                 self.opsicari.current(1)
                 from datetime import date
@@ -579,14 +597,15 @@ class Petugas:
                 getTglBuat = self.checktgl(self.entTglbuat.get()) #check tgl dulu
                 cWorkReq = self.entWorkReq.get('1.0', 'end')
                 cStaff = self.entStaff.get()
+                cStatus = self.opsiStatus.get()
                 
                 #panel kanan
                 cWorkAct = self.entWorkAct.get('1.0', 'end')
                 jamdone = self.entJamdone.get()
                 getTglDone = self.checktgl(self.entTgldone.get()) #check tgl dulu
                 #eksekusi sql
-                sql = "UPDATE logbook SET no_wo=%s,no_ifca=%s,date_create=%s,work_req=%s,staff=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_ifca =%s"
-                cur.execute(sql,(cWo,cIfca,getTglBuat,cWorkReq,cStaff,getTglDone,jamdone,cWorkAct,cIfca))
+                sql = "UPDATE logbook SET no_wo=%s,no_ifca=%s,date_create=%s,work_req=%s,staff=%s,status_ifca=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_ifca =%s"
+                cur.execute(sql,(cWo,cIfca,getTglBuat,cWorkReq,cStaff,cStatus,getTglDone,jamdone,cWorkAct,cIfca))
                 messagebox.showinfo(title="Informasi", \
                         message="Data sudah di terupdate.")
                 cur.close()
