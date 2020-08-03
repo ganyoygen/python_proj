@@ -8,6 +8,9 @@ import mysql.connector
 import datetime
 import time
 import os
+# import tabpending
+# from tabpending import pendingTab
+
 
 
 
@@ -34,6 +37,7 @@ class WindowDraggable():
 
 btnselect = StringVar(value="TN")
 judul_kolom = ("WO","IFCA","Tanggal","UNIT","Work Request","Staff","Work Action","Tanggal Done","Jam Done","Received")
+
 class Petugas:
         def __init__(self, parent):
                 self.parent = parent
@@ -44,13 +48,6 @@ class Petugas:
                 setTengahY = (self.parent.winfo_screenheight()-tinggi)//2
                 self.parent.geometry("%ix%i+%i+%i" %(lebar, tinggi,setTengahX, setTengahY))
                 
-                tabControl = ttk.Notebook(root)
-                self.tabMain = ttk.Frame(tabControl)
-                tabControl.add(self.tabMain, text ='Main')
-                self.tabPending = ttk.Frame(tabControl)
-                tabControl.add(self.tabPending, text ='Pending')              
-                tabControl.pack(expand = 1, fill ="both")
-
                 self.aturKomponen()
 
         def keluar(self,event=None):
@@ -64,18 +61,30 @@ class Petugas:
                 Label(frameWin, text='PETUGAS',bg="#666",fg="white").pack(side=LEFT,padx=20)
                 # buttonx = Button(frameWin, text="X",fg="white", bg="#FA8072", width=6, height=2,bd=0,\
                 #                  activebackground="#FB8072",activeforeground="white", command=self.keluar, relief=FLAT)
-                # Menghilangkan Frame windows
+                # # Menghilangkan Frame windows
                 # self.parent.overrideredirect(1) 
                 # buttonx.pack(side=RIGHT)
 
+                tabControl = ttk.Notebook(root)
+                self.tabMain = ttk.Frame(tabControl)
+                tabControl.add(self.tabMain, text ='Main')
+                self.tabPending = ttk.Frame(tabControl)
+                tabControl.add(self.tabPending, text ='Pending')              
+                tabControl.pack(expand = 1, fill ="both")
+                
+                self.mainTab()
+                # self.pendingTab()
+                self.onClear()
+
+        def mainTab(self):
                 mainFrame = Frame(self.tabMain)
                 # mainFrame = Frame(self.parent)
                 mainFrame.pack(side=TOP,fill=X)
                 btnFrame = Frame(self.tabMain)
-                # tabelFrame = Frame(self.parent)
+                # btnFrame = Frame(self.parent)
                 btnFrame.pack(side=TOP, fill=X)
                 tabelFrame = Frame(self.tabMain)
-                # btnFrame = Frame(self.parent)
+                # tabelFrame = Frame(self.parent)
                 tabelFrame.pack(expand=YES, side=TOP,fill=Y)
 
                 Label(mainFrame, text='').grid(row=0, column=0)
@@ -210,9 +219,6 @@ class Petugas:
                 self.trvTabel.pack(side=TOP, fill=BOTH)
                 self.trvTabel.configure(yscrollcommand=sbVer.set)
                 self.trvTabel.configure(xscrollcommand=sbHor.set)
-
-                # open table 
-                self.onClear()
 
         def read_db_config(self,filename='C:\\config.ini', section='mysql'):
                 """ Read database configuration file and return a dictionary object
