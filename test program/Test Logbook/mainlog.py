@@ -56,10 +56,10 @@ class Petugas:
 
         def aturKomponen(self):
                 # Note: padx(horizontal), pady(vertical)
-                frameWin = Frame(self.parent, bg="#666")
+                frameWin = Frame(self.parent, bg="#898")
                 frameWin.pack(fill=X,side=TOP)
                 WindowDraggable(frameWin)
-                Label(frameWin, text='PETUGAS',bg="#666",fg="white").pack(side=LEFT,padx=20)
+                Label(frameWin, text='PETUGAS',bg="#898",fg="white").pack(side=LEFT,padx=20)
                 # buttonx = Button(frameWin, text="X",fg="white", bg="#FA8072", width=6, height=2,bd=0,\
                 #                  activebackground="#FB8072",activeforeground="white", command=self.keluar, relief=FLAT)
                 # # Menghilangkan Frame windows
@@ -237,11 +237,11 @@ class Petugas:
                 entOne.grid(row=1,column=1,sticky=W)
                 self.pendWo = Entry(entOne, width=10)
                 self.pendWo.grid(row=1, column=0,sticky=W)
-                Label(entOne, text=' ').grid(row=1, column=1, sticky=W,pady=5,padx=10)
+                # Label(entOne, text=' ').grid(row=1, column=1, sticky=W,pady=5,padx=10)
                 self.pendIfca = Entry(entOne, width=15)
                 self.pendIfca.grid(row=1, column=2,sticky=W)               
                 Label(entOne, text=' ').grid(row=1, column=3, sticky=W,pady=5,padx=10)
-                self.pendUnit = Entry(entOne, width=10)
+                self.pendUnit = Entry(entOne, width=12)
                 self.pendUnit.grid(row=1, column=4,sticky=W)
 
                 entTwo = Frame(topFrame)
@@ -271,6 +271,11 @@ class Petugas:
                 Label(topFrame, text='                  ').grid(row=2, column=2, sticky=W,pady=5,padx=10)
                 self.pendWorkAct = ScrolledText(topFrame,height=8,width=40)
                 self.pendWorkAct.grid(row=3, column=5,sticky=W)
+
+                self.btnRefresh = Button(midFrame, text='Refresh',\
+                                        command=self.pending_refresh, width=10,\
+                                        relief=RAISED, bd=2, bg="#667", fg="white",activebackground="#444",activeforeground="white" )
+                self.btnRefresh.grid(row=1, column=0,pady=10,padx=5)
 
                 #tabel
                 self.pend_data = Frame(botFrame, bd=10)
@@ -694,6 +699,28 @@ class Petugas:
                 cur.close()
                 con.close()
 
+        def pending_refresh(self):
+                # refresh juga tab Pending
+                self.btnAccept.config(state="disable")
+                self.pendWo.config(state="normal")
+                self.pendIfca.config(state="normal")
+                self.pendUnit.config(state="normal")
+                self.pendTgl.config(state="normal")
+                self.pendJam.config(state="normal")
+                self.pendStaff.config(state="normal")
+                self.pendWorkReq.config(state="normal")
+                self.pendWorkAct.config(state="normal")
+                self.pendWo.delete(0, END)
+                self.pendIfca.delete(0, END)
+                self.pendUnit.delete(0, END)
+                self.pendTgl.delete(0, END)
+                self.pendJam.delete(0, END)
+                self.pendStaff.delete(0, END)
+                self.pendWorkAct.delete('1.0', 'end')
+                self.pendWorkReq.delete('1.0', 'end')
+                self.pending_table()
+                #########
+
         def onClear(self):
                 self.btnSave.config(state="normal")
                 self.btnUpdate.config(state="disable")
@@ -734,28 +761,6 @@ class Petugas:
 
                 self.auto_wo()
                 self.entUnit.focus_set()
-                
-                # refresh juga tab Pending
-                self.btnAccept.config(state="disable")
-                self.pendWo.config(state="normal")
-                self.pendIfca.config(state="normal")
-                self.pendUnit.config(state="normal")
-                self.pendTgl.config(state="normal")
-                self.pendJam.config(state="normal")
-                self.pendStaff.config(state="normal")
-                self.pendWorkReq.config(state="normal")
-                self.pendWorkAct.config(state="normal")
-                self.pendWo.delete(0, END)
-                self.pendIfca.delete(0, END)
-                self.pendUnit.delete(0, END)
-                self.pendTgl.delete(0, END)
-                self.pendJam.delete(0, END)
-                self.pendStaff.delete(0, END)
-                self.pendWorkAct.delete('1.0', 'end')
-                self.pendWorkReq.delete('1.0', 'end')
-                self.pending_table()
-                #########
-
                 os.system("cls")
 
         def onSave(self):
