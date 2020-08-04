@@ -37,6 +37,7 @@ class WindowDraggable():
 
 btnselect = StringVar(value="TN")
 judul_kolom = ("WO","IFCA","Tanggal","UNIT","Work Request","Staff","Work Action","Tanggal Done","Jam Done","Received")
+kolomPending = ("WO","IFCA","Tanggal","UNIT","Work Request")
 
 class Petugas:
         def __init__(self, parent):
@@ -73,7 +74,7 @@ class Petugas:
                 tabControl.pack(expand = 1, fill ="both")
                 
                 self.mainTab()
-                # self.pendingTab()
+                self.pendingTab()
                 self.onClear()
 
         def mainTab(self):
@@ -219,6 +220,74 @@ class Petugas:
                 self.trvTabel.pack(side=TOP, fill=BOTH)
                 self.trvTabel.configure(yscrollcommand=sbVer.set)
                 self.trvTabel.configure(xscrollcommand=sbHor.set)
+
+        def pendingTab(self):
+                # tab pending
+                topFrame = Frame(self.tabPending)
+                topFrame.pack(side=TOP,fill=X)
+                midFrame = Frame(self.tabPending)
+                midFrame.pack(side=TOP, fill=X)
+                botFrame = Frame(self.tabPending)
+                botFrame.pack(expand=YES, side=TOP,fill=Y)
+
+                Label(topFrame, text='').grid(row=0, column=0)
+                Label(midFrame, text='').grid(row=1, column=0)
+
+                entOne = Frame(topFrame)
+                entOne.grid(row=1,column=1,sticky=W)
+                self.pendWo = Entry(entOne, width=10)
+                self.pendWo.grid(row=1, column=0,sticky=W)
+                Label(entOne, text=' ').grid(row=1, column=1, sticky=W,pady=5,padx=10)
+                self.pendIfca = Entry(entOne, width=15)
+                self.pendIfca.grid(row=1, column=2,sticky=W)               
+                Label(entOne, text=' ').grid(row=1, column=3, sticky=W,pady=5,padx=10)
+                self.pendUnit = Entry(entOne, width=10)
+                self.pendUnit.grid(row=1, column=4,sticky=W)
+
+                entTwo = Frame(topFrame)
+                entTwo.grid(row=2,column=1,sticky=W)
+                self.pendTgl = Entry(entTwo, width=12)
+                self.pendTgl.grid(row=2, column=0,sticky=W)
+                # Label(entTwo, text=' ').grid(row=2, column=1, sticky=W,pady=5,padx=10)
+                self.pendJam = Entry(entTwo, width=7)
+                self.pendJam.grid(row=2, column=1,sticky=W)               
+                Label(entTwo, text=' ').grid(row=2, column=2, sticky=W,pady=5,padx=10)
+                self.pendStaff = Entry(entTwo, width=12)
+                self.pendStaff.grid(row=2, column=3,sticky=W)
+
+                self.pendWorkReq = ScrolledText(topFrame,height=8,width=40)
+                self.pendWorkReq.grid(row=3, column=1,sticky=W)
+
+                entLeft = Frame(topFrame)
+                entLeft.grid(row=2,column=5,sticky=W)
+                Label(entLeft, text='By :').grid(row=2, column=0, sticky=W,pady=5,padx=10)
+                self.accpStaff = Entry(entLeft, width=20)
+                self.accpStaff.grid(row=2, column=1,sticky=W) 
+                self.btnAccept = Button(entLeft, text='Accept',\
+                                        command="", width=10,\
+                                        relief=RAISED, bd=2, bg="#FC6042", fg="white",activebackground="#444",activeforeground="white" )
+                self.btnAccept.grid(row=2, column=2,pady=10,padx=5)
+
+                Label(topFrame, text='                  ').grid(row=2, column=2, sticky=W,pady=5,padx=10)
+                self.pendWorkAct = ScrolledText(topFrame,height=8,width=40)
+                self.pendWorkAct.grid(row=3, column=5,sticky=W)
+
+                #tabel
+                self.pend_data = Frame(botFrame, bd=10)
+                self.pend_data.pack(fill=BOTH, expand=YES)
+                self.tabelPend = ttk.Treeview(self.pend_data, columns=kolomPending,show='headings')
+                self.tabelPend.bind("<Double-1>",self.pending_detail)
+                sbVer = Scrollbar(self.pend_data, orient='vertical',command=self.tabelPend.yview)
+                sbVer.pack(side=RIGHT, fill=Y)
+                sbHor = Scrollbar(self.pend_data, orient='horizontal',command=self.tabelPend.xview)
+                sbHor.pack(side=BOTTOM, fill=X)
+
+                self.tabelPend.pack(side=TOP, fill=BOTH)
+                self.tabelPend.configure(yscrollcommand=sbVer.set)
+                self.tabelPend.configure(xscrollcommand=sbHor.set)
+
+                #showtable
+                self.pending_table()
 
         def read_db_config(self,filename='C:\\config.ini', section='mysql'):
                 """ Read database configuration file and return a dictionary object
@@ -368,6 +437,49 @@ class Petugas:
                 cur.close()
                 con.close()
 
+        def pending_table(self):
+                try:
+                    db_config = self.read_db_config()
+                    con = mysql.connector.connect(**db_config)
+                    cur = con.cursor()
+                    sql = "SELECT * FROM logbook WHERE status_ifca LIKE %s"
+                    data = "PENDING"
+                    val = ("%{}%".format(data),)
+                #     data = "%PENDING%"
+                    cur.execute(sql, val)
+                    results = cur.fetchall()
+
+                    self.tabelPend.delete(*self.tabelPend.get_children()) #refresh, hapus dulu tabel lama
+                    for kolom in kolomPending:
+                        self.tabelPend.heading(kolom,text=kolom)
+
+                    # self.tabelPend.column("No", width=10,anchor="w")
+                    self.tabelPend.column("WO", width=50,anchor="w")
+                    self.tabelPend.column("IFCA", width=80,anchor="w")
+                    self.tabelPend.column("Tanggal", width=80,anchor="w")
+                    self.tabelPend.column("UNIT", width=80,anchor="w")
+                    self.tabelPend.column("Work Request", width=200,anchor="w")
+            
+                    i=0
+                    for dat in results: 
+                        if(i%2):
+                            baris="genap"
+                        else:
+                            baris="ganjil"
+                        #hilangkan nomor mulai dari kolom wo dat[1:]
+                        self.tabelPend.insert('', 'end', values=dat[1:], tags=baris)
+                        i+=1
+
+                    self.tabelPend.tag_configure("ganjil", background="#FFFFFF")
+                    self.tabelPend.tag_configure("genap", background="whitesmoke")
+
+                    cur.close()
+                    con.close()
+                
+                except mysql.connector.Error as err:
+                    messagebox.showerror(title="Error", \
+                        message="SQL Log: {}".format(err))                           
+
         def showtable(self,data):
                 self.trvTabel.delete(*self.trvTabel.get_children()) #refresh, hapus dulu tabel lama
                 for kolom in judul_kolom:
@@ -417,6 +529,67 @@ class Petugas:
                                     message="Wo {} sudah diterima.".format(cIfca))
                         cur.close()
                         con.close()               
+
+        def pending_detail(self, event):
+                try:
+                        curItem = self.tabelPend.item(self.tabelPend.focus())
+                        ifca_value = curItem['values'][1]  
+
+                        self.pendWo.config(state="normal")
+                        self.pendIfca.config(state="normal")
+                        self.pendUnit.config(state="normal")
+                        self.pendTgl.config(state="normal")
+                        self.pendJam.config(state="normal")
+                        self.pendStaff.config(state="normal")
+                        self.pendWorkReq.config(state="normal")
+                        self.pendWorkAct.config(state="normal")
+                        self.pendWo.delete(0, END)
+                        self.pendIfca.delete(0, END)
+                        self.pendUnit.delete(0, END)
+                        self.pendTgl.delete(0, END)
+                        self.pendJam.delete(0, END)
+                        self.pendStaff.delete(0, END)
+                        self.pendWorkAct.delete('1.0', 'end')
+                        self.pendWorkReq.delete('1.0', 'end')
+
+                        self.pendIfca.insert(END, ifca_value)
+
+                        cIfca = self.pendIfca.get()
+                        db_config = self.read_db_config()
+                        con = mysql.connector.connect(**db_config)
+                        cur = con.cursor()
+                        # sql = "SELECT no_wo, no_ifca, date_create, time_create, unit, work_req, staff, work_act, FROM logbook WHERE no_ifca = %s"
+                        sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, work_act, time_create FROM logbook WHERE no_ifca = %s"
+                        cur.execute(sql,(cIfca,))
+                        data = cur.fetchone()
+                        self.pendWo.insert(END, data[0])
+                        #TGL buat
+                        self.pendTgl.insert(END, data[2])
+                        getTgl = self.pendTgl.get() #dari mysql YYYY-MM-DD
+                        #balikin menjadi DD-MM-YYYY
+                        showtgl = str(getTgl)[8:] + '-' + str(getTgl)[5:7] +'-' + str(getTgl)[:4]
+                        self.pendTgl.delete(0, END)
+                        self.pendTgl.insert(END, showtgl)
+                        self.pendJam.insert(END, data[7])
+                        self.pendUnit.insert(END, data[3])
+                        self.pendWorkReq.insert(END, data[4])
+                        self.pendStaff.insert(END, data[5])
+                        self.pendWorkAct.insert(END, data[6])
+
+                        self.pendWo.config(state="readonly")
+                        self.pendIfca.config(state="readonly")
+                        self.pendUnit.config(state="readonly")
+                        self.pendTgl.config(state="readonly")
+                        self.pendJam.config(state="readonly")
+                        self.pendStaff.config(state="readonly")
+                        self.pendWorkReq.config(state="disable")
+                        self.pendWorkAct.config(state="disable")
+                        self.btnAccept.config(state="normal")
+                        cur.close()
+                        con.close()
+                        # self.pending_table()
+                except:
+                        print('Tidak ada data di tabel')
 
         def OnDoubleClick(self, event):
                 try:
@@ -470,10 +643,13 @@ class Petugas:
                                 self.opsiStatus.current(1)
                         elif data[10] == "CANCEL":
                                 self.opsiStatus.current(2)
+                                self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
                         elif data[10] == "PENDING":
                                 self.opsiStatus.current(3)
+                                self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
                         else:
                                 self.opsiStatus.current(0)
+                                self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
 
                         self.entUnit.insert(END, data[3])
                         self.entWorkReq.insert(END, data[4])
@@ -487,14 +663,11 @@ class Petugas:
                                 showtgldone = str(getTgldone)[8:] + '-' + str(getTgldone)[5:7] +'-' + str(getTgldone)[:4]
                                 self.entTgldone.delete(0, END)
                                 self.entTgldone.insert(END, showtgldone)
-                                self.entJamdone.insert(END, data[7])
-                                self.entWorkAct.insert(END, data[8])
                         except:
-                                self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
                                 pass
 
-                        
-
+                        self.entJamdone.insert(END, data[7])
+                        self.entWorkAct.insert(END, data[8])
                         # jangan update ifca, tgl, unit
                         self.entWo.config(state="readonly")
                         self.entIfca.config(state="readonly")
@@ -561,6 +734,28 @@ class Petugas:
 
                 self.auto_wo()
                 self.entUnit.focus_set()
+                
+                # refresh juga tab Pending
+                self.btnAccept.config(state="disable")
+                self.pendWo.config(state="normal")
+                self.pendIfca.config(state="normal")
+                self.pendUnit.config(state="normal")
+                self.pendTgl.config(state="normal")
+                self.pendJam.config(state="normal")
+                self.pendStaff.config(state="normal")
+                self.pendWorkReq.config(state="normal")
+                self.pendWorkAct.config(state="normal")
+                self.pendWo.delete(0, END)
+                self.pendIfca.delete(0, END)
+                self.pendUnit.delete(0, END)
+                self.pendTgl.delete(0, END)
+                self.pendJam.delete(0, END)
+                self.pendStaff.delete(0, END)
+                self.pendWorkAct.delete('1.0', 'end')
+                self.pendWorkReq.delete('1.0', 'end')
+                self.pending_table()
+                #########
+
                 os.system("cls")
 
         def onSave(self):
