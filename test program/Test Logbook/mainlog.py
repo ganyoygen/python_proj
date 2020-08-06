@@ -38,6 +38,7 @@ class WindowDraggable():
 btnselect = StringVar(value="TN")
 judul_kolom = ("WO","IFCA","Tanggal","UNIT","Work Request","Staff","Work Action","Tanggal Done","Jam Done","Received")
 kolomPending = ("WO","IFCA","Tanggal","UNIT","Work Request")
+kolomProgIfca = ("WO","IFCA","UNIT")
 
 class Petugas:
         def __init__(self, parent):
@@ -70,7 +71,9 @@ class Petugas:
                 self.tabMain = ttk.Frame(tabControl)
                 tabControl.add(self.tabMain, text ='Main')
                 self.tabPending = ttk.Frame(tabControl)
-                tabControl.add(self.tabPending, text ='Pending')              
+                tabControl.add(self.tabPending, text ='Pending')
+                self.tabProgress = ttk.Frame(tabControl)
+                tabControl.add(self.tabProgress, text ='Progress')            
                 tabControl.pack(expand = 1, fill ="both")
                 
                 self.mainTab()
@@ -292,7 +295,38 @@ class Petugas:
                 self.tabelPend.configure(xscrollcommand=sbHor.set)
 
                 #showtable
-                self.pending_table()
+                self.pending_refresh()
+
+        def progressTab(self):
+                # tab progress
+                topFrame = Frame(self.tabProgress)
+                topFrame.pack(side=TOP,fill=X)
+                midFrame = Frame(self.tabProgress)
+                midFrame.pack(side=TOP, fill=X)
+                botFrame = Frame(self.tabProgress)
+                botFrame.pack(expand=YES, side=TOP,fill=Y)
+
+                Label(topFrame, text='').grid(row=0, column=0)
+                Label(midFrame, text='').grid(row=1, column=0)
+                
+                listProg = Frame(botFrame)
+                listProg.grid(row=1,column=0,sticky=W)
+                listPend = Frame(botFrame)
+                listPend.grid(row=1,column=1,sticky=W)
+
+                #listPend
+                self.prog_data = Frame(listProg, bd=10)
+                self.prog_data.pack(fill=BOTH, expand=YES)
+                self.tabelProg = ttk.Treeview(self.prog_data, columns=kolomProgIfca,show='headings')
+                self.tabelProg.bind("<Double-1>","self.pending_detail")
+                sbVer = Scrollbar(self.prog_data, orient='vertical',command=self.tabelProg.yview)
+                sbVer.pack(side=RIGHT, fill=Y)
+                sbHor = Scrollbar(self.prog_data, orient='horizontal',command=self.tabelProg.xview)
+                sbHor.pack(side=BOTTOM, fill=X)
+
+                self.tabelProg.pack(side=TOP, fill=BOTH)
+                self.tabelProg.configure(yscrollcommand=sbVer.set)
+                self.tabelProg.configure(xscrollcommand=sbHor.set)
 
         def read_db_config(self,filename='C:\\config.ini', section='mysql'):
                 """ Read database configuration file and return a dictionary object
