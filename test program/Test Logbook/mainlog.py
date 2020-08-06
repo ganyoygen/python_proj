@@ -267,7 +267,7 @@ class Petugas:
                 self.accpStaff = Entry(entLeft, width=20)
                 self.accpStaff.grid(row=2, column=1,sticky=W) 
                 self.btnAccept = Button(entLeft, text='Accept',\
-                                        command="", width=10,\
+                                        command=self.onAccPending, width=10,\
                                         relief=RAISED, bd=2, bg="#FC6042", fg="white",activebackground="#444",activeforeground="white" )
                 self.btnAccept.grid(row=2, column=2,pady=10,padx=5)
 
@@ -865,6 +865,36 @@ class Petugas:
                 cur.close()
                 con.close()
                 self.onSearch()
+
+        def onAccPending(self):
+                db_config = self.read_db_config()
+                con = mysql.connector.connect(**db_config)
+                cur = con.cursor()
+                getIfca = self.pendIfca.get()
+                getAccBy = self.accpStaff.get()
+                getCauses = self.pendWorkAct.get('1.0', 'end')
+                from datetime import datetime
+                getTimeAcc = datetime.now()
+                firstcom = "WO Sudah diterima oleh"
+
+                if len(getAccBy) == 0:
+                        messagebox.showwarning(title="Peringatan",message="Siapa yang menerima WO?")
+                        self.accpStaff.focus_set()
+                else:
+                        sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
+                        "VALUES(%s,%s,%s,%s,%s)"
+                        cur.execute(sql1,(getIfca,getTimeAcc,getCauses,getAccBy.upper(),""))
+
+                        sql2 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
+                        "VALUES(%s,%s,%s,%s,%s)"
+                        cur.execute(sql2,(getIfca,getTimeAcc,firstcom,getAccBy.upper(),""))
+
+                        cur.close()
+                        con.close()
+                        messagebox.showinfo(title="Informasi",message="WO sudah diterima oleh {}.".format(getAccBy))
+                        self.pending_refresh()
+                        
+
 
 
 def main():
