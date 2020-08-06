@@ -435,6 +435,9 @@ class Petugas:
                 cur.execute(sql)
                 hasil = cur.fetchall() # buat dulu daftar wo
 
+                if len(hasil) <= 0: # prevent error jika belum ada data
+                        hasil = "0"
+
                 lastwo = hasil[len(hasil)-1] # Max num wo terakhir
                 print("Jumlah Wo:",len(hasil)) # Jumlah wo didapat
                 newWoNum = (int(max(lastwo))+1) # cari wo, + 1
