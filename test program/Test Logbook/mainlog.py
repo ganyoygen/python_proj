@@ -308,8 +308,54 @@ class Petugas:
                 botFrame = Frame(self.tabProgress)
                 botFrame.pack(expand=YES, side=TOP,fill=Y)
 
-                Label(topFrame, text='top').grid(row=0, column=0)
-                Label(midFrame, text='mid').grid(row=1, column=0)
+                Label(topFrame, text='').grid(row=0, column=0)
+                Label(midFrame, text='').grid(row=0, column=0)
+
+                entOne = Frame(topFrame)
+                entOne.grid(row=1,column=1,sticky=W)
+                self.progWo = Entry(entOne, width=10)
+                self.progWo.grid(row=1, column=0,sticky=W)
+                # Label(entOne, text=' ').grid(row=1, column=1, sticky=W,pady=5,padx=10)
+                self.progIfca = Entry(entOne, width=15)
+                self.progIfca.grid(row=1, column=2,sticky=W)               
+                Label(entOne, text=' ').grid(row=1, column=3, sticky=W,pady=5,padx=10)
+                self.progUnit = Entry(entOne, width=12)
+                self.progUnit.grid(row=1, column=4,sticky=W)
+
+                entTwo = Frame(topFrame)
+                entTwo.grid(row=2,column=1,sticky=W)
+                self.progTgl = Entry(entTwo, width=12)
+                self.progTgl.grid(row=2, column=0,sticky=W)
+                # Label(entTwo, text=' ').grid(row=2, column=1, sticky=W,pady=5,padx=10)
+                self.progJam = Entry(entTwo, width=7)
+                self.progJam.grid(row=2, column=1,sticky=W)               
+                Label(entTwo, text=' ').grid(row=2, column=2, sticky=W,pady=5,padx=10)
+                self.progStaff = Entry(entTwo, width=12)
+                self.progStaff.grid(row=2, column=3,sticky=W)
+
+                self.progWorkReq = ScrolledText(topFrame,height=8,width=40)
+                self.progWorkReq.grid(row=3, column=1,sticky=W)
+
+                entLeft = Frame(topFrame)
+                entLeft.grid(row=2,column=5,sticky=W)
+                self.commitdate = Entry(entLeft, width=25)
+                self.commitdate.grid(row=1, column=0,sticky=W)
+                Label(entLeft, text='By :').grid(row=1, column=1, sticky=W,pady=5,padx=10)
+                self.commitby = Entry(entLeft, width=20)
+                self.commitby.grid(row=1, column=2,sticky=W) 
+                
+                Label(topFrame, text='                  ').grid(row=2,column=2,sticky=W,pady=5,padx=10)
+                self.commitDetail = ScrolledText(topFrame,height=8,width=40)
+                self.commitDetail.grid(row=3, column=5,sticky=W)
+                self.btnCommUpdate = Button(topFrame, text='Update',\
+                                        command="self.onAccPending", width=10,\
+                                        relief=RAISED, bd=2, bg="#FC6042", fg="white",activebackground="#444",activeforeground="white" )
+                self.btnCommUpdate.grid(row=3,column=6,sticky=N,pady=10,padx=5)
+
+                self.btnRefProg = Button(midFrame, text='Refresh',\
+                                        command=self.progress_refresh, width=10,\
+                                        relief=RAISED, bd=2, bg="#667", fg="white",activebackground="#444",activeforeground="white" )
+                self.btnRefProg.grid(row=1,column=0,pady=10,padx=5)
                 
                 listprog = Frame(botFrame)
                 listprog.grid(row=1,column=0,sticky=W)
@@ -741,11 +787,9 @@ class Petugas:
                 except:
                         print('Tidak ada data di tabel')
 
-        def OnDoubleClick(self, event):
-                try:
-                        curItem = self.trvTabel.item(self.trvTabel.focus())
-                        ifca_value = curItem['values'][1]  
-
+        def mainEntrySet(self,opsi):
+                # 1 on doubleclick normal
+                if opsi == "clear":
                         self.entWo.config(state="normal")
                         self.entIfca.config(state="normal")
                         self.entTglbuat.config(state="normal")
@@ -768,6 +812,21 @@ class Petugas:
                         self.btnReceived.config(state="normal")
                         self.rbtnBM.config(state="disable")
                         self.rbtnTN.config(state="disable")
+                # readonly panel kiri kecuali work req dan staff
+                if opsi == "readonlyifca":
+                        self.entWo.config(state="readonly")
+                        self.entIfca.config(state="readonly")
+                        self.entTglbuat.config(state="readonly")
+                        self.entJambuat.config(state="readonly")
+                        self.entUnit.config(state="readonly")
+                # 1 #
+
+        def OnDoubleClick(self, event):
+                try:
+                        curItem = self.trvTabel.item(self.trvTabel.focus())
+                        ifca_value = curItem['values'][1]  
+
+                        self.mainEntrySet("clear")
 
                         self.entIfca.insert(END, ifca_value)
 
@@ -788,23 +847,9 @@ class Petugas:
                         self.entTglbuat.delete(0, END)
                         self.entTglbuat.insert(END, showtgl)
                         self.entJambuat.insert(END, data[9])
-                        
-                        if data[10] == "DONE":
-                                self.opsiStatus.current(1)
-                        elif data[10] == "CANCEL":
-                                self.opsiStatus.current(2)
-                                self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
-                        elif data[10] == "PENDING":
-                                self.opsiStatus.current(3)
-                                self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
-                        else:
-                                self.opsiStatus.current(0)
-                                self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
-
                         self.entUnit.insert(END, data[3])
                         self.entWorkReq.insert(END, data[4])
                         self.entStaff.insert(END, data[5])
-
                         #TGL done
                         try: 
                                 self.entTgldone.insert(END, data[6])
@@ -815,15 +860,26 @@ class Petugas:
                                 self.entTgldone.insert(END, showtgldone)
                         except:
                                 pass
-
                         self.entJamdone.insert(END, data[7])
                         self.entWorkAct.insert(END, data[8])
+
+                        if data[10] == "DONE":
+                                self.opsiStatus.current(1)
+                        elif data[10] == "CANCEL":
+                                self.opsiStatus.current(2)
+                        elif data[10] == "PENDING":
+                                self.opsiStatus.current(3)
+                                self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
+                        elif data[10] == "ONPROGRESS":
+                                self.opsiStatus.current(0)
+                                self.btnReceived.config(state="disable") #tidak dapat receive karena wo sedang on progress
+                                self.btnUpdate.config(state="disable") #tidak dapat update karena wo sedang on progress
+                        else:
+                                self.opsiStatus.current(0)
+                                self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
+
                         # jangan update ifca, tgl, unit
-                        self.entWo.config(state="readonly")
-                        self.entIfca.config(state="readonly")
-                        self.entTglbuat.config(state="readonly")
-                        self.entJambuat.config(state="readonly")
-                        self.entUnit.config(state="readonly")
+                        self.mainEntrySet("readonlyifca")
                         cur.close()
                         con.close()
                 except:
@@ -865,6 +921,30 @@ class Petugas:
                 self.pendWorkAct.delete('1.0', 'end')
                 self.pendWorkReq.delete('1.0', 'end')
                 self.pending_table()
+                #########
+
+        def progress_refresh(self):
+                self.btnCommUpdate.config(state="disable")
+                self.progWo.config(state="normal")
+                self.progIfca.config(state="normal")
+                self.progUnit.config(state="normal")
+                self.progTgl.config(state="normal")
+                self.progJam.config(state="normal")
+                self.progStaff.config(state="normal")
+                self.progWorkReq.config(state="normal")
+                self.commitDetail.config(state="normal")
+                self.progWo.delete(0, END)
+                self.progIfca.delete(0, END)
+                self.progUnit.delete(0, END)
+                self.progTgl.delete(0, END)
+                self.progJam.delete(0, END)
+                self.progStaff.delete(0, END)
+                # self.accpStaff.delete(0, END)
+                self.commitDetail.delete('1.0', 'end')
+                self.progWorkReq.delete('1.0', 'end')
+                
+                self.tabelcomm.delete(*self.tabelcomm.get_children()) #refresh, hapus dulu tabel lama
+                self.progress_table()
                 #########
 
         def onClear(self):
@@ -961,12 +1041,26 @@ class Petugas:
                 cWorkReq = self.entWorkReq.get('1.0', 'end')
                 cStaff = self.entStaff.get()
                 cStatus = self.opsiStatus.get()
+                from datetime import datetime
+                getTimeAcc = datetime.now()
                 
                 #panel kanan
                 cWorkAct = self.entWorkAct.get('1.0', 'end')
                 jamdone = self.entJamdone.get()
                 getTglDone = self.checktgl(self.entTgldone.get()) #check tgl dulu
                 #eksekusi sql
+                # 2 update commit for pending
+                print(cStatus)
+                if cStatus == "PENDING":
+                        if len(cWorkAct) <= 0: #BELUM FUNGSI
+                                print(cWorkAct)
+                                messagebox.showwarning(title="Peringatan",message="Work Action harus diisi.")
+                                self.entWorkAct.focus_set()
+                        else:
+                                sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
+                                "VALUES(%s,%s,%s,%s,%s)"
+                                cur.execute(sql1,(cIfca,getTimeAcc,cWorkAct,cStaff.upper(),""))
+                # 2 #
                 sql = "UPDATE logbook SET no_wo=%s,no_ifca=%s,date_create=%s,work_req=%s,staff=%s,status_ifca=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_ifca =%s"
                 cur.execute(sql,(cWo,cIfca,getTglBuat,cWorkReq,cStaff,cStatus,getTglDone,jamdone,cWorkAct,cIfca))
                 messagebox.showinfo(title="Informasi", \
@@ -981,7 +1075,6 @@ class Petugas:
                 cur = con.cursor()
                 getIfca = self.pendIfca.get()
                 getAccBy = self.accpStaff.get()
-                getCauses = self.pendWorkAct.get('1.0', 'end')
                 from datetime import datetime
                 getTimeAcc = datetime.now()
                 firstcom = "WO Sudah diterima oleh"
@@ -993,14 +1086,10 @@ class Petugas:
                 else:
                         sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
                         "VALUES(%s,%s,%s,%s,%s)"
-                        cur.execute(sql1,(getIfca,getTimeAcc,getCauses,getAccBy.upper(),""))
+                        cur.execute(sql1,(getIfca,getTimeAcc,firstcom,getAccBy.upper(),""))
 
-                        sql2 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
-                        "VALUES(%s,%s,%s,%s,%s)"
-                        cur.execute(sql2,(getIfca,getTimeAcc,firstcom,getAccBy.upper(),""))
-
-                        sql3 = "UPDATE logbook SET status_ifca=%s WHERE no_ifca =%s"
-                        cur.execute(sql3,(setStatus,getIfca))
+                        sql2 = "UPDATE logbook SET status_ifca=%s WHERE no_ifca =%s"
+                        cur.execute(sql2,(setStatus,getIfca))
 
                         cur.close()
                         con.close()
