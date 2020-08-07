@@ -39,6 +39,7 @@ btnselect = StringVar(value="TN")
 judul_kolom = ("WO","IFCA","Tanggal","UNIT","Work Request","Staff","Work Action","Tanggal Done","Jam Done","Received")
 kolomPending = ("WO","IFCA","Tanggal","UNIT","Work Request")
 kolomProgIfca = ("WO","IFCA","UNIT")
+kolomCommIfca = ("TANGGAL","UPDATE","OLEH","DEPT")
 
 class Petugas:
         def __init__(self, parent):
@@ -78,6 +79,7 @@ class Petugas:
                 
                 self.mainTab()
                 self.pendingTab()
+                self.progressTab()
                 self.onClear()
 
         def mainTab(self):
@@ -306,19 +308,19 @@ class Petugas:
                 botFrame = Frame(self.tabProgress)
                 botFrame.pack(expand=YES, side=TOP,fill=Y)
 
-                Label(topFrame, text='').grid(row=0, column=0)
-                Label(midFrame, text='').grid(row=1, column=0)
+                Label(topFrame, text='top').grid(row=0, column=0)
+                Label(midFrame, text='mid').grid(row=1, column=0)
                 
-                listProg = Frame(botFrame)
-                listProg.grid(row=1,column=0,sticky=W)
-                listPend = Frame(botFrame)
-                listPend.grid(row=1,column=1,sticky=W)
+                listprog = Frame(botFrame)
+                listprog.grid(row=1,column=0,sticky=W)
+                listcomm = Frame(botFrame)
+                listcomm.grid(row=1,column=1,sticky=W)
 
-                #listPend
-                self.prog_data = Frame(listProg, bd=10)
+                #listprogress
+                self.prog_data = Frame(listprog, bd=10)
                 self.prog_data.pack(fill=BOTH, expand=YES)
                 self.tabelProg = ttk.Treeview(self.prog_data, columns=kolomProgIfca,show='headings')
-                self.tabelProg.bind("<Double-1>","self.pending_detail")
+                self.tabelProg.bind("<Double-1>",self.progress_detail)
                 sbVer = Scrollbar(self.prog_data, orient='vertical',command=self.tabelProg.yview)
                 sbVer.pack(side=RIGHT, fill=Y)
                 sbHor = Scrollbar(self.prog_data, orient='horizontal',command=self.tabelProg.xview)
@@ -327,6 +329,22 @@ class Petugas:
                 self.tabelProg.pack(side=TOP, fill=BOTH)
                 self.tabelProg.configure(yscrollcommand=sbVer.set)
                 self.tabelProg.configure(xscrollcommand=sbHor.set)
+
+                #listcommited
+                self.comm_data = Frame(listcomm, bd=10)
+                self.comm_data.pack(fill=BOTH, expand=YES)
+                self.tabelcomm = ttk.Treeview(self.comm_data, columns=kolomCommIfca,show='headings')
+                self.tabelcomm.bind("<Double-1>","self.pending_detail")
+                sbVer = Scrollbar(self.comm_data, orient='vertical',command=self.tabelcomm.yview)
+                sbVer.pack(side=RIGHT, fill=Y)
+                sbHor = Scrollbar(self.comm_data, orient='horizontal',command=self.tabelcomm.xview)
+                sbHor.pack(side=BOTTOM, fill=X)
+
+                self.tabelcomm.pack(side=TOP, fill=BOTH)
+                self.tabelcomm.configure(yscrollcommand=sbVer.set)
+                self.tabelcomm.configure(xscrollcommand=sbHor.set)
+
+                self.progress_table()
 
         def read_db_config(self,filename='C:\\config.ini', section='mysql'):
                 """ Read database configuration file and return a dictionary object
@@ -522,6 +540,87 @@ class Petugas:
                     messagebox.showerror(title="Error", \
                         message="SQL Log: {}".format(err))                           
 
+        def progress_table(self):
+                try:
+                    db_config = self.read_db_config()
+                    con = mysql.connector.connect(**db_config)
+                    cur = con.cursor()
+                    sql = "SELECT * FROM logbook WHERE status_ifca LIKE %s"
+                    data = "ONPROGRESS"
+                    val = ("%{}%".format(data),)
+                    cur.execute(sql, val)
+                    results = cur.fetchall()
+
+                    self.tabelProg.delete(*self.tabelProg.get_children()) #refresh, hapus dulu tabel lama
+                    for kolom in kolomProgIfca:
+                        self.tabelProg.heading(kolom,text=kolom)
+
+                    # self.tabelProg.column("No", width=10,anchor="w")
+                    self.tabelProg.column("WO", width=50,anchor="w")
+                    self.tabelProg.column("IFCA", width=80,anchor="w")
+                    self.tabelProg.column("UNIT", width=80,anchor="w")
+                    
+                    i=0
+                    for dat in results: 
+                        if(i%2):
+                            baris="genap"
+                        else:
+                            baris="ganjil"
+                        #tampilkan hanya wo ifca unit 
+                        self.tabelProg.insert('', 'end', values=dat[1]+" "+dat[2]+" "+dat[4], tags=baris)
+                        i+=1
+
+                    self.tabelProg.tag_configure("ganjil", background="#FFFFFF")
+                    self.tabelProg.tag_configure("genap", background="whitesmoke")
+
+                    cur.close()
+                    con.close()
+                
+                except mysql.connector.Error as err:
+                    messagebox.showerror(title="Error", \
+                        message="SQL Log: {}".format(err))                           
+
+        def commited_table(self,data):
+                try:
+                    db_config = self.read_db_config()
+                    con = mysql.connector.connect(**db_config)
+                    cur = con.cursor()
+                    sql = "SELECT * FROM onprogress WHERE no_ifca LIKE %s"
+                #     data = "TN10020352"
+                    val = ("%{}%".format(data),)
+                    cur.execute(sql, val)
+                    results = cur.fetchall()
+
+                    self.tabelcomm.delete(*self.tabelcomm.get_children()) #refresh, hapus dulu tabel lama
+                    for kolom in kolomCommIfca:
+                        self.tabelcomm.heading(kolom,text=kolom)
+
+                    # self.tabelcomm.column("No", width=10,anchor="w")
+                    self.tabelcomm.column("TANGGAL", width=110,anchor="w")
+                    self.tabelcomm.column("UPDATE", width=200,anchor="w")
+                    self.tabelcomm.column("OLEH", width=80,anchor="w")
+                    self.tabelcomm.column("DEPT", width=80,anchor="w")
+                    
+                    i=0
+                    for dat in results: 
+                        if(i%2):
+                            baris="genap"
+                        else:
+                            baris="ganjil"
+                        #tampilkan mulai dari tanggal
+                        self.tabelcomm.insert('', 'end', values=dat[2:], tags=baris)
+                        i+=1
+
+                    self.tabelcomm.tag_configure("ganjil", background="#FFFFFF")
+                    self.tabelcomm.tag_configure("genap", background="whitesmoke")
+
+                    cur.close()
+                    con.close()
+                
+                except mysql.connector.Error as err:
+                    messagebox.showerror(title="Error", \
+                        message="SQL Log: {}".format(err))                           
+
         def showtable(self,data):
                 self.trvTabel.delete(*self.trvTabel.get_children()) #refresh, hapus dulu tabel lama
                 for kolom in judul_kolom:
@@ -575,7 +674,7 @@ class Petugas:
         def pending_detail(self, event):
                 try:
                         curItem = self.tabelPend.item(self.tabelPend.focus())
-                        ifca_value = curItem['values'][1]  
+                        ifca_value = curItem['values'][1]
 
                         self.pendWo.config(state="normal")
                         self.pendIfca.config(state="normal")
@@ -630,6 +729,15 @@ class Petugas:
                         cur.close()
                         con.close()
                         # self.pending_table()
+                except:
+                        print('Tidak ada data di tabel')
+
+        def progress_detail(self, event):
+                try:
+                        curItem = self.tabelProg.item(self.tabelProg.focus())
+                        ifca_value = curItem['values'][1]
+                        self.commited_table(ifca_value)
+
                 except:
                         print('Tidak ada data di tabel')
 
@@ -753,6 +861,7 @@ class Petugas:
                 self.pendTgl.delete(0, END)
                 self.pendJam.delete(0, END)
                 self.pendStaff.delete(0, END)
+                # self.accpStaff.delete(0, END)
                 self.pendWorkAct.delete('1.0', 'end')
                 self.pendWorkReq.delete('1.0', 'end')
                 self.pending_table()
@@ -876,6 +985,7 @@ class Petugas:
                 from datetime import datetime
                 getTimeAcc = datetime.now()
                 firstcom = "WO Sudah diterima oleh"
+                setStatus = "ONPROGRESS"
 
                 if len(getAccBy) == 0:
                         messagebox.showwarning(title="Peringatan",message="Siapa yang menerima WO?")
@@ -888,6 +998,9 @@ class Petugas:
                         sql2 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
                         "VALUES(%s,%s,%s,%s,%s)"
                         cur.execute(sql2,(getIfca,getTimeAcc,firstcom,getAccBy.upper(),""))
+
+                        sql3 = "UPDATE logbook SET status_ifca=%s WHERE no_ifca =%s"
+                        cur.execute(sql3,(setStatus,getIfca))
 
                         cur.close()
                         con.close()
