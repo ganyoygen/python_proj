@@ -380,7 +380,7 @@ class Petugas:
                 self.comm_data = Frame(listcomm, bd=10)
                 self.comm_data.pack(fill=BOTH, expand=YES)
                 self.tabelcomm = ttk.Treeview(self.comm_data, columns=kolomCommIfca,show='headings')
-                self.tabelcomm.bind("<Double-1>","self.pending_detail")
+                self.tabelcomm.bind("<Double-1>",self.prog_comm_detail)
                 sbVer = Scrollbar(self.comm_data, orient='vertical',command=self.tabelcomm.yview)
                 sbVer.pack(side=RIGHT, fill=Y)
                 sbHor = Scrollbar(self.comm_data, orient='horizontal',command=self.tabelcomm.xview)
@@ -721,33 +721,15 @@ class Petugas:
                 try:
                         curItem = self.tabelPend.item(self.tabelPend.focus())
                         ifca_value = curItem['values'][1]
-
-                        self.pendWo.config(state="normal")
-                        self.pendIfca.config(state="normal")
-                        self.pendUnit.config(state="normal")
-                        self.pendTgl.config(state="normal")
-                        self.pendJam.config(state="normal")
-                        self.pendStaff.config(state="normal")
-                        self.pendWorkReq.config(state="normal")
-                        self.pendWorkAct.config(state="normal")
-                        self.pendWo.delete(0, END)
-                        self.pendIfca.delete(0, END)
-                        self.pendUnit.delete(0, END)
-                        self.pendTgl.delete(0, END)
-                        self.pendJam.delete(0, END)
-                        self.pendStaff.delete(0, END)
-                        self.pendWorkAct.delete('1.0', 'end')
-                        self.pendWorkReq.delete('1.0', 'end')
-
+                        self.entrySet("pendclear")
                         self.pendIfca.insert(END, ifca_value)
-
-                        cIfca = self.pendIfca.get()
+                        
                         db_config = self.read_db_config()
                         con = mysql.connector.connect(**db_config)
                         cur = con.cursor()
                         # sql = "SELECT no_wo, no_ifca, date_create, time_create, unit, work_req, staff, work_act, FROM logbook WHERE no_ifca = %s"
                         sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, work_act, time_create FROM logbook WHERE no_ifca = %s"
-                        cur.execute(sql,(cIfca,))
+                        cur.execute(sql,(ifca_value,))
                         data = cur.fetchone()
                         self.pendWo.insert(END, data[0])
                         #TGL buat
@@ -763,14 +745,7 @@ class Petugas:
                         self.pendStaff.insert(END, data[5])
                         self.pendWorkAct.insert(END, data[6])
 
-                        self.pendWo.config(state="readonly")
-                        self.pendIfca.config(state="readonly")
-                        self.pendUnit.config(state="readonly")
-                        self.pendTgl.config(state="readonly")
-                        self.pendJam.config(state="readonly")
-                        self.pendStaff.config(state="readonly")
-                        self.pendWorkReq.config(state="disable")
-                        self.pendWorkAct.config(state="disable")
+                        self.entrySet("pendread")
                         self.btnAccept.config(state="normal")
                         cur.close()
                         con.close()
@@ -783,13 +758,69 @@ class Petugas:
                         curItem = self.tabelProg.item(self.tabelProg.focus())
                         ifca_value = curItem['values'][1]
                         self.commited_table(ifca_value)
+                        self.entrySet("progclear")
 
+                        self.progIfca.insert(END, ifca_value)
+                        db_config = self.read_db_config()
+                        con = mysql.connector.connect(**db_config)
+                        cur = con.cursor()
+                        # sql = "SELECT no_wo, no_ifca, date_create, time_create, unit, work_req, staff, work_act, FROM logbook WHERE no_ifca = %s"
+                        sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, work_act, time_create FROM logbook WHERE no_ifca = %s"
+                        cur.execute(sql,(ifca_value,))
+                        data = cur.fetchone()
+                        self.progWo.insert(END, data[0])
+                        #TGL buat
+                        self.progTgl.insert(END, data[2])
+                        getTgl = self.progTgl.get() #dari mysql YYYY-MM-DD
+                        #balikin menjadi DD-MM-YYYY
+                        showtgl = str(getTgl)[8:] + '-' + str(getTgl)[5:7] +'-' + str(getTgl)[:4]
+                        self.progTgl.delete(0, END)
+                        self.progTgl.insert(END, showtgl)
+                        self.progJam.insert(END, data[7])
+                        self.progUnit.insert(END, data[3])
+                        self.progWorkReq.insert(END, data[4])
+                        self.progStaff.insert(END, data[5])
+
+                        self.entrySet("progread")
+                        cur.close()
+                        con.close()                      
                 except:
                         print('Tidak ada data di tabel')
 
-        def mainEntrySet(self,opsi):
-                # 1 on doubleclick normal
-                if opsi == "clear":
+        def prog_comm_detail(self, event):
+                # try:
+                        curItem = self.tabelcomm.item(self.tabelcomm.focus())
+                        comDate = curItem['values'][0]
+
+                        db_config = self.read_db_config()
+                        con = mysql.connector.connect(**db_config)
+                        cur = con.cursor()
+                        sql = "SELECT * onprogress WHERE date_update = %s"
+                        cur.execute(sql,(comDate,))
+                        data = cur.fetchall()
+                        print(data)
+
+                        self.commitdate.config(state="normal")
+                        self.commitby.config(state="normal")
+                        self.commitDetail.config(state="normal")
+                        self.commitdate.delete(0, END)
+                        self.commitby.delete(0, END)
+                        self.commitDetail.delete('1.0', 'end')
+                        self.commitdate.insert(END, data[2])
+                        self.commitby.insert(END, data[4])
+                        self.commitDetail.insert(END, data[3])
+                        self.commitdate.config(state="readonly")
+                        self.commitby.config(state="readonly")
+                        self.commitDetail.config(state="disable")
+
+                        cur.close()
+                        con.close()
+                # except:
+                        print('Tidak ada data di tabel')
+
+        def entrySet(self,opsi):
+                # 1 on doubleclick main entry, normal
+                if opsi == "mainclear":
                         self.entWo.config(state="normal")
                         self.entIfca.config(state="normal")
                         self.entTglbuat.config(state="normal")
@@ -812,21 +843,79 @@ class Petugas:
                         self.btnReceived.config(state="normal")
                         self.rbtnBM.config(state="disable")
                         self.rbtnTN.config(state="disable")
-                # readonly panel kiri kecuali work req dan staff
-                if opsi == "readonlyifca":
+                # mainentry readonly panel kiri kecuali work req dan staff
+                if opsi == "mainreadifca":
                         self.entWo.config(state="readonly")
                         self.entIfca.config(state="readonly")
                         self.entTglbuat.config(state="readonly")
                         self.entJambuat.config(state="readonly")
                         self.entUnit.config(state="readonly")
                 # 1 #
+                # 2 tabpending, clear
+                if opsi == "pendclear":
+                        self.pendWo.config(state="normal")
+                        self.pendIfca.config(state="normal")
+                        self.pendUnit.config(state="normal")
+                        self.pendTgl.config(state="normal")
+                        self.pendJam.config(state="normal")
+                        self.pendStaff.config(state="normal")
+                        self.pendWorkReq.config(state="normal")
+                        self.pendWorkAct.config(state="normal")
+                        self.pendWo.delete(0, END)
+                        self.pendIfca.delete(0, END)
+                        self.pendUnit.delete(0, END)
+                        self.pendTgl.delete(0, END)
+                        self.pendJam.delete(0, END)
+                        self.pendStaff.delete(0, END)
+                        # self.accpStaff.delete(0, END)
+                        self.pendWorkAct.delete('1.0', 'end')
+                        self.pendWorkReq.delete('1.0', 'end')
+                # tabpending readonly
+                if opsi == "pendread":
+                        self.pendWo.config(state="readonly")
+                        self.pendIfca.config(state="readonly")
+                        self.pendUnit.config(state="readonly")
+                        self.pendTgl.config(state="readonly")
+                        self.pendJam.config(state="readonly")
+                        self.pendStaff.config(state="readonly")
+                        self.pendWorkReq.config(state="disable")
+                        self.pendWorkAct.config(state="disable")
+                # 2 #
+                # 3 progress entry clear
+                if opsi == "progclear":
+                        self.progWo.config(state="normal")
+                        self.progIfca.config(state="normal")
+                        self.progUnit.config(state="normal")
+                        self.progTgl.config(state="normal")
+                        self.progJam.config(state="normal")
+                        self.progStaff.config(state="normal")
+                        self.progWorkReq.config(state="normal")
+                        self.commitDetail.config(state="normal")
+                        self.progWo.delete(0, END)
+                        self.progIfca.delete(0, END)
+                        self.progUnit.delete(0, END)
+                        self.progTgl.delete(0, END)
+                        self.progJam.delete(0, END)
+                        self.progStaff.delete(0, END)
+                        self.commitDetail.delete('1.0', 'end')
+                        self.progWorkReq.delete('1.0', 'end')
+                if opsi == "progread":
+                        self.progWo.config(state="readonly")
+                        self.progIfca.config(state="readonly")
+                        self.progUnit.config(state="readonly")
+                        self.progTgl.config(state="readonly")
+                        self.progJam.config(state="readonly")
+                        self.progStaff.config(state="readonly")
+                        self.progWorkReq.config(state="disable")
+                        # self.commitDetail.config(state="disable")
+                # 3 #
 
         def OnDoubleClick(self, event):
                 try:
                         curItem = self.trvTabel.item(self.trvTabel.focus())
                         ifca_value = curItem['values'][1]  
 
-                        self.mainEntrySet("clear")
+                        self.entrySet("mainclear")
 
                         self.entIfca.insert(END, ifca_value)
 
@@ -879,7 +968,7 @@ class Petugas:
                                 self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
 
                         # jangan update ifca, tgl, unit
-                        self.mainEntrySet("readonlyifca")
+                        self.entrySet("mainreadifca")
                         cur.close()
                         con.close()
                 except:
@@ -901,48 +990,13 @@ class Petugas:
                 con.close()
 
         def pending_refresh(self):
-                # refresh juga tab Pending
                 self.btnAccept.config(state="disable")
-                self.pendWo.config(state="normal")
-                self.pendIfca.config(state="normal")
-                self.pendUnit.config(state="normal")
-                self.pendTgl.config(state="normal")
-                self.pendJam.config(state="normal")
-                self.pendStaff.config(state="normal")
-                self.pendWorkReq.config(state="normal")
-                self.pendWorkAct.config(state="normal")
-                self.pendWo.delete(0, END)
-                self.pendIfca.delete(0, END)
-                self.pendUnit.delete(0, END)
-                self.pendTgl.delete(0, END)
-                self.pendJam.delete(0, END)
-                self.pendStaff.delete(0, END)
-                # self.accpStaff.delete(0, END)
-                self.pendWorkAct.delete('1.0', 'end')
-                self.pendWorkReq.delete('1.0', 'end')
+                self.entrySet("pendclear")
                 self.pending_table()
-                #########
 
         def progress_refresh(self):
                 self.btnCommUpdate.config(state="disable")
-                self.progWo.config(state="normal")
-                self.progIfca.config(state="normal")
-                self.progUnit.config(state="normal")
-                self.progTgl.config(state="normal")
-                self.progJam.config(state="normal")
-                self.progStaff.config(state="normal")
-                self.progWorkReq.config(state="normal")
-                self.commitDetail.config(state="normal")
-                self.progWo.delete(0, END)
-                self.progIfca.delete(0, END)
-                self.progUnit.delete(0, END)
-                self.progTgl.delete(0, END)
-                self.progJam.delete(0, END)
-                self.progStaff.delete(0, END)
-                # self.accpStaff.delete(0, END)
-                self.commitDetail.delete('1.0', 'end')
-                self.progWorkReq.delete('1.0', 'end')
-                
+                self.entrySet("progclear")
                 self.tabelcomm.delete(*self.tabelcomm.get_children()) #refresh, hapus dulu tabel lama
                 self.progress_table()
                 #########
