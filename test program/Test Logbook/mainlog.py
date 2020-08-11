@@ -348,7 +348,7 @@ class Petugas:
                 self.commitDetail = ScrolledText(topFrame,height=8,width=40)
                 self.commitDetail.grid(row=3, column=5,sticky=W)
                 self.btnCommUpdate = Button(topFrame, text='Update',\
-                                        command="self.onAccPending", width=10,\
+                                        command=self.onProgCommUpd, width=10,\
                                         relief=RAISED, bd=2, bg="#FC6042", fg="white",activebackground="#444",activeforeground="white" )
                 self.btnCommUpdate.grid(row=3,column=6,sticky=N,pady=10,padx=5)
 
@@ -390,7 +390,7 @@ class Petugas:
                 self.tabelcomm.configure(yscrollcommand=sbVer.set)
                 self.tabelcomm.configure(xscrollcommand=sbHor.set)
 
-                self.progress_table()
+                self.progress_refresh()
 
         def read_db_config(self,filename='C:\\config.ini', section='mysql'):
                 """ Read database configuration file and return a dictionary object
@@ -468,7 +468,8 @@ class Petugas:
                     self.showtable(results)
 
                 except mysql.connector.Error as err:
-                    print("SQL Log: {}".format(err))
+                    messagebox.showerror(title="Error", \
+                        message="SQL Log: {}".format(err)) 
 
         def onSearch(self):
                 opsi = self.opsicari.get()
@@ -782,23 +783,25 @@ class Petugas:
                         self.progStaff.insert(END, data[5])
 
                         self.entrySet("progread")
+                        self.commitdate.config(state="disable")
+                        self.btnCommUpdate.config(state="normal")
                         cur.close()
                         con.close()                      
                 except:
                         print('Tidak ada data di tabel')
 
         def prog_comm_detail(self, event):
-                # try:
+                try:
                         curItem = self.tabelcomm.item(self.tabelcomm.focus())
                         comDate = curItem['values'][0]
+                        valIfca = self.progIfca.get()
 
                         db_config = self.read_db_config()
                         con = mysql.connector.connect(**db_config)
                         cur = con.cursor()
-                        sql = "SELECT * onprogress WHERE date_update = %s"
-                        cur.execute(sql,(comDate,))
-                        data = cur.fetchall()
-                        print(data)
+                        sql = "SELECT * FROM onprogress WHERE no_ifca LIKE %s AND date_update = %s"
+                        cur.execute(sql,(valIfca,comDate))
+                        data = cur.fetchone()
 
                         self.commitdate.config(state="normal")
                         self.commitby.config(state="normal")
@@ -812,10 +815,11 @@ class Petugas:
                         self.commitdate.config(state="readonly")
                         self.commitby.config(state="readonly")
                         self.commitDetail.config(state="disable")
+                        self.btnCommUpdate.config(state="disable")
 
                         cur.close()
                         con.close()
-                # except:
+                except:
                         print('Tidak ada data di tabel')
 
         def entrySet(self,opsi):
@@ -890,6 +894,8 @@ class Petugas:
                         self.progJam.config(state="normal")
                         self.progStaff.config(state="normal")
                         self.progWorkReq.config(state="normal")
+                        self.commitdate.config(state="normal")
+                        self.commitby.config(state="normal")
                         self.commitDetail.config(state="normal")
                         self.progWo.delete(0, END)
                         self.progIfca.delete(0, END)
@@ -897,6 +903,8 @@ class Petugas:
                         self.progTgl.delete(0, END)
                         self.progJam.delete(0, END)
                         self.progStaff.delete(0, END)
+                        self.commitdate.delete(0, END)
+                        self.commitby.delete(0, END)
                         self.commitDetail.delete('1.0', 'end')
                         self.progWorkReq.delete('1.0', 'end')
                 if opsi == "progread":
@@ -1150,7 +1158,15 @@ class Petugas:
                         messagebox.showinfo(title="Informasi",message="WO sudah diterima oleh {}.".format(getAccBy))
                         self.pending_refresh()
                         
+        def onProgCommUpd(self):
 
+                getUsrUpd = self.commitby.get()
+                if len(getUsrUpd.strip()) == 0: # .strip memastikan space/tab termasuk len 0
+                        messagebox.showwarning(title="Peringatan",message="Siapa yang update commit?")
+                        self.commitby.focus_set()
+                else:
+                        print(type(getUsrUpd))
+                        print("commit update clicked by:",getUsrUpd)
 
 
 def main():
