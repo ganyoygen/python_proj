@@ -427,7 +427,6 @@ class Petugas:
                                 return "terima" 
                         if (data == hasil[1]):
                                 return "tolak"
-                print(len(data))
                 cur.close()
                 con.close()
 
@@ -464,7 +463,7 @@ class Petugas:
                     results = cur.fetchall()
                     print('---',cur.rowcount,'ditemukan ---')
                     cur.close()
-                    con.close() 
+                    con.close()
                     self.showtable(results)
 
                 except mysql.connector.Error as err:
@@ -715,8 +714,9 @@ class Petugas:
                         self.onSearch() #update received sesuai tabel yg dicari
                         messagebox.showinfo(title="Informasi", \
                                     message="Wo {} sudah diterima.".format(cIfca))
+                        con.commit()
                         cur.close()
-                        con.close()               
+                        con.close()              
 
         def pending_detail(self, event):
                 try:
@@ -786,7 +786,7 @@ class Petugas:
                         self.commitdate.config(state="disable")
                         self.btnCommUpdate.config(state="normal")
                         cur.close()
-                        con.close()                      
+                        con.close()            
                 except:
                         print('Tidak ada data di tabel')
 
@@ -967,6 +967,7 @@ class Petugas:
                         elif data[10] == "PENDING":
                                 self.opsiStatus.current(3)
                                 self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
+                                self.btnUpdate.config(state="disable") #tidak dapat update karena wo sudah di list pending
                         elif data[10] == "ONPROGRESS":
                                 self.opsiStatus.current(0)
                                 self.btnReceived.config(state="disable") #tidak dapat receive karena wo sedang on progress
@@ -994,6 +995,7 @@ class Petugas:
                 messagebox.showinfo(title="Informasi", \
                                     message="Data sudah di hapus.")
                 
+                con.commit()
                 cur.close()
                 con.close()
 
@@ -1088,6 +1090,7 @@ class Petugas:
                         cur.execute(sql,(cWo,cIfca.upper(),self.checktgl(cTglBuat),cJamBuat,cUnit.upper(),cWorkReq,cStaff))
                         messagebox.showinfo(title="Informasi", \
                                             message="Data sudah di tersimpan.")
+                        con.commit()
                         cur.close()
                         con.close()
                         self.onClear()
@@ -1121,7 +1124,7 @@ class Petugas:
                                 messagebox.showwarning(title="Peringatan",message="Staff ENG harus diisi.")
                                 self.entStaff.focus_set()
                                 return # stop aja karena cStaff tidak diisi
-                        else: ### jgn eksekusi sekarang mungkin
+                        else: ### jgn eksekusi sekarang mungkin?
                                 sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
                                 "VALUES(%s,%s,%s,%s,%s)"
                                 cur.execute(sql1,(cIfca,getTimeAcc,cWorkAct,cStaff.upper(),""))
@@ -1130,6 +1133,7 @@ class Petugas:
                 cur.execute(sql,(cWo,cIfca,getTglBuat,cWorkReq,cStaff,cStatus,getTglDone,jamdone,cWorkAct,cIfca))
                 messagebox.showinfo(title="Informasi", \
                         message="Data sudah di terupdate.")
+                con.commit()
                 cur.close()
                 con.close()
                 self.onSearch()
@@ -1152,24 +1156,39 @@ class Petugas:
                         sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
                         "VALUES(%s,%s,%s,%s,%s)"
                         cur.execute(sql1,(getIfca,getTimeAcc,firstcom,getAccBy.upper(),""))
-
                         sql2 = "UPDATE logbook SET status_ifca=%s WHERE no_ifca =%s"
                         cur.execute(sql2,(setStatus,getIfca))
-
+                        con.commit()
                         cur.close()
                         con.close()
                         messagebox.showinfo(title="Informasi",message="WO sudah diterima oleh {}.".format(getAccBy))
                         self.pending_refresh()
-                        
-        def onProgCommUpd(self):
 
+        def onProgCommUpd(self):
+                db_config = self.read_db_config()
+                con = mysql.connector.connect(**db_config)
+                cur = con.cursor()
+                getIfca = self.progIfca.get()
                 getUsrUpd = self.commitby.get()
+                getcommit = self.commitDetail.get(1.0,END) # ('1.0', 'end')
+                from datetime import datetime
+                getTime = datetime.now()
+                
                 if len(getUsrUpd.strip()) == 0: # .strip memastikan space/tab termasuk len 0
                         messagebox.showwarning(title="Peringatan",message="Siapa yang update commit?")
                         self.commitby.focus_set()
+                elif len(getcommit.strip()) == 0: # .strip memastikan space/tab termasuk len 0
+                        messagebox.showwarning(title="Peringatan",message="Silahkan isi perubahan terlebih dahulu")
+                        self.commitDetail.focus_set()
                 else:
-                        print(type(getUsrUpd))
-                        print("commit update clicked by:",getUsrUpd)
+                        sql = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
+                        "VALUES(%s,%s,%s,%s,%s)"
+                        cur.execute(sql,(getIfca,getTime,getcommit,getUsrUpd.upper(),""))
+                        messagebox.showinfo(title="Informasi",message="Update telah tersimpan oleh {}.".format(getUsrUpd))
+                        self.progress_detail(self)
+                con.commit()
+                cur.close()
+                con.close()
 
 
 def main():
