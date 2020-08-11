@@ -700,7 +700,7 @@ class Petugas:
 
         def onReceived(self):
                 cIfca = self.entIfca.get()
-                if len(cIfca) == 0:
+                if len(cIfca.strip()) == 0:
                         messagebox.showwarning(title="Peringatan",message="No IFCA Kosong.")
                         self.entIfca.focus_set()
                 else:
@@ -1066,15 +1066,15 @@ class Petugas:
                 if self.checkwo(cWo) == "tolak": #check WO
                         messagebox.showerror(title="Error", \
                         message="Wo {} sudah terdaftar.".format(cWo))
-                elif len(cIfca) == 0:
+                elif len(cIfca.strip()) == 0:
                         messagebox.showwarning(title="Peringatan",message="No IFCA Kosong.")
                         self.entIfca.focus_set()
                 elif self.checktgl(cTglBuat) == None: #check tgl jika kosong, batalkan save
                         messagebox.showerror(title="Error",message="Format tanggal salah")    
-                elif len(cJamBuat) == 0:
+                elif len(cJamBuat.strip()) == 0:
                         messagebox.showwarning(title="Peringatan",message="Jam buat harus diisi.")
                         self.entJambuat.focus_set()
-                elif len(cUnit) == 0:
+                elif len(cUnit.strip()) == 0:
                         messagebox.showwarning(title="Peringatan",message="Unit harus diisi.")
                         self.entUnit.focus_set()
                 elif self.checkifca(cIfca) == "tolak": #check IFCA
@@ -1112,13 +1112,16 @@ class Petugas:
                 getTglDone = self.checktgl(self.entTgldone.get()) #check tgl dulu
                 #eksekusi sql
                 # 2 update commit for pending
-                print(cStatus)
                 if cStatus == "PENDING":
-                        if len(cWorkAct) <= 0: #BELUM FUNGSI
-                                print(cWorkAct)
+                        if len(cWorkAct.strip()) <= 0: 
                                 messagebox.showwarning(title="Peringatan",message="Work Action harus diisi.")
                                 self.entWorkAct.focus_set()
-                        else:
+                                return # stop aja karena cWorkAct tidak diisi
+                        elif len(cStaff.strip()) <= 0: 
+                                messagebox.showwarning(title="Peringatan",message="Staff ENG harus diisi.")
+                                self.entStaff.focus_set()
+                                return # stop aja karena cStaff tidak diisi
+                        else: ### jgn eksekusi sekarang mungkin
                                 sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
                                 "VALUES(%s,%s,%s,%s,%s)"
                                 cur.execute(sql1,(cIfca,getTimeAcc,cWorkAct,cStaff.upper(),""))
@@ -1142,7 +1145,7 @@ class Petugas:
                 firstcom = "WO Sudah diterima oleh"
                 setStatus = "ONPROGRESS"
 
-                if len(getAccBy) == 0:
+                if len(getAccBy.strip()) == 0:
                         messagebox.showwarning(title="Peringatan",message="Siapa yang menerima WO?")
                         self.accpStaff.focus_set()
                 else:
