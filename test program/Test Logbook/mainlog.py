@@ -172,6 +172,15 @@ class Petugas:
                 self.entWorkAct = ScrolledText(mainFrame,height=4,width=35)
                 self.entWorkAct.grid(row=5, column=5,sticky=W)
 
+                Label(mainFrame, text="Received").grid(row=6, column=3, sticky=W,padx=20)
+                Label(mainFrame, text=':').grid(row=6, column=4, sticky=W,pady=5,padx=10)
+                recentry = Frame(mainFrame)
+                recentry.grid(row=6,column=5,sticky=W)
+                self.entRecDate = Entry(recentry, width=20)
+                self.entRecDate.grid(row=0, column=0,sticky=W)
+                self.entRecBy = Entry(recentry, width=25)
+                self.entRecBy.grid(row=0, column=1,sticky=W)
+
                 #panel button
                 self.btnSave = Button(btnFrame, text='Save',\
                                         command=self.onSave, width=10,\
@@ -216,7 +225,7 @@ class Petugas:
                 self.fr_data = Frame(tabelFrame, bd=10)
                 self.fr_data.pack(fill=BOTH, expand=YES)
                 self.trvTabel = ttk.Treeview(self.fr_data, columns=judul_kolom,show='headings')
-                self.trvTabel.bind("<Double-1>", self.OnDoubleClick)
+                self.trvTabel.bind("<Double-1>", self.mainlog_detail)
                 sbVer = Scrollbar(self.fr_data, orient='vertical',command=self.trvTabel.yview)
                 sbVer.pack(side=RIGHT, fill=Y)
                 sbHor = Scrollbar(self.fr_data, orient='horizontal',command=self.trvTabel.xview)
@@ -830,6 +839,8 @@ class Petugas:
                         self.entTglbuat.config(state="normal")
                         self.entJambuat.config(state="normal")
                         self.entUnit.config(state="normal")
+                        self.entRecBy.config(state="normal")
+                        self.entRecDate.config(state="normal")
                         self.entWo.delete(0, END)
                         self.entIfca.delete(0, END)
                         self.entTglbuat.delete(0, END)
@@ -840,6 +851,8 @@ class Petugas:
                         self.entTgldone.delete(0, END)
                         self.entJamdone.delete(0, END)
                         self.entWorkAct.delete('1.0', 'end')
+                        self.entRecBy.delete(0, END)
+                        self.entRecDate.delete(0, END)
 
                         self.btnSave.config(state="disable")
                         self.btnUpdate.config(state="normal")
@@ -854,6 +867,8 @@ class Petugas:
                         self.entTglbuat.config(state="readonly")
                         self.entJambuat.config(state="readonly")
                         self.entUnit.config(state="readonly")
+                        self.entRecBy.config(state="readonly")
+                        self.entRecDate.config(state="readonly")
                 # 1 #
                 # 2 tabpending, clear
                 if opsi == "pendclear":
@@ -918,38 +933,37 @@ class Petugas:
                         # self.commitDetail.config(state="disable")
                 # 3 #
 
-        def OnDoubleClick(self, event):
+        def mainlog_detail(self, event):
                 try:
                         curItem = self.trvTabel.item(self.trvTabel.focus())
                         ifca_value = curItem['values'][1]  
 
                         self.entrySet("mainclear")
 
-                        self.entIfca.insert(END, ifca_value)
-
-                        cIfca = self.entIfca.get()
                         db_config = self.read_db_config()
                         con = mysql.connector.connect(**db_config)
                         cur = con.cursor()
-                        sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, date_done, time_done, work_act, time_create, status_ifca FROM logbook WHERE no_ifca = %s"
-                        cur.execute(sql,(cIfca,))
+                        # sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, date_done, time_done, work_act, time_create, status_ifca FROM logbook WHERE no_ifca = %s"
+                        sql = "SELECT * FROM logbook WHERE no_ifca = %s"
+                        cur.execute(sql,(ifca_value,))
                         data = cur.fetchone()
 
-                        self.entWo.insert(END, data[0])
+                        self.entIfca.insert(END, ifca_value)
+                        self.entWo.insert(END, data[1])
                         #TGL buat
-                        self.entTglbuat.insert(END, data[2])
+                        self.entTglbuat.insert(END, data[3])
                         getTgl = self.entTglbuat.get() #dari mysql YYYY-MM-DD
                         #balikin menjadi DD-MM-YYYY
                         showtgl = str(getTgl)[8:] + '-' + str(getTgl)[5:7] +'-' + str(getTgl)[:4]
                         self.entTglbuat.delete(0, END)
                         self.entTglbuat.insert(END, showtgl)
-                        self.entJambuat.insert(END, data[9])
-                        self.entUnit.insert(END, data[3])
-                        self.entWorkReq.insert(END, data[4])
-                        self.entStaff.insert(END, data[5])
+                        self.entJambuat.insert(END, data[13])
+                        self.entUnit.insert(END, data[4])
+                        self.entWorkReq.insert(END, data[5])
+                        self.entStaff.insert(END, data[6])
                         #TGL done
                         try: 
-                                self.entTgldone.insert(END, data[6])
+                                self.entTgldone.insert(END, data[8])
                                 getTgldone = self.entTgldone.get() #dari mysql YYYY-MM-DD
                                 #balikin menjadi DD-MM-YYYY
                                 showtgldone = str(getTgldone)[8:] + '-' + str(getTgldone)[5:7] +'-' + str(getTgldone)[:4]
@@ -957,18 +971,21 @@ class Petugas:
                                 self.entTgldone.insert(END, showtgldone)
                         except:
                                 pass
-                        self.entJamdone.insert(END, data[7])
-                        self.entWorkAct.insert(END, data[8])
+                        self.entJamdone.insert(END, data[9])
+                        self.entWorkAct.insert(END, data[7])
+                        try: self.entRecDate.insert(END, data[12])
+                        except: pass
+                        self.entRecBy.insert(END, data[11])
 
-                        if data[10] == "DONE":
+                        if data[14] == "DONE":
                                 self.opsiStatus.current(1)
-                        elif data[10] == "CANCEL":
+                        elif data[14] == "CANCEL":
                                 self.opsiStatus.current(2)
-                        elif data[10] == "PENDING":
+                        elif data[14] == "PENDING":
                                 self.opsiStatus.current(3)
                                 self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
                                 self.btnUpdate.config(state="disable") #tidak dapat update karena wo sudah di list pending
-                        elif data[10] == "ONPROGRESS":
+                        elif data[14] == "ONPROGRESS":
                                 self.opsiStatus.current(0)
                                 self.btnReceived.config(state="disable") #tidak dapat receive karena wo sedang on progress
                                 self.btnUpdate.config(state="disable") #tidak dapat update karena wo sedang on progress
@@ -976,7 +993,13 @@ class Petugas:
                                 self.opsiStatus.current(0)
                                 self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
 
-                        # jangan update ifca, tgl, unit
+                        if data[10] == True and ifca_value[:2] == "TN":
+                                # tidak dapat receive wo TN karena sudah direceive
+                                self.btnReceived.config(state="disable")
+                                # ngapain diUpdate lagi wo TN sudah di CS
+                                self.btnUpdate.config(state="disable")
+                        
+                        # read only setelah entry terisi
                         self.entrySet("mainreadifca")
                         cur.close()
                         con.close()
@@ -1012,29 +1035,19 @@ class Petugas:
                 #########
 
         def onClear(self):
+                self.entrySet("mainclear")
+
                 self.btnSave.config(state="normal")
                 self.btnUpdate.config(state="disable")
                 self.btnDelete.config(state="disable")
                 self.btnReceived.config(state="disable")
                 self.rbtnBM.config(state="normal")
                 self.rbtnTN.config(state="normal")
-                self.entWo.config(state="normal")
-                self.entIfca.config(state="normal")
-                self.entTglbuat.config(state="normal")
-                self.entJambuat.config(state="normal")
-                self.entUnit.config(state="normal")
-                self.entWo.delete(0, END)
-                self.entIfca.delete(0, END)
-                self.entTglbuat.delete(0, END)
-                self.entJambuat.delete(0, END)
-                self.entUnit.delete(0, END)
-                self.entWorkReq.delete('1.0', 'end')
-                self.entStaff.delete(0, END)
-                self.entTgldone.delete(0, END)
-                self.entJamdone.delete(0, END)
-                self.entWorkAct.delete('1.0', 'end')
-                self.entCari.delete(0, END)
+                self.entRecBy.config(state="readonly")
+                self.entRecDate.config(state="readonly")
+
                 self.trvTabel.delete(*self.trvTabel.get_children())
+                self.entCari.delete(0, END)
 
                 self.opsiStatus.current(0)
 
