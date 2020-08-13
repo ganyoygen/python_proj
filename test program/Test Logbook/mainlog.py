@@ -8,6 +8,7 @@ import mysql.connector
 import datetime
 import time
 import os
+from dateEntry import CustomDateEntry # input tgl pake kalender
 # import tabpending
 # from tabpending import pendingTab
 
@@ -120,7 +121,7 @@ class Petugas:
                 Label(mainFrame, text=':').grid(row=3, column=1, sticky=W,pady=5,padx=10)
                 tglbuat = Frame(mainFrame)
                 tglbuat.grid(row=3,column=2,sticky=W)
-                self.entTglbuat = Entry(tglbuat, width=12)
+                self.entTglbuat = CustomDateEntry(tglbuat, width=12)
                 self.entTglbuat.grid(row=1, column=0,sticky=W)
                 self.entJambuat = Entry(tglbuat, width=7)
                 self.entJambuat.grid(row=1, column=1,sticky=W)
@@ -864,7 +865,7 @@ class Petugas:
                 if opsi == "mainreadifca":
                         self.entWo.config(state="readonly")
                         self.entIfca.config(state="readonly")
-                        self.entTglbuat.config(state="readonly")
+                        self.entTglbuat.config(state="disable")
                         self.entJambuat.config(state="readonly")
                         self.entUnit.config(state="readonly")
                         self.entRecBy.config(state="readonly")
