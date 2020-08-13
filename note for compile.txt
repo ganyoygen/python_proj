@@ -1,0 +1,1 @@
+pyinstaller.exe --onefile --hidden-import babel.numbers mainlog.py --noconsole
