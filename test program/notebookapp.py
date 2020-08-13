@@ -1,6 +1,6 @@
 '''
 Created on Jan 14, 2018
-@author: aditya
+@author: aditya - https://github.com/adipandas/
 This program shows the use of notebook in tkinter
 Notebook is used to create Tabs in the application.
 This enables browsing different pages in the application.
