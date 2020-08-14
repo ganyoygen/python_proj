@@ -980,6 +980,8 @@ class Petugas:
 
                         if data[14] == "DONE":
                                 self.opsiStatus.current(1)
+                                # ngapain diUpdate lagi wo sudah DONE
+                                self.btnUpdate.config(state="disable")
                         elif data[14] == "CANCEL":
                                 self.opsiStatus.current(2)
                         elif data[14] == "PENDING":
@@ -1101,7 +1103,7 @@ class Petugas:
                         cur = con.cursor()
                         sql = "INSERT INTO logbook (no_wo, no_ifca, date_create, time_create, unit, work_req, staff)"+\
                               "VALUES(%s,%s,%s,%s,%s,%s,%s)"
-                        cur.execute(sql,(cWo,cIfca.upper(),self.checktgl(cTglBuat),cJamBuat,cUnit.upper(),cWorkReq,cStaff))
+                        cur.execute(sql,(cWo,cIfca.upper(),self.checktgl(cTglBuat),cJamBuat,cUnit.upper(),cWorkReq,cStaff.upper()))
                         messagebox.showinfo(title="Informasi", \
                                             message="Data sudah di tersimpan.")
                         con.commit()
@@ -1144,7 +1146,7 @@ class Petugas:
                                 cur.execute(sql1,(cIfca,getTimeAcc,cWorkAct,cStaff.upper(),""))
                 # 2 #
                 sql = "UPDATE logbook SET no_wo=%s,no_ifca=%s,date_create=%s,work_req=%s,staff=%s,status_ifca=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_ifca =%s"
-                cur.execute(sql,(cWo,cIfca,getTglBuat,cWorkReq,cStaff,cStatus,getTglDone,jamdone,cWorkAct,cIfca))
+                cur.execute(sql,(cWo,cIfca,getTglBuat,cWorkReq,cStaff.upper(),cStatus,getTglDone,jamdone,cWorkAct,cIfca))
                 messagebox.showinfo(title="Informasi", \
                         message="Data sudah di terupdate.")
                 con.commit()
