@@ -601,9 +601,12 @@ class Petugas:
                     db_config = self.read_db_config()
                     con = mysql.connector.connect(**db_config)
                     cur = con.cursor()
-                    sql = "SELECT * FROM logbook WHERE status_ifca LIKE %s"
-                    data = "ONPROGRESS"
-                    val = ("%{}%".format(data),)
+                #     sql = "SELECT * FROM logbook WHERE status_ifca LIKE %s"
+                    sql = "SELECT no_wo, no_ifca, unit FROM logbook WHERE status_ifca LIKE %s OR status_ifca LIKE %s OR status_ifca LIKE %s"
+                    onprogr = "ONPROGRESS"
+                    sendeng = "SENDTOENG"
+                    recfrcs = "RECFROMCS"
+                    val = ("%{}%".format(onprogr),"%{}%".format(sendeng),"%{}%".format(recfrcs))
                     cur.execute(sql, val)
                     results = cur.fetchall()
 
@@ -623,7 +626,8 @@ class Petugas:
                         else:
                             baris="ganjil"
                         #tampilkan hanya wo ifca unit 
-                        self.tabelProg.insert('', 'end', values=dat[1]+" "+dat[2]+" "+dat[4], tags=baris)
+                        # self.tabelProg.insert('', 'end', values=dat[1]+" "+dat[2]+" "+dat[4], tags=baris)
+                        self.tabelProg.insert('', 'end', values=dat, tags=baris)
                         i+=1
 
                     self.tabelProg.tag_configure("ganjil", background="#FFFFFF")
