@@ -485,19 +485,19 @@ class Petugas:
                 cari = self.entCari.get()
                 if opsi == "Tanggal":
                         cari = self.checktgl(cari)
-                        sql = "SELECT * FROM logbook WHERE date_create LIKE %s"
+                        sql = "SELECT * FROM logbook WHERE date_create LIKE %s ORDER BY date_create DESC"
                         val = ("%{}%".format(cari),)
                         self.search_data(sql,val)
                 elif opsi == "IFCA":
-                        sql = "SELECT * FROM logbook WHERE no_ifca LIKE %s"
+                        sql = "SELECT * FROM logbook WHERE no_ifca LIKE %s ORDER BY no_ifca DESC"
                         val = ("%{}%".format(cari),)
                         self.search_data(sql,val)
                 elif opsi == "Unit":
-                        sql = "SELECT * FROM logbook WHERE unit LIKE %s"
+                        sql = "SELECT * FROM logbook WHERE unit LIKE %s ORDER BY date_create DESC"
                         val = ("%{}%".format(cari),)
                         self.search_data(sql,val)
                 elif opsi == "Work Req.":
-                        sql = "SELECT * FROM logbook WHERE work_req LIKE %s"
+                        sql = "SELECT * FROM logbook WHERE work_req LIKE %s ORDER BY date_create DESC"
                         val = ("%{}%".format(cari),)
                         self.search_data(sql,val)
 
