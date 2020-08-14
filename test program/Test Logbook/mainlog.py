@@ -8,7 +8,7 @@ import mysql.connector
 import datetime
 import time
 import os
-from dateEntry import CustomDateEntry # input tgl pake kalender
+from entryDate import CustomDateEntry # input tgl pake kalender
 # import tabpending
 # from tabpending import pendingTab
 
@@ -121,7 +121,7 @@ class Petugas:
                 Label(mainFrame, text=':').grid(row=3, column=1, sticky=W,pady=5,padx=10)
                 tglbuat = Frame(mainFrame)
                 tglbuat.grid(row=3,column=2,sticky=W)
-                self.entTglbuat = CustomDateEntry(tglbuat, width=12)
+                self.entTglbuat = CustomDateEntry(tglbuat, width=10, locale='en_UK')
                 self.entTglbuat.grid(row=1, column=0,sticky=W)
                 self.entJambuat = Entry(tglbuat, width=7)
                 self.entJambuat.grid(row=1, column=1,sticky=W)
@@ -162,7 +162,7 @@ class Petugas:
                 Label(mainFrame, text=':').grid(row=4, column=4, sticky=W,pady=5,padx=10)             
                 tgldone = Frame(mainFrame)
                 tgldone.grid(row=4,column=5,sticky=W)
-                self.entTgldone = Entry(tgldone, width=12)
+                self.entTgldone = CustomDateEntry(tgldone, width=10, locale='en_UK')
                 self.entTgldone.grid(row=1, column=0,sticky=W)
                 self.entJamdone = Entry(tgldone, width=7)
                 self.entJamdone.grid(row=1, column=1,sticky=W)
