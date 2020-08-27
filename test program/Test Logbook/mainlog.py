@@ -9,6 +9,8 @@ import datetime
 import time
 import os
 from entryDate import CustomDateEntry # input tgl pake kalender
+import csv # untuk write ke Excel
+from tkinter import filedialog
 # import tabpending
 # from tabpending import pendingTab
 
@@ -221,6 +223,11 @@ class Petugas:
                                         state="normal", width=10,\
                                        relief=RAISED, bd=2, bg="#667", fg="white",activebackground="#444",activeforeground="white")
                 self.btnSearch.grid(row=1,column=3,pady=10,padx=5)
+                self.btnMainExp = Button(btnFrame, text='Export',\
+                                        command=self.onMainExport,\
+                                        state="normal", width=10,\
+                                       relief=RAISED, bd=2, bg="#558", fg="white",activebackground="#444",activeforeground="white")
+                self.btnMainExp.grid(row=1,column=4,pady=10,padx=5)
 
                 #tabel
                 self.fr_data = Frame(tabelFrame, bd=10)
@@ -710,6 +717,21 @@ class Petugas:
 
                 self.trvTabel.tag_configure("ganjil", background="#FFFFFF")
                 self.trvTabel.tag_configure("genap", background="whitesmoke")                              
+
+        def onMainExport(self):
+                directory = filedialog.asksaveasfilename(initialdir = "/", \
+                        defaultextension='.csv', \
+                        title="Save file Export", \
+                        filetypes=[("Excel CSV", "*.csv"),("All", "*.*")])
+                print(directory)
+                '''
+                filename=open('test.csv','w')
+                cWrite=csv.writer(filename)
+
+                for dat in data:
+                        cWrite.writerow(dat)
+                filename.close()
+                '''
 
         def onReceived(self):
                 cIfca = self.entIfca.get()
@@ -1213,6 +1235,7 @@ class Petugas:
 
 def main():
     os.system("cls")
+    root.title("Project Logbook by GanyoyGen")
     Petugas(root)
     root.mainloop()
 main()
