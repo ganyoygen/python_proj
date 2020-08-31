@@ -719,11 +719,53 @@ class Petugas:
                 self.trvTabel.tag_configure("genap", background="whitesmoke")                              
 
         def onMainExport(self):
-                directory = filedialog.asksaveasfilename(initialdir = "/", \
+                opsi = self.opsicari.get()
+                cari = self.entCari.get()
+                if opsi == "Tanggal":
+                        cari = self.checktgl(cari)
+                        sql = "SELECT * FROM logbook WHERE date_create LIKE %s"
+                        val = ("%{}%".format(cari),)
+                elif opsi == "IFCA":
+                        sql = "SELECT * FROM logbook WHERE no_ifca LIKE %s"
+                        val = ("%{}%".format(cari),)
+                elif opsi == "Unit":
+                        sql = "SELECT * FROM logbook WHERE unit LIKE %s"
+                        val = ("%{}%".format(cari),)
+                elif opsi == "Work Req.":
+                        sql = "SELECT * FROM logbook WHERE work_req LIKE %s"
+                        val = ("%{}%".format(cari),)
+                
+                try:
+                    db_config = self.read_db_config()
+                    con = mysql.connector.connect(**db_config)
+                    cur = con.cursor()
+                    cur.execute(sql,val)
+                    results = cur.fetchall()
+                    if len(results) <= 0:
+                            return # stop aja karena kosong
+                
+                    directory = filedialog.asksaveasfilename(initialdir = "/", \
                         defaultextension='.csv', \
                         title="Save file Export", \
                         filetypes=[("Excel CSV", "*.csv"),("All", "*.*")])
-                print(directory)
+                    filename=open(directory,'w')
+                    cWrite=csv.writer(filename)
+                    cWrite.writerow(["Index","No WO","No IFCA","Tanggal Buat","Unit",\
+                            "Work Request","Staff","Work Action","Tanggal Selesai",\
+                            "Jam Selesai","Diterima","Penerima","Tanggal Diterima",\
+                            "Jam Buat","Status WO"])
+                    for dat in results:
+                        cWrite.writerow(dat)
+                    filename.close()
+                    cur.close()
+                    con.close()
+
+                    messagebox.showinfo(title="Export File", \
+                            message="Sudah tersimpan di: {}".format(directory))
+
+                except mysql.connector.Error as err:
+                    messagebox.showerror(title="Error", \
+                        message="SQL Log: {}".format(err))
                 '''
                 filename=open('test.csv','w')
                 cWrite=csv.writer(filename)
