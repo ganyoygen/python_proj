@@ -11,13 +11,14 @@ import os
 from entryDate import CustomDateEntry # input tgl pake kalender
 import csv # untuk write ke Excel
 from tkinter import filedialog
+from ttkthemes import ThemedTk # make sure to pip install ttkthemes
 # import tabpending
 # from tabpending import pendingTab
 
 
 
-
-root = Tk()
+root = ThemedTk(theme='clearlooks')
+# root = Tk()
 class WindowDraggable():
         def __init__(self, label):
                 self.label = label
@@ -593,8 +594,8 @@ class Petugas:
                         self.tabelPend.insert('', 'end', values=dat[1:], tags=baris)
                         i+=1
 
-                    self.tabelPend.tag_configure("ganjil", background="#FFFFFF")
-                    self.tabelPend.tag_configure("genap", background="whitesmoke")
+                    self.tabelPend.tag_configure("ganjil", background="gainsboro")
+                    self.tabelPend.tag_configure("genap", background="floral white")
 
                     cur.close()
                     con.close()
@@ -637,8 +638,8 @@ class Petugas:
                         self.tabelProg.insert('', 'end', values=dat, tags=baris)
                         i+=1
 
-                    self.tabelProg.tag_configure("ganjil", background="#FFFFFF")
-                    self.tabelProg.tag_configure("genap", background="whitesmoke")
+                    self.tabelProg.tag_configure("ganjil", background="gainsboro")
+                    self.tabelProg.tag_configure("genap", background="floral white")
 
                     cur.close()
                     con.close()
@@ -678,8 +679,8 @@ class Petugas:
                         self.tabelcomm.insert('', 'end', values=dat[2:], tags=baris)
                         i+=1
 
-                    self.tabelcomm.tag_configure("ganjil", background="#FFFFFF")
-                    self.tabelcomm.tag_configure("genap", background="whitesmoke")
+                    self.tabelcomm.tag_configure("ganjil", background="gainsboro")
+                    self.tabelcomm.tag_configure("genap", background="floral white")
 
                     cur.close()
                     con.close()
@@ -715,8 +716,8 @@ class Petugas:
                     self.trvTabel.insert('', 'end', values=dat[1:], tags=baris)
                     i+=1
 
-                self.trvTabel.tag_configure("ganjil", background="#FFFFFF")
-                self.trvTabel.tag_configure("genap", background="whitesmoke")                              
+                self.trvTabel.tag_configure("ganjil", background="gainsboro")
+                self.trvTabel.tag_configure("genap", background="floral white")                              
 
         def onMainExport(self):
                 opsi = self.opsicari.get()
