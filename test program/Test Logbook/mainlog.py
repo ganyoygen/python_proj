@@ -269,10 +269,10 @@ class Petugas:
 
                 entTwo = Frame(topFrame)
                 entTwo.grid(row=2,column=1,sticky=W)
-                self.pendTgl = Entry(entTwo, width=12)
+                self.pendTgl = Entry(entTwo, width=15)
                 self.pendTgl.grid(row=2, column=0,sticky=W)
                 # Label(entTwo, text=' ').grid(row=2, column=1, sticky=W,pady=5,padx=10)
-                self.pendJam = Entry(entTwo, width=7)
+                self.pendJam = Entry(entTwo, width=10)
                 self.pendJam.grid(row=2, column=1,sticky=W)               
                 Label(entTwo, text=' ').grid(row=2, column=2, sticky=W,pady=5,padx=10)
                 self.pendStaff = Entry(entTwo, width=12)
@@ -342,10 +342,10 @@ class Petugas:
 
                 entTwo = Frame(topFrame)
                 entTwo.grid(row=2,column=1,sticky=W)
-                self.progTgl = Entry(entTwo, width=12)
+                self.progTgl = Entry(entTwo, width=15)
                 self.progTgl.grid(row=2, column=0,sticky=W)
                 # Label(entTwo, text=' ').grid(row=2, column=1, sticky=W,pady=5,padx=10)
-                self.progJam = Entry(entTwo, width=7)
+                self.progJam = Entry(entTwo, width=10)
                 self.progJam.grid(row=2, column=1,sticky=W)               
                 Label(entTwo, text=' ').grid(row=2, column=2, sticky=W,pady=5,padx=10)
                 self.progStaff = Entry(entTwo, width=12)
@@ -365,10 +365,25 @@ class Petugas:
                 Label(topFrame, text='                  ').grid(row=2,column=2,sticky=W,pady=5,padx=10)
                 self.commitDetail = ScrolledText(topFrame,height=8,width=40)
                 self.commitDetail.grid(row=3, column=5,sticky=W)
-                self.btnCommUpdate = Button(topFrame, text='Update',\
+                
+                entBtnRight = Frame(topFrame)
+                entBtnRight.grid(row=3,column=6,sticky=W)
+                self.btnCommUpdate = Button(entBtnRight, text='Update',\
                                         command=self.onProgCommUpd, width=10,\
                                         relief=RAISED, bd=2, bg="#FC6042", fg="white",activebackground="#444",activeforeground="white" )
-                self.btnCommUpdate.grid(row=3,column=6,sticky=N,pady=10,padx=5)
+                self.btnCommUpdate.grid(row=0,column=0,sticky=N,pady=5,padx=5)
+                self.btnCommReturn = Button(entBtnRight, text='Return',\
+                                        command='self.onProgCommUpd', width=10,\
+                                        relief=RAISED, bd=2, bg="#FC6042", fg="white",activebackground="#444",activeforeground="white" )
+                self.btnCommReturn.grid(row=1,column=0,sticky=N,pady=5,padx=5)
+                self.btnCommTake = Button(entBtnRight, text='Take',\
+                                        command='self.onProgCommUpd', width=10,\
+                                        relief=RAISED, bd=2, bg="#FC6042", fg="white",activebackground="#444",activeforeground="white" )
+                self.btnCommTake.grid(row=2,column=0,sticky=N,pady=5,padx=5)
+                self.btnCommDone = Button(entBtnRight, text='Done',\
+                                        command='self.onProgCommUpd', width=10,\
+                                        relief=RAISED, bd=2, bg="#FC6042", fg="white",activebackground="#444",activeforeground="white" )
+                self.btnCommDone.grid(row=3,column=0,sticky=N,pady=5,padx=5)
 
                 self.btnRefProg = Button(midFrame, text='Refresh',\
                                         command=self.progress_refresh, width=10,\
