@@ -903,7 +903,8 @@ class Petugas:
                         self.commitdate.delete(0, END)
                         self.commitby.delete(0, END)
                         self.commitDetail.delete('1.0', 'end')
-                        self.commitdate.insert(END, data[2])
+                        showdate = str(data[2])[8:10] + '-' + str(data[2])[5:7] +'-' + str(data[2])[:4]+' '+str(data[2])[11:]
+                        self.commitdate.insert(END, showdate)
                         self.commitby.insert(END, data[4])
                         self.commitDetail.insert(END, data[3])
                         self.commitdate.config(state="readonly")
