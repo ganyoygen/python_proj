@@ -3,7 +3,8 @@ from tkinter import *
 from tkinter import ttk
 from tkinter.scrolledtext import ScrolledText
 from tkinter import messagebox
-from configparser import ConfigParser
+# from configparser import ConfigParser
+from mysqlcon import read_db_config
 import mysql.connector
 import datetime
 import time
@@ -425,29 +426,8 @@ class Petugas:
 
                 self.progress_refresh()
 
-        def read_db_config(self,filename='C:\\config.ini', section='mysql'):
-                """ Read database configuration file and return a dictionary object
-                :param filename: name of the configuration file
-                :param section: section of database configuration
-                :return: a dictionary of database parameters
-                """
-                # create parser and read ini configuration file
-                parser = ConfigParser()
-                parser.read(filename)
-
-                # get section, default to mysql
-                db = {}
-                if parser.has_section(section):
-                    items = parser.items(section)
-                    for item in items:
-                        db[item[0]] = item[1]
-                else:
-                    raise Exception('{0} not found in the {1} file'.format(section, filename))
-            
-                return db
-
         def checkwo(self,data):
-                db_config = self.read_db_config()
+                db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
                 sql = ("SELECT * FROM logbook where no_wo LIKE %s")
@@ -464,7 +444,7 @@ class Petugas:
                 con.close()
 
         def checkifca(self,data):
-                db_config = self.read_db_config()
+                db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
                 sql = ("SELECT * FROM logbook where no_ifca LIKE %s")
@@ -489,7 +469,7 @@ class Petugas:
 
         def search_data(self,opsi,data):
                 try:
-                    db_config = self.read_db_config()
+                    db_config = read_db_config()
                     con = mysql.connector.connect(**db_config)
                     cur = con.cursor()
                     cur.execute(opsi, data)
@@ -525,7 +505,7 @@ class Petugas:
                         self.search_data(sql,val)
 
         def auto_wo(self):
-                db_config = self.read_db_config()
+                db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
                 sql = "SELECT no_wo FROM logbook"
@@ -555,7 +535,7 @@ class Petugas:
 
         def auto_ifca(self):
                 tipe = str(btnselect.get())
-                db_config = self.read_db_config()
+                db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
                 sql = "SELECT no_ifca FROM logbook WHERE no_ifca LIKE %s"
@@ -578,7 +558,7 @@ class Petugas:
 
         def pending_table(self):
                 try:
-                    db_config = self.read_db_config()
+                    db_config = read_db_config()
                     con = mysql.connector.connect(**db_config)
                     cur = con.cursor()
                     sql = "SELECT * FROM logbook WHERE status_ifca LIKE %s"
@@ -621,7 +601,7 @@ class Petugas:
 
         def progress_table(self):
                 try:
-                    db_config = self.read_db_config()
+                    db_config = read_db_config()
                     con = mysql.connector.connect(**db_config)
                     cur = con.cursor()
                 #     sql = "SELECT * FROM logbook WHERE status_ifca LIKE %s"
@@ -665,7 +645,7 @@ class Petugas:
 
         def commited_table(self,data):
                 try:
-                    db_config = self.read_db_config()
+                    db_config = read_db_config()
                     con = mysql.connector.connect(**db_config)
                     cur = con.cursor()
                     sql = "SELECT * FROM onprogress WHERE no_ifca LIKE %s"
@@ -752,7 +732,7 @@ class Petugas:
                         val = ("%{}%".format(cari),)
                 
                 try:
-                    db_config = self.read_db_config()
+                    db_config = read_db_config()
                     con = mysql.connector.connect(**db_config)
                     cur = con.cursor()
                     cur.execute(sql,val)
@@ -797,7 +777,7 @@ class Petugas:
                         messagebox.showwarning(title="Peringatan",message="No IFCA Kosong.")
                         self.entIfca.focus_set()
                 else:
-                        db_config = self.read_db_config()
+                        db_config = read_db_config()
                         con = mysql.connector.connect(**db_config)
                         cur = con.cursor()
                         setreceived = True
@@ -819,7 +799,7 @@ class Petugas:
                         self.entrySet("pendclear")
                         self.pendIfca.insert(END, ifca_value)
                         
-                        db_config = self.read_db_config()
+                        db_config = read_db_config()
                         con = mysql.connector.connect(**db_config)
                         cur = con.cursor()
                         # sql = "SELECT no_wo, no_ifca, date_create, time_create, unit, work_req, staff, work_act, FROM logbook WHERE no_ifca = %s"
@@ -856,7 +836,7 @@ class Petugas:
                         self.entrySet("progclear")
 
                         self.progIfca.insert(END, ifca_value)
-                        db_config = self.read_db_config()
+                        db_config = read_db_config()
                         con = mysql.connector.connect(**db_config)
                         cur = con.cursor()
                         # sql = "SELECT no_wo, no_ifca, date_create, time_create, unit, work_req, staff, work_act, FROM logbook WHERE no_ifca = %s"
@@ -890,7 +870,7 @@ class Petugas:
                         comDate = curItem['values'][0]
                         valIfca = self.progIfca.get()
 
-                        db_config = self.read_db_config()
+                        db_config = read_db_config()
                         con = mysql.connector.connect(**db_config)
                         cur = con.cursor()
                         sql = "SELECT * FROM onprogress WHERE no_ifca LIKE %s AND date_update = %s"
@@ -1026,7 +1006,7 @@ class Petugas:
 
                         self.entrySet("mainclear")
 
-                        db_config = self.read_db_config()
+                        db_config = read_db_config()
                         con = mysql.connector.connect(**db_config)
                         cur = con.cursor()
                         # sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, date_done, time_done, work_act, time_create, status_ifca FROM logbook WHERE no_ifca = %s"
@@ -1095,7 +1075,7 @@ class Petugas:
                         print('Tidak ada data di tabel')
 
         def onDelete(self):
-                db_config = self.read_db_config()
+                db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
                 self.entWo.config(state="normal")
@@ -1155,7 +1135,7 @@ class Petugas:
                 os.system("cls")
 
         def onSave(self):
-                db_config = self.read_db_config()
+                db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
  
                 cWo = self.entWo.get()
@@ -1197,7 +1177,7 @@ class Petugas:
                         self.onClear()
 
         def onUpdate(self):
-                db_config = self.read_db_config()
+                db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
                 #panel kiri
@@ -1240,7 +1220,7 @@ class Petugas:
                 self.onSearch()
 
         def onAccPending(self):
-                db_config = self.read_db_config()
+                db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
                 getIfca = self.pendIfca.get()
@@ -1266,7 +1246,7 @@ class Petugas:
                         self.pending_refresh()
 
         def onProgCommUpd(self):
-                db_config = self.read_db_config()
+                db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
                 getIfca = self.progIfca.get()
