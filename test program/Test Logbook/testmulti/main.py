@@ -4,7 +4,6 @@ https://stackoverflow.com/questions/36032712/ttk-notebook-share-data-between-imp
 import tkinter as tk
 from tkinter import ttk
 from page1 import Page1
-from page2 import Page2
 from page3 import Page3
 
 class Example(tk.Frame):
@@ -15,14 +14,11 @@ class Example(tk.Frame):
         self.notebook.pack(fill="both", expand=True)
 
         page1 = Page1(self.notebook)
-        page2 = Page2(self.notebook)
         page3 = Page3(self.notebook)
         self.notebook.add(page1, text="Page 1")
-        self.notebook.add(page2, text="Page 2")
         self.notebook.add(page3, text="Page 3")
 
 if __name__ == "__main__":
     root = tk.Tk()
-    Example(root).pack()
-    # Example(root).pack(fill="both", expand=True)
+    Example(root).pack(fill="both", expand=True)
     root.mainloop()
