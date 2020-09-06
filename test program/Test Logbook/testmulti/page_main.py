@@ -59,7 +59,9 @@ class PageMain(tk.Frame):
         tglbuat.grid(row=3,column=2,sticky=W)
         self.entTglbuat = CustomDateEntry(tglbuat, width=10, locale='en_UK')
         self.entTglbuat.grid(row=1, column=0,sticky=W)
-        self.entJambuat = Entry(tglbuat, width=7)
+        vcmd = (self.register(self.onValidate), '%d', '%s', '%S')
+        self.entJambuat = Entry(tglbuat, validate="key", validatecommand=vcmd, width=7, justify=tk.CENTER)
+        self.entJambuat.bind("<KeyRelease>", self.hour_24)
         self.entJambuat.grid(row=1, column=1,sticky=W)
         # self.entBulan = Entry(tglbuat, width=5)
         # self.entBulan.grid(row=1, column=1,sticky=W,padx=2)
@@ -191,6 +193,42 @@ class PageMain(tk.Frame):
         self.trvTabel.configure(xscrollcommand=sbHor.set)
 
         self.onClear()
+
+    def onValidate(self, d, s, S):
+        # if it's deleting return True
+        if d == "0":
+            return True
+        # Allow only digit, ":" and check the length of the string
+        if ((S == ":" and len(s) != 2) or (not S.isdigit() and
+                S != ":") or (len(s) == 3 and int(S) > 5) or len(s) > 4):
+            self.bell()
+            return False
+         
+        return True
+ 
+    def hour_24(self, event):
+        """
+        Check and build the correct format hour: hh:mm in 24 format
+        it keep in mind the 0x, 1x and 2x hours and the max minutes can be 59
+        """
+ 
+        # get the object that triggered the event
+        s = event.widget
+        # if delete a char do return ok or delete the char ":" and the previous number
+        if len(s.get()) == 2 and event.keysym=="BackSpace":
+            s.delete(len(s.get())-1, tk.END)
+        if event.keysym=="BackSpace":
+            return
+         
+        # check the hour format and add : between hours and minutes
+        if len(s.get()) == 1 and int(s.get()) > 2:
+            s.insert(0, "0")
+            s.insert("end", ":")
+        elif len(s.get()) == 2 and int(s.get()) < 24:
+            s.insert(2, ":")
+        elif len(s.get()) >= 2 and s.get()[2:3] != ":":
+            self.bell()
+            s.delete(1, tk.END)
 
     def entrySet(self,opsi):
         # 1 on doubleclick main entry, normal
@@ -503,10 +541,11 @@ class PageMain(tk.Frame):
             self.entTglbuat.insert(END, data[3])
             getTgl = self.entTglbuat.get() #dari mysql YYYY-MM-DD
             #balikin menjadi DD-MM-YYYY
-            showtgl = str(getTgl)[8:] + '-' + str(getTgl)[5:7] +'-' + str(getTgl)[:4]
+            showtgl = str(getTgl)[8:] +'-'+ str(getTgl)[5:7] +'-'+ str(getTgl)[:4]
             self.entTglbuat.delete(0, END)
             self.entTglbuat.insert(END, showtgl)
-            self.entJambuat.insert(END, data[13])
+            # self.entJambuat.insert(END, data[13])
+            self.entJambuat.insert(END, str(data[13])[:2]+str(data[13])[3:])
             self.entUnit.insert(END, data[4])
             self.entWorkReq.insert(END, data[5])
             self.entStaff.insert(END, data[6])

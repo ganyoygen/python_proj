@@ -1,6 +1,3 @@
-'''
-https://stackoverflow.com/questions/36032712/ttk-notebook-share-data-between-imported-tabs
-'''
 import os
 import tkinter
 from tkinter import *
@@ -8,8 +5,10 @@ from tkinter import ttk
 from page_main import PageMain
 from page_pending import Pending
 from page_progress import PageProg
+from ttkthemes import ThemedTk # make sure to pip install ttkthemes
 
-root = Tk()
+# root = Tk()
+root = ThemedTk(theme='clearlooks')
 btnselect = StringVar(value="TN")
 class WindowDraggable():
     def __init__(self, label):
