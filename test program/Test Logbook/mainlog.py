@@ -741,6 +741,7 @@ class Petugas:
                             return # stop aja karena kosong
                 
                     directory = filedialog.asksaveasfilename(initialdir = "/", \
+                        initialfile = cari, \
                         defaultextension='.csv', \
                         title="Save file Export", \
                         filetypes=[("Excel CSV", "*.csv"),("All", "*.*")])
