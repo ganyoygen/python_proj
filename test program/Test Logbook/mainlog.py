@@ -738,14 +738,20 @@ class Petugas:
                     cur.execute(sql,val)
                     results = cur.fetchall()
                     if len(results) <= 0:
+                            cur.close()
+                            con.close()
                             return # stop aja karena kosong
                 
-                    directory = filedialog.asksaveasfilename(initialdir = "/", \
+                    directory = filedialog.asksaveasfilename(initialdir = os.getcwd(), \
                         initialfile = cari, \
                         defaultextension='.csv', \
                         title="Save file Export", \
                         filetypes=[("Excel CSV", "*.csv"),("All", "*.*")])
-                    filename=open(directory,'w',newline='')
+                    try:
+                        filename=open(directory,'w',newline='')
+                    except:
+                        print("export aborted by user")
+                        return 
                     cWrite=csv.writer(filename)
                     cWrite.writerow(["Index","No WO","No IFCA","Tanggal Buat","Unit",\
                             "Work Request","Staff","Work Action","Tanggal Selesai",\
@@ -766,14 +772,6 @@ class Petugas:
                 except mysql.connector.Error as err:
                     messagebox.showerror(title="Error", \
                         message="SQL Log: {}".format(err))
-                '''
-                filename=open('test.csv','w')
-                cWrite=csv.writer(filename)
-
-                for dat in data:
-                        cWrite.writerow(dat)
-                filename.close()
-                '''
 
         def onReceived(self):
                 cIfca = self.entIfca.get()
@@ -1279,6 +1277,7 @@ class Petugas:
 def main():
     os.system("cls")
     root.title("Project Logbook by GanyoyGen")
+    root.iconbitmap(str(os.getcwd()+"\\"+"mainicon.ico"))
     Petugas(root)
     root.mainloop()
 main()
