@@ -65,7 +65,7 @@ class MainLog:
 def main():
     os.system("cls")
     root.title("Project Logbook by GanyoyGen")
-    # root.iconbitmap(str(os.getcwd()+"\\"+"mainicon.ico"))
+    root.iconbitmap(str(os.getcwd()+"\\"+"mainicon.ico"))
     MainLog(root)
     root.mainloop()
 main()

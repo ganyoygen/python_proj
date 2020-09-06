@@ -24,11 +24,11 @@ class PageProg(tk.Frame):
 
     def komponenProgress(self):
         # tab progress
-        topFrame = Frame(self.tabProgress)
+        topFrame = Frame(self)
         topFrame.pack(side=TOP,fill=X)
-        midFrame = Frame(self.tabProgress)
+        midFrame = Frame(self)
         midFrame.pack(side=TOP, fill=X)
-        botFrame = Frame(self.tabProgress)
+        botFrame = Frame(self)
         botFrame.pack(expand=YES, side=TOP,fill=Y)
         
         Label(topFrame, text='').grid(row=0, column=0)
@@ -73,26 +73,29 @@ class PageProg(tk.Frame):
         entBtnRight = Frame(topFrame)
         entBtnRight.grid(row=3,column=6,sticky=W)
         self.btnCommUpdate = Button(entBtnRight, text='Update',\
-                                command=self.onProgCommUpd, width=10,\
-                                relief=RAISED, bd=2, bg="#FC6042", fg="white",activebackground="#444",activeforeground="white" )
+            command=self.onProgCommUpd, width=10,\
+            relief=RAISED, bd=2, bg="#FC6042", fg="white",\
+            activebackground="#444",activeforeground="white" )
         self.btnCommUpdate.grid(row=0,column=0,sticky=N,pady=5,padx=5)
         self.btnCommReturn = Button(entBtnRight, text='Return',\
-                                command='self.onProgCommUpd', width=10,\
-                                relief=RAISED, bd=2, bg="#FC6042", fg="white",activebackground="#444",activeforeground="white" )
+            command='self.onProgCommUpd', width=10,\
+            relief=RAISED, bd=2, bg="#FC6042", fg="white",\
+            activebackground="#444",activeforeground="white" )
         self.btnCommReturn.grid(row=1,column=0,sticky=N,pady=5,padx=5)
         self.btnCommTake = Button(entBtnRight, text='Take',\
-                                command='self.onProgCommUpd', width=10,\
-                                relief=RAISED, bd=2, bg="#FC6042", fg="white",activebackground="#444",activeforeground="white" )
+            command='self.onProgCommUpd', width=10,\
+            relief=RAISED, bd=2, bg="#FC6042", fg="white",\
+            activebackground="#444",activeforeground="white" )
         self.btnCommTake.grid(row=2,column=0,sticky=N,pady=5,padx=5)
         self.btnCommDone = Button(entBtnRight, text='Done',\
-                                command='self.onProgCommUpd', width=10,\
-                                relief=RAISED, bd=2, bg="#FC6042", fg="white",#
-                                activebackground="#444",activeforeground="white" )
+            command='self.onProgCommUpd', width=10,\
+            relief=RAISED, bd=2, bg="#FC6042", fg="white",#
+            activebackground="#444",activeforeground="white" )
         self.btnCommDone.grid(row=3,column=0,sticky=N,pady=5,padx=5)
         self.btnRefProg = Button(midFrame, text='Refresh',\
-                                command=self.progress_refresh, width=10,\
-                                relief=RAISED, bd=2, bg="#667", fg="white",#
-                                activebackground="#444",activeforeground="white" )
+            command=self.progress_refresh, width=10,\
+            relief=RAISED, bd=2, bg="#667", fg="white",#
+            activebackground="#444",activeforeground="white" )
         self.btnRefProg.grid(row=1,column=0,pady=10,padx=5)
                 
         listprog = Frame(botFrame)
@@ -129,3 +132,216 @@ class PageProg(tk.Frame):
         self.tabelcomm.configure(xscrollcommand=sbHor.set)
         
         self.progress_refresh()
+    
+    def entrySet(self,opsi):
+        # 3 progress entry clear
+        if opsi == "progclear":
+            self.progWo.config(state="normal")
+            self.progIfca.config(state="normal")
+            self.progUnit.config(state="normal")
+            self.progTgl.config(state="normal")
+            self.progJam.config(state="normal")
+            self.progStaff.config(state="normal")
+            self.progWorkReq.config(state="normal")
+            self.commitdate.config(state="normal")
+            self.commitby.config(state="normal")
+            self.commitDetail.config(state="normal")
+            self.progWo.delete(0, END)
+            self.progIfca.delete(0, END)
+            self.progUnit.delete(0, END)
+            self.progTgl.delete(0, END)
+            self.progJam.delete(0, END)
+            self.progStaff.delete(0, END)
+            self.commitdate.delete(0, END)
+            self.commitby.delete(0, END)
+            self.commitDetail.delete('1.0', 'end')
+            self.progWorkReq.delete('1.0', 'end')
+        if opsi == "progread":
+            self.progWo.config(state="readonly")
+            self.progIfca.config(state="readonly")
+            self.progUnit.config(state="readonly")
+            self.progTgl.config(state="readonly")
+            self.progJam.config(state="readonly")
+            self.progStaff.config(state="readonly")
+            self.progWorkReq.config(state="disable")
+            # self.commitDetail.config(state="disable")
+        # 3 #
+
+    def progress_table(self):
+        try:
+            db_config = read_db_config()
+            con = mysql.connector.connect(**db_config)
+            cur = con.cursor()
+        #     sql = "SELECT * FROM logbook WHERE status_ifca LIKE %s"
+            sql = "SELECT no_wo, no_ifca, unit FROM logbook WHERE status_ifca LIKE %s OR status_ifca LIKE %s OR status_ifca LIKE %s"
+            onprogr = "ONPROGRESS"
+            sendeng = "SENDTOENG"
+            recfrcs = "RECFROMCS"
+            val = ("%{}%".format(onprogr),"%{}%".format(sendeng),"%{}%".format(recfrcs))
+            cur.execute(sql, val)
+            results = cur.fetchall()
+            self.tabelProg.delete(*self.tabelProg.get_children()) #refresh, hapus dulu tabel lama
+            for kolom in kolomProgIfca:
+                self.tabelProg.heading(kolom,text=kolom)
+            # self.tabelProg.column("No", width=10,anchor="w")
+            self.tabelProg.column("WO", width=50,anchor="w")
+            self.tabelProg.column("IFCA", width=80,anchor="w")
+            self.tabelProg.column("UNIT", width=80,anchor="w")
+            
+            i=0
+            for dat in results: 
+                if(i%2):
+                    baris="genap"
+                else:
+                    baris="ganjil"
+                #tampilkan hanya wo ifca unit 
+                # self.tabelProg.insert('', 'end', values=dat[1]+" "+dat[2]+" "+dat[4], tags=baris)
+                self.tabelProg.insert('', 'end', values=dat, tags=baris)
+                i+=1
+            self.tabelProg.tag_configure("ganjil", background="gainsboro")
+            self.tabelProg.tag_configure("genap", background="floral white")
+            cur.close()
+            con.close()
+        
+        except mysql.connector.Error as err:
+            messagebox.showerror(title="Error", \
+                message="SQL Log: {}".format(err))                           
+
+    def commited_table(self,data):
+        try:
+            db_config = read_db_config()
+            con = mysql.connector.connect(**db_config)
+            cur = con.cursor()
+            sql = "SELECT * FROM onprogress WHERE no_ifca LIKE %s"
+        #     data = "TN10020352"
+            val = ("%{}%".format(data),)
+            cur.execute(sql, val)
+            results = cur.fetchall()
+            self.tabelcomm.delete(*self.tabelcomm.get_children()) #refresh, hapus dulu tabel lama
+            for kolom in kolomCommIfca:
+                self.tabelcomm.heading(kolom,text=kolom)
+            # self.tabelcomm.column("No", width=10,anchor="w")
+            self.tabelcomm.column("TANGGAL", width=110,anchor="w")
+            self.tabelcomm.column("UPDATE", width=200,anchor="w")
+            self.tabelcomm.column("OLEH", width=80,anchor="w")
+            self.tabelcomm.column("DEPT", width=80,anchor="w")
+            
+            i=0
+            for dat in results: 
+                if(i%2):
+                    baris="genap"
+                else:
+                    baris="ganjil"
+                #tampilkan mulai dari tanggal
+                self.tabelcomm.insert('', 'end', values=dat[2:], tags=baris)
+                i+=1
+            self.tabelcomm.tag_configure("ganjil", background="gainsboro")
+            self.tabelcomm.tag_configure("genap", background="floral white")
+            cur.close()
+            con.close()
+        
+        except mysql.connector.Error as err:
+            messagebox.showerror(title="Error", \
+                message="SQL Log: {}".format(err))                           
+
+    def progress_detail(self, event):
+        try:
+                curItem = self.tabelProg.item(self.tabelProg.focus())
+                ifca_value = curItem['values'][1]
+                self.commited_table(ifca_value)
+                self.entrySet("progclear")
+                self.progIfca.insert(END, ifca_value)
+                db_config = read_db_config()
+                con = mysql.connector.connect(**db_config)
+                cur = con.cursor()
+                # sql = "SELECT no_wo, no_ifca, date_create, time_create, unit, work_req, staff, work_act, FROM logbook WHERE no_ifca = %s"
+                sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, work_act, time_create FROM logbook WHERE no_ifca = %s"
+                cur.execute(sql,(ifca_value,))
+                data = cur.fetchone()
+                self.progWo.insert(END, data[0])
+                #TGL buat
+                self.progTgl.insert(END, data[2])
+                getTgl = self.progTgl.get() #dari mysql YYYY-MM-DD
+                #balikin menjadi DD-MM-YYYY
+                showtgl = str(getTgl)[8:] + '-' + str(getTgl)[5:7] +'-' + str(getTgl)[:4]
+                self.progTgl.delete(0, END)
+                self.progTgl.insert(END, showtgl)
+                self.progJam.insert(END, data[7])
+                self.progUnit.insert(END, data[3])
+                self.progWorkReq.insert(END, data[4])
+                self.progStaff.insert(END, data[5])
+                self.entrySet("progread")
+                self.commitdate.config(state="disable")
+                self.btnCommUpdate.config(state="normal")
+                cur.close()
+                con.close()            
+        except:
+                print('Tidak ada data di tabel')
+
+    def prog_comm_detail(self, event):
+        try:
+                curItem = self.tabelcomm.item(self.tabelcomm.focus())
+                comDate = curItem['values'][0]
+                valIfca = self.progIfca.get()
+            
+                db_config = read_db_config()
+                con = mysql.connector.connect(**db_config)
+                cur = con.cursor()
+                sql = "SELECT * FROM onprogress WHERE no_ifca LIKE %s AND date_update = %s"
+                cur.execute(sql,(valIfca,comDate))
+                data = cur.fetchone()
+                self.commitdate.config(state="normal")
+                self.commitby.config(state="normal")
+                self.commitDetail.config(state="normal")
+                self.commitdate.delete(0, END)
+                self.commitby.delete(0, END)
+                self.commitDetail.delete('1.0', 'end')
+                showdate = str(data[2])[8:10] + '-' + str(data[2])[5:7] +'-' + str(data[2])[:4]+' '+str(data[2])[11:]
+                self.commitdate.insert(END, showdate)
+                self.commitby.insert(END, data[4])
+                self.commitDetail.insert(END, data[3])
+                self.commitdate.config(state="readonly")
+                self.commitby.config(state="readonly")
+                self.commitDetail.config(state="disable")
+                self.btnCommUpdate.config(state="disable")
+                cur.close()
+                con.close()
+        except:
+                print('Tidak ada data di tabel')
+
+    def progress_refresh(self):
+        self.btnCommUpdate.config(state="disable")
+        self.entrySet("progclear")
+        self.tabelcomm.delete(*self.tabelcomm.get_children()) #refresh, hapus dulu tabel lama
+        self.progress_table()
+        #########
+
+    def onProgCommUpd(self):
+        try:
+            db_config = read_db_config()
+            con = mysql.connector.connect(**db_config)
+            cur = con.cursor()
+            getIfca = self.progIfca.get()
+            getUsrUpd = self.commitby.get()
+            getcommit = self.commitDetail.get(1.0,END) # ('1.0', 'end')
+            from datetime import datetime
+            getTime = datetime.now()
+            
+            if len(getUsrUpd.strip()) == 0: # .strip memastikan space/tab termasuk len 0
+                    messagebox.showwarning(title="Peringatan",message="Siapa yang update commit?")
+                    self.commitby.focus_set()
+            elif len(getcommit.strip()) == 0: # .strip memastikan space/tab termasuk len 0
+                    messagebox.showwarning(title="Peringatan",message="Silahkan isi perubahan terlebih dahulu")
+                    self.commitDetail.focus_set()
+            else:
+                    sql = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
+                    "VALUES(%s,%s,%s,%s,%s)"
+                    cur.execute(sql,(getIfca,getTime,getcommit,getUsrUpd.upper(),""))
+                    messagebox.showinfo(title="Informasi",message="Update telah tersimpan oleh {}.".format(getUsrUpd))
+                    self.progress_detail(self)
+            con.commit()
+            cur.close()
+            con.close()
+        except mysql.connector.Error as err:
+            messagebox.showerror(title="Error", \
+                message="SQL Log: {}".format(err))
