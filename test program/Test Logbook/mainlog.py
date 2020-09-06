@@ -427,6 +427,7 @@ class Petugas:
                 self.progress_refresh()
 
         def checkwo(self,data):
+            try:
                 db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
@@ -442,8 +443,12 @@ class Petugas:
                                 return "tolak"
                 cur.close()
                 con.close()
+            except mysql.connector.Error as err:
+                messagebox.showerror(title="Error", \
+                    message="SQL Log: {}".format(err))
 
         def checkifca(self,data):
+            try:
                 db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
@@ -457,6 +462,9 @@ class Petugas:
                                 return "tolak"
                 cur.close()
                 con.close()
+            except mysql.connector.Error as err:
+                messagebox.showerror(title="Error", \
+                    message="SQL Log: {}".format(err))
 
         def checktgl(self,data):
                 if len(str(data)) == 10:
@@ -505,6 +513,7 @@ class Petugas:
                         self.search_data(sql,val)
 
         def auto_wo(self):
+            try:
                 db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
@@ -532,8 +541,12 @@ class Petugas:
                 self.entWo.config(state="normal")
                 cur.close()
                 con.close()
+            except mysql.connector.Error as err:
+                messagebox.showerror(title="Error", \
+                    message="SQL Log: {}".format(err))
 
         def auto_ifca(self):
+            try:
                 tipe = str(btnselect.get())
                 db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
@@ -555,6 +568,9 @@ class Petugas:
                 self.entIfca.config(state="normal")
                 cur.close()
                 con.close()
+            except mysql.connector.Error as err:
+                messagebox.showerror(title="Error", \
+                    message="SQL Log: {}".format(err))
 
         def pending_table(self):
                 try:
@@ -779,6 +795,7 @@ class Petugas:
                         messagebox.showwarning(title="Peringatan",message="No IFCA Kosong.")
                         self.entIfca.focus_set()
                 else:
+                    try:
                         db_config = read_db_config()
                         con = mysql.connector.connect(**db_config)
                         cur = con.cursor()
@@ -792,7 +809,10 @@ class Petugas:
                                     message="Wo {} sudah diterima.".format(cIfca))
                         con.commit()
                         cur.close()
-                        con.close()              
+                        con.close()
+                    except mysql.connector.Error as err:
+                        messagebox.showerror(title="Error", \
+                            message="SQL Log: {}".format(err))          
 
         def pending_detail(self, event):
                 try:
@@ -1077,6 +1097,7 @@ class Petugas:
                         print('Tidak ada data di tabel')
 
         def onDelete(self):
+            try:
                 db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
@@ -1091,6 +1112,9 @@ class Petugas:
                 con.commit()
                 cur.close()
                 con.close()
+            except mysql.connector.Error as err:
+                messagebox.showerror(title="Error", \
+                    message="SQL Log: {}".format(err))
 
         def pending_refresh(self):
                 self.btnAccept.config(state="disable")
@@ -1137,6 +1161,7 @@ class Petugas:
                 os.system("cls")
 
         def onSave(self):
+            try:
                 db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
  
@@ -1177,8 +1202,12 @@ class Petugas:
                         cur.close()
                         con.close()
                         self.onClear()
+            except mysql.connector.Error as err:
+                messagebox.showerror(title="Error", \
+                    message="SQL Log: {}".format(err))
 
         def onUpdate(self):
+            try:
                 db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
@@ -1220,8 +1249,12 @@ class Petugas:
                 cur.close()
                 con.close()
                 self.onSearch()
+            except mysql.connector.Error as err:
+                messagebox.showerror(title="Error", \
+                    message="SQL Log: {}".format(err))
 
         def onAccPending(self):
+            try:
                 db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
@@ -1246,8 +1279,12 @@ class Petugas:
                         con.close()
                         messagebox.showinfo(title="Informasi",message="WO sudah diterima oleh {}.".format(getAccBy))
                         self.pending_refresh()
+            except mysql.connector.Error as err:
+                messagebox.showerror(title="Error", \
+                    message="SQL Log: {}".format(err))
 
         def onProgCommUpd(self):
+            try:
                 db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
@@ -1272,6 +1309,9 @@ class Petugas:
                 con.commit()
                 cur.close()
                 con.close()
+            except mysql.connector.Error as err:
+                messagebox.showerror(title="Error", \
+                    message="SQL Log: {}".format(err))
 
 
 def main():
