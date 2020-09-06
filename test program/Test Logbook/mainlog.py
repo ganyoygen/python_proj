@@ -744,14 +744,17 @@ class Petugas:
                         defaultextension='.csv', \
                         title="Save file Export", \
                         filetypes=[("Excel CSV", "*.csv"),("All", "*.*")])
-                    filename=open(directory,'w')
+                    filename=open(directory,'w',newline='')
                     cWrite=csv.writer(filename)
                     cWrite.writerow(["Index","No WO","No IFCA","Tanggal Buat","Unit",\
                             "Work Request","Staff","Work Action","Tanggal Selesai",\
                             "Jam Selesai","Diterima","Penerima","Tanggal Diterima",\
                             "Jam Buat","Status WO"])
+                    i=0
                     for dat in results:
                         cWrite.writerow(dat)
+                        i+=1
+                    cWrite.writerow(["Save to",directory,str(i),"record(s)"])
                     filename.close()
                     cur.close()
                     con.close()
