@@ -10,6 +10,7 @@ from ttkthemes import ThemedTk # make sure to pip install ttkthemes
 # root = Tk()
 root = ThemedTk(theme='clearlooks')
 btnselect = StringVar(value="TN")
+statwosel = StringVar(value="PEND")
 class WindowDraggable():
     def __init__(self, label):
             self.label = label
@@ -53,7 +54,7 @@ class MainLog:
 
         page1 = PageMain(self.notebook,btnselect) # untuk radiobutton tambah positional di __init__() Class PageMain
         page2 = Pending(self.notebook)
-        page3 = PageProg(self.notebook)
+        page3 = PageProg(self.notebook,statwosel)
         self.notebook.add(page1, text="Main")
         self.notebook.add(page2, text="Pending")
         self.notebook.add(page3, text="Progress")

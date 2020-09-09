@@ -15,8 +15,9 @@ kolomProgIfca = ("WO","IFCA","UNIT")
 kolomCommIfca = ("TANGGAL","UPDATE","OLEH","DEPT")
 
 class PageProg(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent,statwosel):
         tk.Frame.__init__(self, parent)
+        self.statwosel = statwosel
 
         # label = tk.Label(self, text="This is page 2")
         # label.pack(fill ="both", expand=True, padx=20, pady=10)
@@ -96,8 +97,22 @@ class PageProg(tk.Frame):
             command=self.progress_refresh, width=10,\
             relief=RAISED, bd=2, bg="#667", fg="white",#
             activebackground="#444",activeforeground="white" )
-        self.btnRefProg.grid(row=1,column=0,pady=10,padx=5)
-                
+        self.btnRefProg.grid(row=0,column=0,pady=10,padx=5)
+        
+        btnselect = Frame(midFrame)
+        btnselect.grid(row=1,column=0,sticky=W)
+        self.rstswo = ttk.Radiobutton(btnselect,text="PENDING",variable=self.statwosel,value="PEND",command=self.progress_refresh)
+        self.rstswo.grid(row=0, column=0,sticky=W)
+        self.rstswo = ttk.Radiobutton(btnselect,text="PROGRESS",variable=self.statwosel,value="PROG",command=self.progress_refresh)
+        Label(btnselect, text="     ").grid(row=0,column=1,sticky=E)
+        self.rstswo.grid(row=0, column=2,sticky=W)
+        self.rstswo = ttk.Radiobutton(btnselect,text="RETURN",variable=self.statwosel,value="RETU",command=self.progress_refresh)
+        Label(btnselect, text="     ").grid(row=0,column=3,sticky=E)
+        self.rstswo.grid(row=0, column=4,sticky=W)
+        self.rstswo = ttk.Radiobutton(btnselect,text="TAKE",variable=self.statwosel,value="TAKE",command=self.progress_refresh)
+        Label(btnselect, text="     ").grid(row=0,column=5,sticky=E)
+        self.rstswo.grid(row=0, column=6,sticky=W)
+
         listprog = Frame(botFrame)
         listprog.grid(row=1,column=0,sticky=W)
         listcomm = Frame(botFrame)
@@ -167,17 +182,18 @@ class PageProg(tk.Frame):
             # self.commitDetail.config(state="disable")
         # 3 #
 
-    def progress_table(self):
+    def progress_table(self,opsi):
+        '''
+        opsi = <status WO>
+        '''
         try:
             db_config = read_db_config()
             con = mysql.connector.connect(**db_config)
             cur = con.cursor()
         #     sql = "SELECT * FROM logbook WHERE status_ifca LIKE %s"
-            sql = "SELECT no_wo, no_ifca, unit FROM logbook WHERE status_ifca LIKE %s OR status_ifca LIKE %s OR status_ifca LIKE %s"
-            onprogr = "ONPROGRESS"
-            sendeng = "SENDTOENG"
-            recfrcs = "RECFROMCS"
-            val = ("%{}%".format(onprogr),"%{}%".format(sendeng),"%{}%".format(recfrcs))
+            # sql = "SELECT no_wo, no_ifca, unit FROM logbook WHERE status_ifca LIKE %s OR status_ifca LIKE %s OR status_ifca LIKE %s"
+            sql = "SELECT no_wo, no_ifca, unit FROM logbook WHERE status_ifca LIKE %s"
+            val = ("%{}%".format(opsi),)
             cur.execute(sql, val)
             results = cur.fetchall()
             self.tabelProg.delete(*self.tabelProg.get_children()) #refresh, hapus dulu tabel lama
@@ -222,7 +238,7 @@ class PageProg(tk.Frame):
                 self.tabelcomm.heading(kolom,text=kolom)
             # self.tabelcomm.column("No", width=10,anchor="w")
             self.tabelcomm.column("TANGGAL", width=110,anchor="w")
-            self.tabelcomm.column("UPDATE", width=200,anchor="w")
+            self.tabelcomm.column("UPDATE", width=300,anchor="w")
             self.tabelcomm.column("OLEH", width=80,anchor="w")
             self.tabelcomm.column("DEPT", width=80,anchor="w")
             
@@ -255,7 +271,7 @@ class PageProg(tk.Frame):
                 con = mysql.connector.connect(**db_config)
                 cur = con.cursor()
                 # sql = "SELECT no_wo, no_ifca, date_create, time_create, unit, work_req, staff, work_act, FROM logbook WHERE no_ifca = %s"
-                sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, work_act, time_create FROM logbook WHERE no_ifca = %s"
+                sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, work_act, time_create, status_ifca FROM logbook WHERE no_ifca = %s"
                 cur.execute(sql,(ifca_value,))
                 data = cur.fetchone()
                 self.progWo.insert(END, data[0])
@@ -272,7 +288,8 @@ class PageProg(tk.Frame):
                 self.progStaff.insert(END, data[5])
                 self.entrySet("progread")
                 self.commitdate.config(state="disable")
-                self.btnCommUpdate.config(state="normal")
+                if data[8] == "PENDING": self.btnCommUpdate.config(state="disable")
+                else : self.btnCommUpdate.config(state="normal")
                 cur.close()
                 con.close()            
         except:
@@ -313,7 +330,10 @@ class PageProg(tk.Frame):
         self.btnCommUpdate.config(state="disable")
         self.entrySet("progclear")
         self.tabelcomm.delete(*self.tabelcomm.get_children()) #refresh, hapus dulu tabel lama
-        self.progress_table()
+        tipe = str(self.statwosel.get())
+        if tipe == "PEND": self.progress_table("PENDING")
+        elif tipe == "PROG": self.progress_table("ONPROGRESS")
+        else : pass
         #########
 
     def onProgCommUpd(self):
