@@ -36,7 +36,7 @@ class MainLog:
         self.parent = parent
         self.parent.protocol("WM_DELETE_WINDOWS", self.keluar)
         lebar=950
-        tinggi=600
+        tinggi=620
         setTengahX = (self.parent.winfo_screenwidth()-lebar)//2
         setTengahY = (self.parent.winfo_screenheight()-tinggi)//2
         self.parent.geometry("%ix%i+%i+%i" %(lebar, tinggi,setTengahX, setTengahY))

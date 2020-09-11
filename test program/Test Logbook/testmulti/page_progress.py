@@ -22,53 +22,61 @@ class PageProg(tk.Frame):
         # label = tk.Label(self, text="This is page 2")
         # label.pack(fill ="both", expand=True, padx=20, pady=10)
         self.komponenProgress()
+        self.komponenAtas()
+        self.komponenTengah()
+        self.komponenBawah()
 
     def komponenProgress(self):
         # tab progress
-        topFrame = Frame(self)
-        topFrame.pack(side=TOP,fill=X)
-        midFrame = Frame(self)
-        midFrame.pack(side=TOP, fill=X)
-        botFrame = Frame(self)
-        botFrame.pack(expand=YES, side=TOP,fill=Y)
+        self.topFrame = ttk.Frame(self)
+        self.topFrame.pack(side=TOP,fill=X)
+        self.midFrame = ttk.Frame(self)
+        self.midFrame.pack(side=TOP, fill=X)
+        self.botFrame = ttk.Frame(self)
+        self.botFrame.pack(side=TOP, fill=X)
+        footer = ttk.Frame(self)
+        footer.pack(side=TOP, fill=X)
         
-        Label(topFrame, text='').grid(row=0, column=0)
-        Label(midFrame, text='').grid(row=0, column=0)
+        ttk.Label(self.topFrame, text='').grid(row=0, column=0)
+        ttk.Label(self.midFrame, text='').grid(row=0, column=0)
+        ttk.Label(self.botFrame, text='').grid(row=0, column=0)
+        ttk.Label(footer, text='').grid(row=0, column=0)
         
-        entOne = Frame(topFrame)
+    def komponenAtas(self):
+        entOne = ttk.Frame(self.topFrame)
         entOne.grid(row=1,column=1,sticky=W)
         self.progWo = ttk.Entry(entOne, width=10)
         self.progWo.grid(row=1, column=0,sticky=W)
         # Label(entOne, text=' ').grid(row=1, column=1, sticky=W,pady=5,padx=10)
         self.progIfca = ttk.Entry(entOne, width=15)
         self.progIfca.grid(row=1, column=2,sticky=W)               
-        Label(entOne, text=' ').grid(row=1, column=3, sticky=W,pady=5,padx=10)
+        ttk.Label(entOne, text=' ').grid(row=1, column=3, sticky=W,pady=5,padx=10)
         self.progUnit = ttk.Entry(entOne, width=12)
         self.progUnit.grid(row=1, column=4,sticky=W)
 
-        entTwo = Frame(topFrame)
+        entTwo = ttk.Frame(self.topFrame)
         entTwo.grid(row=2,column=1,sticky=W)
         self.progTgl = ttk.Entry(entTwo, width=15)
         self.progTgl.grid(row=1, column=0,sticky=W)
         # Label(entTwo, text=' ').grid(row=1, column=1, sticky=W,pady=5,padx=10)
         self.progJam = ttk.Entry(entTwo, width=10)
         self.progJam.grid(row=1, column=1,sticky=W)               
-        Label(entTwo, text=' ').grid(row=1, column=2, sticky=W,pady=5,padx=10)
+        ttk.Label(entTwo, text=' ').grid(row=1, column=2, sticky=W,pady=5,padx=10)
         self.progStaff = ttk.Entry(entTwo, width=12)
         self.progStaff.grid(row=1, column=3,sticky=W)
 
-        self.progWorkReq = ScrolledText(topFrame,height=8,width=40)
+        self.progWorkReq = ScrolledText(self.topFrame,height=8,width=40)
         self.progWorkReq.grid(row=3, column=1,sticky=W)
         
-        Label(topFrame, text='     ').grid(row=3,column=2,sticky=W,pady=5,padx=10)
-        self.commitDetail = ScrolledText(topFrame,height=8,width=40)
+        ttk.Label(self.topFrame, text='     ').grid(row=3,column=2,sticky=W,pady=5,padx=10)
+        self.commitDetail = ScrolledText(self.topFrame,height=8,width=40)
         self.commitDetail.grid(row=3, column=3,sticky=W)
 
-        entLeft = Frame(topFrame)
+        entLeft = ttk.Frame(self.topFrame)
         entLeft.grid(row=2,column=3,sticky=W)
         self.commitdate = ttk.Entry(entLeft, width=20)
         self.commitdate.grid(row=1, column=0,sticky=W)
-        Label(entLeft, text='By :').grid(row=1, column=1, sticky=W,pady=5,padx=5)
+        ttk.Label(entLeft, text='By :').grid(row=1, column=1, sticky=W,pady=5,padx=5)
         self.commitby = ttk.Entry(entLeft, width=15)
         self.commitby.grid(row=1, column=2,sticky=W)
 
@@ -78,7 +86,7 @@ class PageProg(tk.Frame):
             activebackground="#444",activeforeground="white" )
         self.btnPendAccp.grid(row=1,column=3,sticky=N,pady=10,padx=5)
         
-        entBtnRight = Frame(topFrame)
+        entBtnRight = ttk.Frame(self.topFrame)
         entBtnRight.grid(row=3,column=4,sticky=W)
         
         self.btnCommUpdate = Button(entBtnRight, text='Update',\
@@ -90,34 +98,38 @@ class PageProg(tk.Frame):
             command=self.onReturnWO, width=10,\
             relief=RAISED, bd=2, bg="#FC6042", fg="white",\
             activebackground="#444",activeforeground="white" )
+        self.btnCommReturn.bind("<Button-3>",self.onReturnWO) # percobaan tooltips
         self.btnCommReturn.grid(row=2,column=0,sticky=N,pady=5,padx=5)
         self.btnCommTake = Button(entBtnRight, text='Take',\
-            command='self.onProgCommUpd', width=10,\
+            command=self.onTakeWO, width=10,\
             relief=RAISED, bd=2, bg="#FC6042", fg="white",\
             activebackground="#444",activeforeground="white" )
+        self.btnCommTake.bind("<Button-3>",self.onTakeWO) # percobaan tooltips
         self.btnCommTake.grid(row=3,column=0,sticky=N,pady=5,padx=5)
         self.btnCommDone = Button(entBtnRight, text='Done',\
-            command='self.onProgCommUpd', width=10,\
+            command='self.onSetDoneWO', width=10,\
             relief=RAISED, bd=2, bg="#FC6042", fg="white",#
             activebackground="#444",activeforeground="white" )
+        self.btnCommDone.bind("<Button-3>",self.onSetDoneWO) # percobaan tooltips
         self.btnCommDone.grid(row=4,column=0,sticky=N,pady=5,padx=5)
         
-        btnselect = Frame(midFrame)
+    def komponenTengah(self):
+        btnselect = ttk.Frame(self.midFrame)
         btnselect.grid(row=1,column=1,sticky=W)
         self.rstswo = ttk.Radiobutton(btnselect,text="PENDING",variable=self.statwosel,value="PEND",command=self.progress_refresh)
         self.rstswo.grid(row=1, column=1,sticky=W)
         self.rstswo = ttk.Radiobutton(btnselect,text="PROGRESS",variable=self.statwosel,value="PROG",command=self.progress_refresh)
-        Label(btnselect, text="     ").grid(row=1,column=2,sticky=E)
+        ttk.Label(btnselect, text="     ").grid(row=1,column=2,sticky=E)
         self.rstswo.grid(row=1, column=3,sticky=W)
         self.rstswo = ttk.Radiobutton(btnselect,text="RETURN",variable=self.statwosel,value="RETU",command=self.progress_refresh)
-        Label(btnselect, text="     ").grid(row=1,column=4,sticky=E)
+        ttk.Label(btnselect, text="     ").grid(row=1,column=4,sticky=E)
         self.rstswo.grid(row=1, column=5,sticky=W)
         self.rstswo = ttk.Radiobutton(btnselect,text="TAKE",variable=self.statwosel,value="TAKE",command=self.progress_refresh)
-        Label(btnselect, text="     ").grid(row=1,column=6,sticky=E)
+        ttk.Label(btnselect, text="     ").grid(row=1,column=6,sticky=E)
         self.rstswo.grid(row=1, column=7,sticky=W)
-        Label(btnselect, text="     ").grid(row=1,column=8,sticky=E)
+        ttk.Label(btnselect, text="     ").grid(row=1,column=8,sticky=E)
 
-        frcaridata = Frame(midFrame)
+        frcaridata = ttk.Frame(self.midFrame)
         frcaridata.grid(row=1,column=2,sticky=E)
 
         self.entcaridata = ttk.Entry(frcaridata, width=15)
@@ -129,19 +141,21 @@ class PageProg(tk.Frame):
             activebackground="#444",activeforeground="white")
         self.btnRefProg.grid(row=1,column=2,pady=5,padx=5)
 
-        listprog = Frame(botFrame)
+    def komponenBawah(self):
+        listprog = ttk.Frame(self.botFrame)
         listprog.grid(row=1,column=0,sticky=W)
-        listcomm = Frame(botFrame)
-        listcomm.grid(row=1,column=1,sticky=W)
+        ttk.Label(self.botFrame, text='     ').grid(row=1,column=1)
+        listcomm = ttk.Frame(self.botFrame)
+        listcomm.grid(row=1,column=2,sticky=W)
 
         #listprogress
-        self.prog_data = Frame(listprog, bd=10)
-        self.prog_data.pack(fill=BOTH, expand=YES)
-        self.tabelProg = ttk.Treeview(self.prog_data, columns=kolomProgIfca,show='headings')
+        # self.prog_data = Frame(listprog, bd=10)
+        # self.prog_data.pack(fill=BOTH, expand=YES)
+        self.tabelProg = ttk.Treeview(listprog, columns=kolomProgIfca,show='headings')
         self.tabelProg.bind("<Double-1>",self.progress_detail)
-        sbVer = ttk.Scrollbar(self.prog_data, orient='vertical',command=self.tabelProg.yview)
+        sbVer = ttk.Scrollbar(listprog, orient='vertical',command=self.tabelProg.yview)
         sbVer.pack(side=RIGHT, fill=Y)
-        sbHor = ttk.Scrollbar(self.prog_data, orient='horizontal',command=self.tabelProg.xview)
+        sbHor = ttk.Scrollbar(listprog, orient='horizontal',command=self.tabelProg.xview)
         sbHor.pack(side=BOTTOM, fill=X)
 
         self.tabelProg.pack(side=TOP, fill=BOTH)
@@ -149,13 +163,13 @@ class PageProg(tk.Frame):
         self.tabelProg.configure(xscrollcommand=sbHor.set)
 
         #listcommited
-        self.comm_data = Frame(listcomm, bd=10)
-        self.comm_data.pack(fill=BOTH, expand=YES)
-        self.tabelcomm = ttk.Treeview(self.comm_data, columns=kolomCommIfca,show='headings')
+        # self.comm_data = Frame(listcomm, bd=10)
+        # self.comm_data.pack(fill=BOTH, expand=YES)
+        self.tabelcomm = ttk.Treeview(listcomm, columns=kolomCommIfca,show='headings')
         self.tabelcomm.bind("<Double-1>",self.prog_comm_detail)
-        sbVer = ttk.Scrollbar(self.comm_data, orient='vertical',command=self.tabelcomm.yview)
+        sbVer = ttk.Scrollbar(listcomm, orient='vertical',command=self.tabelcomm.yview)
         sbVer.pack(side=RIGHT, fill=Y)
-        sbHor = ttk.Scrollbar(self.comm_data, orient='horizontal',command=self.tabelcomm.xview)
+        sbHor = ttk.Scrollbar(listcomm, orient='horizontal',command=self.tabelcomm.xview)
         sbHor.pack(side=BOTTOM, fill=X)
 
         self.tabelcomm.pack(side=TOP, fill=BOTH)
@@ -317,6 +331,10 @@ class PageProg(tk.Frame):
                 elif data[8] == "ONPROGRESS": 
                     self.btnCommUpdate.config(state="normal")
                     self.btnCommReturn.config(state="normal")
+                elif data[8] == "RETURNEDCS": 
+                    self.btnCommTake.config(state="normal")
+                elif data[8] == "TAKENBYENG": 
+                    self.btnCommDone.config(state="normal")
                 else : pass
                 self.commitby.focus_set()
                 cur.close()
@@ -349,9 +367,7 @@ class PageProg(tk.Frame):
                 self.commitdate.config(state="readonly")
                 self.commitby.config(state="readonly")
                 self.commitDetail.config(state="disable")
-                self.btnCommUpdate.config(state="disable")
-                self.btnPendAccp.config(state="disable")
-                self.btnCommReturn.config(state="disable")
+                self.entrySet("disablebtn")
                 cur.close()
                 con.close()
         except:
@@ -365,6 +381,7 @@ class PageProg(tk.Frame):
         if tipe == "PEND": self.progress_table("PENDING")
         elif tipe == "PROG": self.progress_table("ONPROGRESS")
         elif tipe == "RETU": self.progress_table("RETURNEDCS")
+        elif tipe == "TAKE": self.progress_table("TAKENBYENG")
         else : pass
         #########
 
@@ -382,9 +399,11 @@ class PageProg(tk.Frame):
             if len(getUsrUpd.strip()) == 0: # .strip memastikan space/tab termasuk len 0
                     messagebox.showwarning(title="Peringatan",message="Siapa yang update commit?")
                     self.commitby.focus_set()
+                    self.commitby.delete(0, END)
             elif len(getcommit.strip()) == 0: # .strip memastikan space/tab termasuk len 0
                     messagebox.showwarning(title="Peringatan",message="Silahkan isi perubahan terlebih dahulu")
                     self.commitDetail.focus_set()
+                    self.commitDetail.delete('1.0','end')
             else:
                     sql = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
                     "VALUES(%s,%s,%s,%s,%s)"
@@ -412,6 +431,7 @@ class PageProg(tk.Frame):
             if len(getAccBy.strip()) == 0:
                 messagebox.showwarning(title="Peringatan",message="Siapa yang menerima WO?")
                 self.commitby.focus_set()
+                self.commitby.delete(0, END)
             else:
                 sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
                 "VALUES(%s,%s,%s,%s,%s)"
@@ -427,7 +447,10 @@ class PageProg(tk.Frame):
             messagebox.showerror(title="Error", \
                 message="SQL Log: {}".format(err))
 
-    def onReturnWO(self):
+    def onReturnWO(self,event=None):
+        if not event == None:
+            print("event True =",Event) # percobaan tooltips
+            return
         try:
             db_config = read_db_config()
             con = mysql.connector.connect(**db_config)
@@ -442,6 +465,7 @@ class PageProg(tk.Frame):
             if len(getAccBy.strip()) == 0:
                 messagebox.showwarning(title="Peringatan",message="Siapa yang mengembalikan WO?")
                 self.commitby.focus_set()
+                self.commitby.delete(0, END)
             elif messagebox.askokcancel('Return WO','WO akan dikembalikan ke ENG?') == True: 
                 sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
                 "VALUES(%s,%s,%s,%s,%s)"
@@ -450,6 +474,76 @@ class PageProg(tk.Frame):
                 cur.execute(sql2,(setStatus,getIfca))
                 messagebox.showinfo(title="Informasi",message="WO Sudah dikembalikan ke ENG oleh {}.".format(getAccBy))
                 self.progress_refresh()
+            else: pass
+            con.commit()
+            cur.close()
+            con.close()
+        except mysql.connector.Error as err:
+            messagebox.showerror(title="Error", \
+                message="SQL Log: {}".format(err)) 
+
+    def onTakeWO(self,event=None):
+        if not event == None:
+            print("event True =",Event) # percobaan tooltips
+            return
+        try:
+            db_config = read_db_config()
+            con = mysql.connector.connect(**db_config)
+            cur = con.cursor()
+            getIfca = self.progIfca.get()
+            getAccBy = self.commitby.get()
+            from datetime import datetime
+            getTimeAcc = datetime.now()
+            firstcom = "WO Sudah diterima dari CS ke ENG oleh {}.".format(getAccBy)
+            setStatus = "TAKENBYENG"
+
+            if len(getAccBy.strip()) == 0:
+                messagebox.showwarning(title="Peringatan",message="Siapa yang menerima WO?")
+                self.commitby.focus_set()
+                self.commitby.delete(0, END)
+            elif messagebox.askokcancel('Take WO','WO sudah dikembalikan dari CS?') == True: 
+                sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
+                "VALUES(%s,%s,%s,%s,%s)"
+                cur.execute(sql1,(getIfca,getTimeAcc,firstcom,getAccBy.upper(),""))
+                sql2 = "UPDATE logbook SET status_ifca=%s WHERE no_ifca =%s"
+                cur.execute(sql2,(setStatus,getIfca))
+                messagebox.showinfo(title="Informasi",message="WO Sudah diterima dari CS ke ENG oleh {}.".format(getAccBy))
+                self.progress_refresh()
+            else: pass
+            con.commit()
+            cur.close()
+            con.close()
+        except mysql.connector.Error as err:
+            messagebox.showerror(title="Error", \
+                message="SQL Log: {}".format(err)) 
+
+    def onSetDoneWO(self,event=None):
+        if not event == None:
+            print("event True =",Event) # percobaan tooltips
+            return
+        try:
+            db_config = read_db_config()
+            con = mysql.connector.connect(**db_config)
+            cur = con.cursor()
+            getIfca = self.progIfca.get()
+            getAccBy = self.commitby.get()
+            from datetime import datetime
+            getTimeAcc = datetime.now()
+            firstcom = "Status wo DONE oleh {}.".format(getAccBy)
+            setStatus = "DONE"
+
+            if len(getAccBy.strip()) == 0:
+                messagebox.showwarning(title="Peringatan",message="Siapa staff yang handle WO?")
+                self.commitby.focus_set()
+                self.commitby.delete(0, END)
+            # elif messagebox.askokcancel('Take WO','WO sudah dikembalikan dari CS?') == True: 
+            #     sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
+            #     "VALUES(%s,%s,%s,%s,%s)"
+            #     cur.execute(sql1,(getIfca,getTimeAcc,firstcom,getAccBy.upper(),""))
+            #     sql2 = "UPDATE logbook SET status_ifca=%s WHERE no_ifca =%s"
+            #     cur.execute(sql2,(setStatus,getIfca))
+            #     messagebox.showinfo(title="Informasi",message="WO Sudah diterima dari CS ke ENG oleh {}.".format(getAccBy))
+            #     self.progress_refresh()
             else: pass
             con.commit()
             cur.close()
