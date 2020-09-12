@@ -10,13 +10,15 @@ from entryDate import CustomDateEntry # input tgl pake kalender
 from tkinter import *
 from tkinter import ttk, messagebox, filedialog
 from tkinter.scrolledtext import ScrolledText
+from popup_date import popupWindow
 
 kolomProgIfca = ("WO","IFCA","UNIT")
 kolomCommIfca = ("TANGGAL","UPDATE","OLEH","DEPT")
 
 class PageProg(tk.Frame):
-    def __init__(self, parent,statwosel):
+    def __init__(self,parent,statwosel):
         tk.Frame.__init__(self, parent)
+        self.parent = parent
         self.statwosel = statwosel
 
         # label = tk.Label(self, text="This is page 2")
@@ -107,7 +109,7 @@ class PageProg(tk.Frame):
         self.btnCommTake.bind("<Button-3>",self.onTakeWO) # percobaan tooltips
         self.btnCommTake.grid(row=3,column=0,sticky=N,pady=5,padx=5)
         self.btnCommDone = Button(entBtnRight, text='Done',\
-            command='self.onSetDoneWO', width=10,\
+            command=self.onSetDoneWO, width=10,\
             relief=RAISED, bd=2, bg="#FC6042", fg="white",#
             activebackground="#444",activeforeground="white" )
         self.btnCommDone.bind("<Button-3>",self.onSetDoneWO) # percobaan tooltips
@@ -501,7 +503,7 @@ class PageProg(tk.Frame):
                 messagebox.showwarning(title="Peringatan",message="Siapa yang menerima WO?")
                 self.commitby.focus_set()
                 self.commitby.delete(0, END)
-            elif messagebox.askokcancel('Take WO','WO sudah dikembalikan dari CS?') == True: 
+            elif messagebox.askokcancel('Take WO','WO sudah diterima dari CS?') == True: 
                 sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
                 "VALUES(%s,%s,%s,%s,%s)"
                 cur.execute(sql1,(getIfca,getTimeAcc,firstcom,getAccBy.upper(),""))
@@ -536,7 +538,8 @@ class PageProg(tk.Frame):
                 messagebox.showwarning(title="Peringatan",message="Siapa staff yang handle WO?")
                 self.commitby.focus_set()
                 self.commitby.delete(0, END)
-            # elif messagebox.askokcancel('Take WO','WO sudah dikembalikan dari CS?') == True: 
+            # elif len(setdate = popupWindow(self.parent)) >= 0:
+            #      print(setdate)
             #     sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
             #     "VALUES(%s,%s,%s,%s,%s)"
             #     cur.execute(sql1,(getIfca,getTimeAcc,firstcom,getAccBy.upper(),""))
@@ -544,7 +547,15 @@ class PageProg(tk.Frame):
             #     cur.execute(sql2,(setStatus,getIfca))
             #     messagebox.showinfo(title="Informasi",message="WO Sudah diterima dari CS ke ENG oleh {}.".format(getAccBy))
             #     self.progress_refresh()
-            else: pass
+            else: 
+                setdate = popupWindow(self.parent)
+                setdate.parent.wait_window(setdate.top)
+                if len(setdate.value.strip()) > 0: 
+                    # output <tanggal> <jam>, lanjutkan perintah DONE
+                    print("setdate.value =",setdate.value)
+                else: 
+                    # output kosong, batalkan perintah DONE
+                    print("batalkan done")
             con.commit()
             cur.close()
             con.close()
