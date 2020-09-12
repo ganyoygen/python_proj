@@ -7,10 +7,10 @@ import datetime
 
 from mysqlcon import read_db_config
 from entryDate import CustomDateEntry # input tgl pake kalender
+from popup_date import PopupDateTime # popup set tgl jam
 from tkinter import *
 from tkinter import ttk, messagebox, filedialog
 from tkinter.scrolledtext import ScrolledText
-from popup_date import popupWindow
 
 kolomProgIfca = ("WO","IFCA","UNIT")
 kolomCommIfca = ("TANGGAL","UPDATE","OLEH","DEPT")
@@ -21,15 +21,12 @@ class PageProg(tk.Frame):
         self.parent = parent
         self.statwosel = statwosel
 
-        # label = tk.Label(self, text="This is page 2")
-        # label.pack(fill ="both", expand=True, padx=20, pady=10)
         self.komponenProgress()
         self.komponenAtas()
         self.komponenTengah()
         self.komponenBawah()
 
     def komponenProgress(self):
-        # tab progress
         self.topFrame = ttk.Frame(self)
         self.topFrame.pack(side=TOP,fill=X)
         self.midFrame = ttk.Frame(self)
@@ -49,18 +46,16 @@ class PageProg(tk.Frame):
         entOne.grid(row=1,column=1,sticky=W)
         self.progWo = ttk.Entry(entOne, width=10)
         self.progWo.grid(row=1, column=0,sticky=W)
-        # Label(entOne, text=' ').grid(row=1, column=1, sticky=W,pady=5,padx=10)
         self.progIfca = ttk.Entry(entOne, width=15)
-        self.progIfca.grid(row=1, column=2,sticky=W)               
-        ttk.Label(entOne, text=' ').grid(row=1, column=3, sticky=W,pady=5,padx=10)
+        self.progIfca.grid(row=1, column=1,sticky=W)               
+        ttk.Label(entOne, text=' ').grid(row=1, column=2, sticky=W,pady=5,padx=10)
         self.progUnit = ttk.Entry(entOne, width=12)
-        self.progUnit.grid(row=1, column=4,sticky=W)
+        self.progUnit.grid(row=1, column=3,sticky=W)
 
         entTwo = ttk.Frame(self.topFrame)
         entTwo.grid(row=2,column=1,sticky=W)
         self.progTgl = ttk.Entry(entTwo, width=15)
         self.progTgl.grid(row=1, column=0,sticky=W)
-        # Label(entTwo, text=' ').grid(row=1, column=1, sticky=W,pady=5,padx=10)
         self.progJam = ttk.Entry(entTwo, width=10)
         self.progJam.grid(row=1, column=1,sticky=W)               
         ttk.Label(entTwo, text=' ').grid(row=1, column=2, sticky=W,pady=5,padx=10)
@@ -150,30 +145,22 @@ class PageProg(tk.Frame):
         listcomm = ttk.Frame(self.botFrame)
         listcomm.grid(row=1,column=2,sticky=W)
 
-        #listprogress
-        # self.prog_data = Frame(listprog, bd=10)
-        # self.prog_data.pack(fill=BOTH, expand=YES)
         self.tabelProg = ttk.Treeview(listprog, columns=kolomProgIfca,show='headings')
         self.tabelProg.bind("<Double-1>",self.progress_detail)
         sbVer = ttk.Scrollbar(listprog, orient='vertical',command=self.tabelProg.yview)
         sbVer.pack(side=RIGHT, fill=Y)
         sbHor = ttk.Scrollbar(listprog, orient='horizontal',command=self.tabelProg.xview)
         sbHor.pack(side=BOTTOM, fill=X)
-
         self.tabelProg.pack(side=TOP, fill=BOTH)
         self.tabelProg.configure(yscrollcommand=sbVer.set)
         self.tabelProg.configure(xscrollcommand=sbHor.set)
 
-        #listcommited
-        # self.comm_data = Frame(listcomm, bd=10)
-        # self.comm_data.pack(fill=BOTH, expand=YES)
         self.tabelcomm = ttk.Treeview(listcomm, columns=kolomCommIfca,show='headings')
         self.tabelcomm.bind("<Double-1>",self.prog_comm_detail)
         sbVer = ttk.Scrollbar(listcomm, orient='vertical',command=self.tabelcomm.yview)
         sbVer.pack(side=RIGHT, fill=Y)
         sbHor = ttk.Scrollbar(listcomm, orient='horizontal',command=self.tabelcomm.xview)
         sbHor.pack(side=BOTTOM, fill=X)
-
         self.tabelcomm.pack(side=TOP, fill=BOTH)
         self.tabelcomm.configure(yscrollcommand=sbVer.set)
         self.tabelcomm.configure(xscrollcommand=sbHor.set)
@@ -229,7 +216,7 @@ class PageProg(tk.Frame):
             db_config = read_db_config()
             con = mysql.connector.connect(**db_config)
             cur = con.cursor()
-        #     sql = "SELECT * FROM logbook WHERE status_ifca LIKE %s"
+            # sql = "SELECT * FROM logbook WHERE status_ifca LIKE %s"
             # sql = "SELECT no_wo, no_ifca, unit FROM logbook WHERE status_ifca LIKE %s OR status_ifca LIKE %s OR status_ifca LIKE %s"
             sql = "SELECT no_wo, no_ifca, unit FROM logbook WHERE status_ifca LIKE %s"
             val = ("%{}%".format(opsi),)
@@ -538,17 +525,8 @@ class PageProg(tk.Frame):
                 messagebox.showwarning(title="Peringatan",message="Siapa staff yang handle WO?")
                 self.commitby.focus_set()
                 self.commitby.delete(0, END)
-            # elif len(setdate = popupWindow(self.parent)) >= 0:
-            #      print(setdate)
-            #     sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
-            #     "VALUES(%s,%s,%s,%s,%s)"
-            #     cur.execute(sql1,(getIfca,getTimeAcc,firstcom,getAccBy.upper(),""))
-            #     sql2 = "UPDATE logbook SET status_ifca=%s WHERE no_ifca =%s"
-            #     cur.execute(sql2,(setStatus,getIfca))
-            #     messagebox.showinfo(title="Informasi",message="WO Sudah diterima dari CS ke ENG oleh {}.".format(getAccBy))
-            #     self.progress_refresh()
             else: 
-                setdate = popupWindow(self.parent)
+                setdate = PopupDateTime(self.parent)
                 setdate.parent.wait_window(setdate.top)
                 if len(setdate.value.strip()) > 0: 
                     # output <tanggal> <jam>, lanjutkan perintah DONE
