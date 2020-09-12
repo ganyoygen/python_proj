@@ -476,8 +476,10 @@ class PageMain(tk.Frame):
             try:
                 filename=open(directory,'w',newline='')
             except:
+                cur.close()
+                con.close()
                 print("export aborted by user")
-                return 
+                return
             cWrite=csv.writer(filename)
             cWrite.writerow(["Index","No WO","No IFCA","Tanggal Buat","Unit",\
                     "Work Request","Staff","Work Action","Tanggal Selesai",\
