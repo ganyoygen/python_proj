@@ -7,6 +7,7 @@ import datetime
 
 from mysqlcon import read_db_config
 from entryDate import CustomDateEntry # input tgl pake kalender
+from popup_date import PopupDateTime # popup set tgl jam
 from tkinter import *
 from tkinter import ttk, messagebox, filedialog
 from tkinter.scrolledtext import ScrolledText
@@ -14,12 +15,12 @@ from tkinter.scrolledtext import ScrolledText
 judul_kolom = ("WO","IFCA","Tanggal","UNIT","Work Request","Staff","Work Action","Tanggal Done","Jam Done","Received")
 
 class PageMain(tk.Frame):
-    def __init__(self,parent,btnselect):
+    def __init__(self,parent,btnselect,imgdateset):
         tk.Frame.__init__(self,parent)
+        self.parent = parent
         self.btnselect = btnselect
+        self.imgdateget = imgdateset.subsample(2, 2) # Resizing image by.subsample to fit on button
 
-        # label = tk.Label(self, text="This is page 2")
-        # label.pack(fill ="both", expand=True, padx=20, pady=10)
         self.komponenMain()
         self.komponenAtas()
         self.komponenTengah()
@@ -35,10 +36,10 @@ class PageMain(tk.Frame):
         footer = ttk.Frame(self)
         footer.pack(side=TOP, fill=X)
         
-        ttk.Label(self.topFrame, text='top').grid(row=0, column=0)
-        ttk.Label(self.midFrame, text='mid').grid(row=0, column=0)
-        ttk.Label(self.botFrame, text='bot').grid(row=0, column=0)
-        ttk.Label(footer, text='foot').grid(row=0, column=0)
+        ttk.Label(self.topFrame, text='').grid(row=0, column=0)
+        ttk.Label(self.midFrame, text='').grid(row=0, column=0)
+        ttk.Label(self.botFrame, text='').grid(row=0, column=0)
+        ttk.Label(footer, text='').grid(row=0, column=0)
 
     def komponenAtas(self):
         #samping kiri
@@ -67,12 +68,13 @@ class PageMain(tk.Frame):
         ttk.Label(topleft, text=':').grid(row=2, column=1, sticky=W,pady=5,padx=10)
         tglbuat = ttk.Frame(topleft)
         tglbuat.grid(row=2,column=2,sticky=W)
-        self.entTglbuat = CustomDateEntry(tglbuat, width=10, locale='en_UK')
+        self.entTglbuat = ttk.Entry(tglbuat, width=10)
         self.entTglbuat.grid(row=1, column=0,sticky=W)
-        vcmd = (self.register(self.onValidate), '%d', '%s', '%S')
-        self.entJambuat = ttk.Entry(tglbuat, validate="key", validatecommand=vcmd, width=7, justify=tk.CENTER)
-        self.entJambuat.bind("<KeyRelease>", self.hour_24)
+        self.entJambuat = ttk.Entry(tglbuat,width=7)
         self.entJambuat.grid(row=1, column=1,sticky=W)
+
+        self.btndate = Button(tglbuat,image=self.imgdateget,command=self.onDateCreate)
+        self.btndate.grid(row=1, column=2,pady=10,padx=5)
 
         ttk.Label(topleft, text="Unit").grid(row=3, column=0, sticky=W,padx=20)
         ttk.Label(topleft, text=':').grid(row=3, column=1, sticky=W,pady=5,padx=10)             
@@ -92,8 +94,8 @@ class PageMain(tk.Frame):
         #samping kanan
         topright = ttk.Frame(self.topFrame)
         topright.grid(row=1,column=2,sticky=W)
-        ttk.Label(topright, text="ROW 0").grid(row=0, column=0, sticky=W,pady=5,padx=20)
-        ttk.Label(topright, text="ROW 1").grid(row=1, column=0, sticky=W,pady=5,padx=20)
+        ttk.Label(topright, text="").grid(row=0, column=0, sticky=W,pady=5,padx=20)
+        ttk.Label(topright, text="").grid(row=1, column=0, sticky=W,pady=5,padx=20)
         ttk.Label(topright, text="Status").grid(row=2, column=0, sticky=W,pady=5,padx=20)
         ttk.Label(topright, text=':').grid(row=2, column=1, sticky=W,pady=5,padx=10)
 
@@ -201,42 +203,6 @@ class PageMain(tk.Frame):
 
         self.onClear()
 
-    def onValidate(self, d, s, S):
-        # if it's deleting return True
-        if d == "0":
-            return True
-        # Allow only digit, ":" and check the length of the string
-        if ((S == ":" and len(s) != 2) or (not S.isdigit() and
-                S != ":") or (len(s) == 3 and int(S) > 5) or len(s) > 4):
-            self.bell()
-            return False
-         
-        return True
- 
-    def hour_24(self, event):
-        """
-        Check and build the correct format hour: hh:mm in 24 format
-        it keep in mind the 0x, 1x and 2x hours and the max minutes can be 59
-        """
- 
-        # get the object that triggered the event
-        s = event.widget
-        # if delete a char do return ok or delete the char ":" and the previous number
-        if len(s.get()) == 2 and event.keysym=="BackSpace":
-            s.delete(len(s.get())-1, tk.END)
-        if event.keysym=="BackSpace":
-            return
-         
-        # check the hour format and add : between hours and minutes
-        if len(s.get()) == 1 and int(s.get()) > 2:
-            s.insert(0, "0")
-            s.insert("end", ":")
-        elif len(s.get()) == 2 and int(s.get()) < 24:
-            s.insert(2, ":")
-        elif len(s.get()) >= 2 and s.get()[2:3] != ":":
-            self.bell()
-            s.delete(1, tk.END)
-
     def entrySet(self,opsi):
         # 1 on doubleclick main entry, normal
         if opsi == "mainclear":
@@ -269,7 +235,7 @@ class PageMain(tk.Frame):
         if opsi == "mainreadifca":
             self.entWo.config(state="readonly")
             self.entIfca.config(state="readonly")
-            self.entTglbuat.config(state="disable")
+            self.entTglbuat.config(state="readonly")
             self.entJambuat.config(state="readonly")
             self.entUnit.config(state="readonly")
             self.entRecBy.config(state="readonly")
@@ -553,8 +519,8 @@ class PageMain(tk.Frame):
             showtgl = str(getTgl)[8:] +'-'+ str(getTgl)[5:7] +'-'+ str(getTgl)[:4]
             self.entTglbuat.delete(0, END)
             self.entTglbuat.insert(END, showtgl)
-            # self.entJambuat.insert(END, data[13])
-            self.entJambuat.insert(END, str(data[13])[:2]+str(data[13])[3:])
+            self.entJambuat.insert(END, data[13])
+            # self.entJambuat.insert(END, str(data[13])[:2]+str(data[13])[3:])
             self.entUnit.insert(END, data[4])
             self.entWorkReq.insert(END, data[5])
             self.entStaff.insert(END, data[6])
@@ -633,6 +599,8 @@ class PageMain(tk.Frame):
         self.rbtnTN.config(state="normal")
         self.entRecBy.config(state="readonly")
         self.entRecDate.config(state="readonly")
+        self.entTglbuat.config(state="readonly")
+        self.entJambuat.config(state="readonly")
         self.tabelIfca.delete(*self.tabelIfca.get_children())
         self.entCari.delete(0, END)
         self.opsiStatus.current(0)
@@ -642,8 +610,6 @@ class PageMain(tk.Frame):
         today = date.today()
         self.entCari.insert(END,today.strftime("%d-%m-%Y"))
         self.onSearch()
-        # tanggal otomatis hari ini
-        self.entTglbuat.insert(END,today.strftime("%d-%m-%Y"))
         self.auto_wo()
         self.entUnit.focus_set()
         os.system("cls")
@@ -668,10 +634,9 @@ class PageMain(tk.Frame):
                     messagebox.showwarning(title="Peringatan",message="No IFCA Kosong.")
                     self.entIfca.focus_set()
             elif self.checktgl(cTglBuat) == None: #check tgl jika kosong, batalkan save
-                    messagebox.showerror(title="Error",message="Format tanggal salah")    
+                    messagebox.showerror(title="Error",message="Format tanggal salah")
             elif len(cJamBuat.strip()) == 0:
                     messagebox.showwarning(title="Peringatan",message="Jam buat harus diisi.")
-                    self.entJambuat.focus_set()
             elif len(cUnit.strip()) == 0:
                     messagebox.showwarning(title="Peringatan",message="Unit harus diisi.")
                     self.entUnit.focus_set()
@@ -740,3 +705,22 @@ class PageMain(tk.Frame):
         except mysql.connector.Error as err:
             messagebox.showerror(title="Error", \
                 message="SQL Log: {}".format(err))
+
+    def onDateCreate(self):
+        setdate = PopupDateTime(self.parent)
+        setdate.parent.wait_window(setdate.top)
+        if len(setdate.value.strip()) > 0: 
+            # output <tanggal> <jam>, lanjutkan perintah
+            getdate, gettime = setdate.value.split() #pisah tanggal dan jam
+            self.entTglbuat.config(state="normal")
+            self.entJambuat.config(state="normal")
+            self.entTglbuat.delete(0, END)
+            self.entJambuat.delete(0, END)
+            self.entTglbuat.insert(END, getdate)
+            self.entJambuat.insert(END, gettime)
+            self.entTglbuat.config(state="readonly")
+            self.entJambuat.config(state="readonly")
+            self.entUnit.focus_set()
+        else: 
+            # output kosong, batalkan perintah
+            pass
