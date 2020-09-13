@@ -11,23 +11,25 @@ class PopupDateTime(object):
         top.iconbitmap(str(os.getcwd()+"\\"+"icon-icons.com_main.ico"))
         self.parent = master
         self.value = ""
-        tanggal=ttk.Label(top,text="Tanggal")
+        topFrame = ttk.Frame(top)
+        topFrame.grid(row=0,column=0)
+        tanggal=ttk.Label(topFrame,text="Tanggal")
         tanggal.grid(row=0,column=0)
-        tikdua = ttk.Label(top,text=":")
+        tikdua = ttk.Label(topFrame,text=":")
         tikdua.grid(row=0,column=1)
-        self.date = CustomDateEntry(top, width=10, locale='en_UK')
+        self.date = CustomDateEntry(topFrame, width=10, locale='en_UK')
         self.date.grid(row=0,column=2,sticky='W')
-        jam=ttk.Label(top,text="Jam")
+        jam=ttk.Label(topFrame,text="Jam")
         jam.grid(row=1,column=0)
-        tikdua = ttk.Label(top,text=":")
+        tikdua = ttk.Label(topFrame,text=":")
         tikdua.grid(row=1,column=1)
 
         vcmd = (top.register(self.onValidate), '%d', '%s', '%S')
-        self.hour = ttk.Entry(top, validate="key", validatecommand=vcmd, width=7)
+        self.hour = ttk.Entry(topFrame, validate="key", validatecommand=vcmd, width=7)
         self.hour.bind("<KeyRelease>", self.hour_24)
         self.hour.grid(row=1,column=2,sticky='W')      
 
-        self.okbtn=ttk.Button(top,text="OK",width=7,command=self.cleanup)
+        self.okbtn=ttk.Button(topFrame,text="OK",width=7,command=self.cleanup)
         self.okbtn.grid(row=2,column=3)
         self.okbtn["state"] = "disabled"
         top.title("Input Date and Time")
@@ -115,9 +117,9 @@ class PopupDateTime(object):
 class TestRun(object):
     def __init__(self,master):
         self.master=master
-        self.setbtn=ttk.Button(master,text="Atur Tanggal",command=self.popup)
+        self.setbtn=ttk.Button(master,text="Set Date",command=self.popup)
         self.setbtn.pack()
-        self.showbtn=ttk.Button(master,text="Print Tanggal",command=lambda: sys.stdout.write(self.entryValue()+'\n'))
+        self.showbtn=ttk.Button(master,text="Get Date",command=lambda: sys.stdout.write(self.entryValue()+'\n'))
         self.showbtn.pack()
     def popup(self):
         self.gopopup=PopupDateTime(self.master)

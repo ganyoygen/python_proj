@@ -36,10 +36,10 @@ class MainLog:
         self.parent = parent
         self.parent.protocol("WM_DELETE_WINDOWS", self.keluar)
         lebar=950
-        tinggi=620
+        tinggi=680
         setTengahX = (self.parent.winfo_screenwidth()-lebar)//2
         setTengahY = (self.parent.winfo_screenheight()-tinggi)//2
-        self.parent.geometry("%ix%i+%i+%i" %(lebar, tinggi,setTengahX, setTengahY))
+        self.parent.geometry("%ix%i+%i+%i" %(lebar, tinggi,setTengahX, setTengahY-40)) # setTengahY-40 : Biar lebih keatas
         
         self.aturKomponen()
     
@@ -48,6 +48,13 @@ class MainLog:
         frameWin.pack(fill=X,side=TOP)
         WindowDraggable(frameWin)
         Label(frameWin, text='Work Order Logbook Record',bg="#898",fg="white").pack(side=LEFT,padx=20)
+        '''
+        # Menghilangkan Frame windows
+        buttonx = Button(frameWin, text="X",fg="white", bg="#FA8072", width=6, height=2,bd=0,\
+                         activebackground="#FB8072",activeforeground="white", command=self.keluar, relief=FLAT)
+        self.parent.overrideredirect(1) 
+        buttonx.pack(side=RIGHT)
+        '''
 
         self.notebook = ttk.Notebook(root)
         self.notebook.pack(fill="both", expand=True)
