@@ -73,9 +73,8 @@ class PageMain(tk.Frame):
         self.entTglbuat.grid(row=1, column=0,sticky=W)
         self.entJambuat = ttk.Entry(tglbuat,width=7)
         self.entJambuat.grid(row=1, column=1,sticky=W)
-
-        self.btndate = Button(tglbuat,image=self.imgdateget,command=self.onDateCreate)
-        self.btndate.grid(row=1, column=2,pady=10,padx=5)
+        self.btnDateCreate = Button(tglbuat,image=self.imgdateget,command=self.onDateCreate)
+        self.btnDateCreate.grid(row=1, column=2,pady=10,padx=5)
 
         ttk.Label(topleft, text="Unit").grid(row=3, column=0, sticky=W,padx=20)
         ttk.Label(topleft, text=':').grid(row=3, column=1, sticky=W,pady=5,padx=10)             
@@ -110,10 +109,12 @@ class PageMain(tk.Frame):
         ttk.Label(topright, text=':').grid(row=3, column=1, sticky=W,pady=5,padx=10)             
         tgldone = ttk.Frame(topright)
         tgldone.grid(row=3,column=2,sticky=W)
-        self.entTgldone = CustomDateEntry(tgldone, width=10, locale='en_UK')
+        self.entTgldone = ttk.Entry(tgldone, width=10)
         self.entTgldone.grid(row=0, column=0,sticky=W)
         self.entJamdone = ttk.Entry(tgldone, width=7)
         self.entJamdone.grid(row=0, column=1,sticky=W)
+        self.btnDateDone = Button(tgldone,image=self.imgdateget,command=self.onDateDone)
+        self.btnDateDone.grid(row=0, column=2,pady=10,padx=5)
 
         ttk.Label(topright, text="Work Action").grid(row=4, column=0, sticky=NW,padx=20)
         ttk.Label(topright, text=':').grid(row=4, column=1, sticky=NW,padx=10,pady=6)
@@ -212,6 +213,8 @@ class PageMain(tk.Frame):
             self.entTglbuat.config(state="normal")
             self.entJambuat.config(state="normal")
             self.entUnit.config(state="normal")
+            self.entTgldone.config(state="normal")
+            self.entJamdone.config(state="normal")
             self.entRecBy.config(state="normal")
             self.entRecDate.config(state="normal")
             self.entWo.delete(0, END)
@@ -226,22 +229,37 @@ class PageMain(tk.Frame):
             self.entWorkAct.delete('1.0', 'end')
             self.entRecBy.delete(0, END)
             self.entRecDate.delete(0, END)
+            self.entRecBy.config(state="normal")
+            self.entRecDate.config(state="normal")
+
+            # A. readonly aja, input pake popup
+            self.entTglbuat.config(state="readonly")
+            self.entJambuat.config(state="readonly")
+            self.entTgldone.config(state="readonly")
+            self.entJamdone.config(state="readonly")
+            # A #
+        # mainentry readonly panel kiri kecuali work req dan staff
+        elif opsi == "disablebtn":
+            self.btnDateCreate.config(state="disable")
+            self.btnDateDone.config(state="disable")
             self.btnSave.config(state="disable")
-            self.btnUpdate.config(state="normal")
-            self.btnDelete.config(state="normal")
-            self.btnReceived.config(state="normal")
+            self.btnUpdate.config(state="disable")
+            self.btnDelete.config(state="disable")
+            self.btnReceived.config(state="disable")
             self.rbtnBM.config(state="disable")
             self.rbtnTN.config(state="disable")
-        # mainentry readonly panel kiri kecuali work req dan staff
-        if opsi == "mainreadifca":
+        elif opsi == "mainreadifca":
             self.entWo.config(state="readonly")
             self.entIfca.config(state="readonly")
             self.entTglbuat.config(state="readonly")
             self.entJambuat.config(state="readonly")
             self.entUnit.config(state="readonly")
+            self.entTgldone.config(state="readonly")
+            self.entJamdone.config(state="readonly")
             self.entRecBy.config(state="readonly")
             self.entRecDate.config(state="readonly")
         # 1 #
+        else : pass
 
     def checkwo(self,data):
         try:
@@ -504,6 +522,14 @@ class PageMain(tk.Frame):
             curItem = self.tabelIfca.item(self.tabelIfca.focus())
             ifca_value = curItem['values'][1]  
             self.entrySet("mainclear")
+            self.entrySet("disablebtn")
+            self.entTglbuat.config(state="normal")
+            self.entJambuat.config(state="normal")
+            self.entTgldone.config(state="normal")
+            self.entJamdone.config(state="normal")
+            self.btnDateDone.config(state="normal")
+            self.btnUpdate.config(state="normal")
+            self.btnReceived.config(state="normal")
             db_config = read_db_config()
             con = mysql.connector.connect(**db_config)
             cur = con.cursor()
@@ -544,7 +570,7 @@ class PageMain(tk.Frame):
                     self.opsiStatus.current(1)
                     # ngapain diUpdate lagi wo sudah DONE
                     self.btnUpdate.config(state="disable")
-            elif data[14] == "CANCEL":
+            elif data[14] == "CANCEL": # status CANCEL masih bisa diupdate
                     self.opsiStatus.current(2)
             elif data[14] == "PENDING":
                     self.opsiStatus.current(3)
@@ -592,16 +618,12 @@ class PageMain(tk.Frame):
 
     def onClear(self):
         self.entrySet("mainclear")
+        self.entrySet("disablebtn")
+        self.btnDateCreate.config(state="normal")
+        self.btnDateDone.config(state="normal")
         self.btnSave.config(state="normal")
-        self.btnUpdate.config(state="disable")
-        self.btnDelete.config(state="disable")
-        self.btnReceived.config(state="disable")
         self.rbtnBM.config(state="normal")
         self.rbtnTN.config(state="normal")
-        self.entRecBy.config(state="readonly")
-        self.entRecDate.config(state="readonly")
-        self.entTglbuat.config(state="readonly")
-        self.entJambuat.config(state="readonly")
         self.tabelIfca.delete(*self.tabelIfca.get_children())
         self.entCari.delete(0, END)
         self.opsiStatus.current(0)
@@ -634,13 +656,13 @@ class PageMain(tk.Frame):
             elif len(cIfca.strip()) == 0:
                     messagebox.showwarning(title="Peringatan",message="No IFCA Kosong.")
                     self.entIfca.focus_set()
-            elif self.checktgl(cTglBuat) == None: #check tgl jika kosong, batalkan save
+                    self.entIfca.delete(0, END)
+            elif self.checktgl(cTglBuat) == None or len(cJamBuat.strip()) == 0: #check tgl jika kosong, batalkan save
                     messagebox.showerror(title="Error",message="Format tanggal salah")
-            elif len(cJamBuat.strip()) == 0:
-                    messagebox.showwarning(title="Peringatan",message="Jam buat harus diisi.")
             elif len(cUnit.strip()) == 0:
                     messagebox.showwarning(title="Peringatan",message="Unit harus diisi.")
                     self.entUnit.focus_set()
+                    self.entUnit.delete(0, END)
             elif self.checkifca(cIfca) == "tolak": #check IFCA
                     messagebox.showerror(title="Error", \
                     message="{} sudah terdaftar.".format(cIfca))
@@ -652,10 +674,10 @@ class PageMain(tk.Frame):
                     cur.execute(sql,(cWo,cIfca.upper(),self.checktgl(cTglBuat),cJamBuat,cUnit.upper(),cWorkReq,cStaff.upper()))
                     messagebox.showinfo(title="Informasi", \
                                         message="Data sudah di tersimpan.")
-                    con.commit()
                     cur.close()
-                    con.close()
                     self.onClear()
+            con.commit()
+            con.close()
         except mysql.connector.Error as err:
             messagebox.showerror(title="Error", \
                 message="SQL Log: {}".format(err))
@@ -681,20 +703,42 @@ class PageMain(tk.Frame):
             getTglDone = self.checktgl(self.entTgldone.get()) #check tgl dulu
             #eksekusi sql
             # 2 update commit for pending
-            if cStatus == "PENDING":
-                    if len(cWorkAct.strip()) <= 0: 
-                            messagebox.showwarning(title="Peringatan",message="Work Action harus diisi.")
-                            self.entWorkAct.focus_set()
-                            return # stop aja karena cWorkAct tidak diisi
-                    elif len(cStaff.strip()) <= 0: 
-                            messagebox.showwarning(title="Peringatan",message="Staff ENG harus diisi.")
-                            self.entStaff.focus_set()
-                            return # stop aja karena cStaff tidak diisi
-                    else: ### jgn eksekusi sekarang mungkin?
-                            sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
-                            "VALUES(%s,%s,%s,%s,%s)"
-                            cur.execute(sql1,(cIfca,getTimeAcc,cWorkAct,cStaff.upper(),""))
+            if cStatus == "DONE":
+                if len(cStaff.strip()) <= 0: 
+                    messagebox.showwarning(title="Peringatan",message="Staff ENG harus diisi.")
+                    self.entStaff.focus_set()
+                    self.entStaff.delete(0, END)
+                    return # stop aja karena cStaff tidak diisi
+                elif len(cWorkAct.strip()) <= 0:
+                    messagebox.showwarning(title="Peringatan",message="Work Action harus diisi.")
+                    self.entWorkAct.focus_set()
+                    self.entWorkAct.delete('1.0', 'end')
+                    return # stop aja karena cWorkAct tidak diisi
+                elif getTglDone == None or len(jamdone.strip()) == 0:
+                    messagebox.showwarning(title="Peringatan",message="Tanggal harus diisi.")
+                    return # stop aja karena tanggal tidak diisi
+                else : pass
+            elif cStatus == "PENDING":
+                getTglDone = None
+                jamdone = None
+                if len(cStaff.strip()) <= 0: 
+                    messagebox.showwarning(title="Peringatan",message="Staff ENG harus diisi.")
+                    self.entStaff.focus_set()
+                    self.entStaff.delete(0, END)
+                    return # stop aja karena cStaff tidak diisi
+                elif len(cWorkAct.strip()) <= 0: 
+                    messagebox.showwarning(title="Peringatan",message="Work Action harus diisi.")
+                    self.entWorkAct.focus_set()
+                    self.entWorkAct.delete('1.0', 'end')
+                    return # stop aja karena cWorkAct tidak diisi
+                else: ### jgn eksekusi sekarang mungkin?
+                    sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
+                    "VALUES(%s,%s,%s,%s,%s)"
+                    cur.execute(sql1,(cIfca,getTimeAcc,cWorkAct,cStaff.upper(),""))
             # 2 #
+            else : # UPDATE / CANCEL tidak perlu tanggal
+                getTglDone = None
+                jamdone = None
             sql = "UPDATE logbook SET no_wo=%s,no_ifca=%s,date_create=%s,work_req=%s,staff=%s,status_ifca=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_ifca =%s"
             cur.execute(sql,(cWo,cIfca,getTglBuat,cWorkReq,cStaff.upper(),cStatus,getTglDone,jamdone,cWorkAct,cIfca))
             messagebox.showinfo(title="Informasi", \
@@ -722,6 +766,24 @@ class PageMain(tk.Frame):
             self.entTglbuat.config(state="readonly")
             self.entJambuat.config(state="readonly")
             self.entUnit.focus_set()
+        else: 
+            # output kosong, batalkan perintah
+            pass
+
+    def onDateDone(self):
+        setdate = PopupDateTime(self.parent)
+        setdate.parent.wait_window(setdate.top)
+        if len(setdate.value.strip()) > 0: 
+            # output <tanggal> <jam>, lanjutkan perintah
+            getdate, gettime = setdate.value.split() #pisah tanggal dan jam
+            self.entTgldone.config(state="normal")
+            self.entJamdone.config(state="normal")
+            self.entTgldone.delete(0, END)
+            self.entJamdone.delete(0, END)
+            self.entTgldone.insert(END, getdate)
+            self.entJamdone.insert(END, gettime)
+            self.entTgldone.config(state="readonly")
+            self.entJamdone.config(state="readonly")
         else: 
             # output kosong, batalkan perintah
             pass
