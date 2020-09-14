@@ -15,11 +15,12 @@ from tkinter.scrolledtext import ScrolledText
 judul_kolom = ("WO","IFCA","Tanggal","UNIT","Work Request","Staff","Work Action","Tanggal Done","Jam Done","Received")
 
 class PageMain(tk.Frame):
-    def __init__(self,parent,btnselect,imgdateset):
+    def __init__(self,parent):
         tk.Frame.__init__(self,parent)
         self.parent = parent
-        self.btnselect = btnselect
+        imgdateset = tk.PhotoImage(file = str(os.getcwd()+"\\"+"icon-icons.com_date.png"))
         self.imgdateget = imgdateset.subsample(2, 2) # Resizing image by.subsample to fit on button
+        self.btnselect = StringVar(parent,value="TN")
 
         self.komponenMain()
         self.komponenAtas()

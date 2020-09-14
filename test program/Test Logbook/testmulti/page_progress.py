@@ -16,10 +16,10 @@ kolomProgIfca = ("WO","IFCA","UNIT")
 kolomCommIfca = ("TANGGAL","UPDATE","OLEH","DEPT")
 
 class PageProg(tk.Frame):
-    def __init__(self,parent,statwosel):
+    def __init__(self,parent):
         tk.Frame.__init__(self, parent)
         self.parent = parent
-        self.statwosel = statwosel
+        self.statwosel = StringVar(parent,value="PEND")
 
         self.komponenProgress()
         self.komponenAtas()

@@ -9,9 +9,7 @@ from ttkthemes import ThemedTk # make sure to pip install ttkthemes
 
 # root = Tk()
 root = ThemedTk(theme='clearlooks')
-btnselect = StringVar(value="TN")
-statwosel = StringVar(value="PEND")
-imgdateset = PhotoImage(file = str(os.getcwd()+"\\"+"icon-icons.com_date.png"))
+
 class WindowDraggable():
     def __init__(self, label):
             self.label = label
@@ -60,9 +58,9 @@ class MainLog:
         self.notebook = ttk.Notebook(root)
         self.notebook.pack(fill="both", expand=True)
 
-        page1 = PageMain(self.notebook,btnselect,imgdateset) # untuk radiobutton tambah positional di __init__() Class PageMain
+        page1 = PageMain(self.notebook)
         page2 = Pending(self.notebook)
-        page3 = PageProg(self.notebook,statwosel)
+        page3 = PageProg(self.notebook)
         self.notebook.add(page1, text="Main")
         self.notebook.add(page2, text="Pending")
         self.notebook.add(page3, text="Progress")
