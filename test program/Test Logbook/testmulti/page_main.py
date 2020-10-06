@@ -527,9 +527,6 @@ class PageMain(tk.Frame):
             self.entJambuat.config(state="normal")
             self.entTgldone.config(state="normal")
             self.entJamdone.config(state="normal")
-            self.btnDateDone.config(state="normal")
-            self.btnUpdate.config(state="normal")
-            self.btnReceived.config(state="normal")
             db_config = read_db_config()
             con = mysql.connector.connect(**db_config)
             cur = con.cursor()
@@ -567,27 +564,23 @@ class PageMain(tk.Frame):
             except: pass
             self.entRecBy.insert(END, data[11])
             if data[14] == "DONE":
-                    self.opsiStatus.current(1)
-                    # ngapain diUpdate lagi wo sudah DONE
-                    self.btnUpdate.config(state="disable")
-            elif data[14] == "CANCEL": # status CANCEL masih bisa diupdate
-                    self.opsiStatus.current(2)
+                self.opsiStatus.current(1)
+                self.btnReceived.config(state="normal")
+                # ngapain diUpdate lagi wo sudah DONE
+            elif data[14] == "CANCEL": 
+                self.opsiStatus.current(2)
+                self.btnReceived.config(state="normal")
             elif data[14] == "PENDING":
-                    self.opsiStatus.current(3)
-                    self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
-                    self.btnUpdate.config(state="disable") #tidak dapat update karena wo sudah di list pending
-            elif data[14] == "ONPROGRESS":
-                    self.opsiStatus.current(0)
-                    self.btnReceived.config(state="disable") #tidak dapat receive karena wo sedang on progress
-                    self.btnUpdate.config(state="disable") #tidak dapat update karena wo sedang on progress
+                self.opsiStatus.current(3)
+            elif data[14] == "ONPROGRESS" or data[14] == "RETURNEDCS" or data[14] == "TAKENBYENG":
+                self.opsiStatus.current(0)
             else:
-                    self.opsiStatus.current(0)
-                    self.btnReceived.config(state="disable") #tidak dapat receive karena wo belum done
+                self.btnUpdate.config(state="normal")
+                self.btnDateDone.config(state="normal")
+                self.opsiStatus.current(0)
             if data[10] == True and ifca_value[:2] == "TN":
-                    # tidak dapat receive wo TN karena sudah direceive
-                    self.btnReceived.config(state="disable")
-                    # ngapain diUpdate lagi wo TN sudah di CS
-                    self.btnUpdate.config(state="disable")
+                # tidak dapat receive wo TN karena sudah direceive
+                self.btnReceived.config(state="disable")
             
             # read only setelah entry terisi
             self.entrySet("mainreadifca")
