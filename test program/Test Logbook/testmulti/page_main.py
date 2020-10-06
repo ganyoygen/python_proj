@@ -362,20 +362,21 @@ class PageMain(tk.Frame):
 
             lastwo = hasil[len(hasil)-1] # Max num wo terakhir
             print("Jumlah Wo:",len(hasil)) # Jumlah wo didapat
-            newWoNum = (int(max(lastwo))+1) # cari wo, + 1
-            getNewWo = str(newWoNum) # Wo baru siap dipakai
-            print("Get new Wo:",getNewWo) 
-            self.entWo.delete(0, END)
-    
-            if len(str(getNewWo)) <= 6:
-                self.entWo.insert(0, getNewWo)
-                self.entIfca.focus_set()
-            else:
-                messagebox.showwarning(title="Peringatan", \
-                        message="maaf lebar data untuk no WO hanya sampai 6 digit")
-            self.entWo.config(state="normal")
-            cur.close()
-            con.close()
+            try: # prevent error, ketika IFCA terakhir tanpa no. WO (blank)
+                newWoNum = (int(max(lastwo))+1) # cari wo, + 1
+                getNewWo = str(newWoNum) # Wo baru siap dipakai
+                print("Get new Wo:",getNewWo)
+                self.entWo.delete(0, END)
+                if len(str(getNewWo)) <= 6:
+                    self.entWo.insert(0, getNewWo)
+                    self.entIfca.focus_set()
+                else:
+                    messagebox.showwarning(title="Peringatan", \
+                            message="maaf lebar data untuk no WO hanya sampai 6 digit")
+                self.entWo.config(state="normal")
+                cur.close()
+                con.close()
+            except: pass
         except mysql.connector.Error as err:
             messagebox.showerror(title="Error", \
                 message="SQL Log: {}".format(err))
