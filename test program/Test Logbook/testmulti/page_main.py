@@ -550,17 +550,18 @@ class PageMain(tk.Frame):
             self.entStaff.insert(END, data[6])
             #TGL done
             try: 
-                    self.entTgldone.insert(END, data[8])
-                    getTgldone = self.entTgldone.get() #dari mysql YYYY-MM-DD
-                    #balikin menjadi DD-MM-YYYY
-                    showtgldone = str(getTgldone)[8:] + '-' + str(getTgldone)[5:7] +'-' + str(getTgldone)[:4]
-                    self.entTgldone.delete(0, END)
-                    self.entTgldone.insert(END, showtgldone)
-            except:
-                    pass
+                self.entTgldone.insert(END, data[8])
+                getTgldone = self.entTgldone.get() #dari mysql YYYY-MM-DD
+                #balikin menjadi DD-MM-YYYY
+                showtgldone = str(getTgldone)[8:] + '-' + str(getTgldone)[5:7] +'-' + str(getTgldone)[:4]
+                self.entTgldone.delete(0, END)
+                self.entTgldone.insert(END, showtgldone)
+            except: pass
             self.entJamdone.insert(END, data[9])
             self.entWorkAct.insert(END, data[7])
-            try: self.entRecDate.insert(END, data[12])
+            try: 
+                showdate = str(data[12])[8:10] + '-' + str(data[12])[5:7] +'-' + str(data[12])[:4]+' '+str(data[12])[11:]
+                self.entRecDate.insert(END, showdate)
             except: pass
             self.entRecBy.insert(END, data[11])
             if data[14] == "DONE":
