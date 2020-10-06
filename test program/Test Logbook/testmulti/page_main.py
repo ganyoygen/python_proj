@@ -328,6 +328,8 @@ class PageMain(tk.Frame):
     def onSearch(self):
         opsi = self.opsicari.get()
         cari = self.entCari.get()
+        self.entrySet("mainclear")
+        self.opsiStatus.current(0)
         if opsi == "Tanggal":
                 cari = self.checktgl(cari)
                 sql = "SELECT * FROM logbook WHERE date_create LIKE %s ORDER BY date_create DESC"
