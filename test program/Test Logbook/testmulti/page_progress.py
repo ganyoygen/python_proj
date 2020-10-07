@@ -276,6 +276,9 @@ class PageProg(tk.Frame):
                     baris="ganjil"
                 #tampilkan mulai dari tanggal
                 self.tabelcomm.insert('', 'end', values=dat[2:], tags=baris)
+                # nantinya kumpulkan dulu data progres selanjutnya store ke sql
+                # self.commitDetail.insert(END, dat[2:])
+                # self.commitDetail.insert(END, "\r\n")
                 i+=1
             self.tabelcomm.tag_configure("ganjil", background="gainsboro")
             self.tabelcomm.tag_configure("genap", background="floral white")
@@ -290,8 +293,8 @@ class PageProg(tk.Frame):
         try:
                 curItem = self.tabelProg.item(self.tabelProg.focus())
                 ifca_value = curItem['values'][1]
-                self.commited_table(ifca_value)
                 self.entrySet("progclear")
+                self.commited_table(ifca_value)
                 self.progIfca.insert(END, ifca_value)
                 db_config = read_db_config()
                 con = mysql.connector.connect(**db_config)
@@ -531,6 +534,8 @@ class PageProg(tk.Frame):
                 if len(setdate.value.strip()) > 0: 
                     # output <tanggal> <jam>, lanjutkan perintah DONE
                     print("setdate.value =",setdate.value)
+                    print("tgl",setdate.value[0:10])
+                    print("jam",setdate.value[11:])
                 else: 
                     # output kosong, batalkan perintah DONE
                     print("batalkan done")
