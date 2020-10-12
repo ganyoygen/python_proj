@@ -733,6 +733,12 @@ class PageMain(tk.Frame):
                     "VALUES(%s,%s,%s,%s,%s)"
                     cur.execute(sql1,(cIfca,getTimeAcc,cWorkAct.strip(),cStaff.upper(),""))
             # 2 #
+            elif cStatus == "CANCEL":
+                if len(cWorkAct.strip()) <= 0: 
+                    messagebox.showwarning(title="Peringatan",message="Work Action harus diisi.")
+                    self.entWorkAct.focus_set()
+                    self.entWorkAct.delete('1.0', 'end')
+                    return # stop aja karena cWorkAct tidak diisi
             else : # UPDATE / CANCEL tidak perlu tanggal
                 getTglDone = None
                 jamdone = None
