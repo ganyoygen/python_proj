@@ -668,7 +668,7 @@ class PageMain(tk.Frame):
                     cur = con.cursor()
                     sql = "INSERT INTO logbook (no_wo, no_ifca, date_create, time_create, unit, work_req, staff)"+\
                           "VALUES(%s,%s,%s,%s,%s,%s,%s)"
-                    cur.execute(sql,(cWo,cIfca.upper(),self.checktgl(cTglBuat),cJamBuat,cUnit.upper(),cWorkReq,cStaff.upper()))
+                    cur.execute(sql,(cWo,cIfca.upper(),self.checktgl(cTglBuat),cJamBuat,cUnit.upper(),cWorkReq.strip(),cStaff.upper()))
                     messagebox.showinfo(title="Informasi", \
                                         message="Data sudah di tersimpan.")
                     cur.close()
@@ -731,13 +731,13 @@ class PageMain(tk.Frame):
                 else: ### jgn eksekusi sekarang mungkin?
                     sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
                     "VALUES(%s,%s,%s,%s,%s)"
-                    cur.execute(sql1,(cIfca,getTimeAcc,cWorkAct,cStaff.upper(),""))
+                    cur.execute(sql1,(cIfca,getTimeAcc,cWorkAct.strip(),cStaff.upper(),""))
             # 2 #
             else : # UPDATE / CANCEL tidak perlu tanggal
                 getTglDone = None
                 jamdone = None
             sql = "UPDATE logbook SET no_wo=%s,no_ifca=%s,date_create=%s,work_req=%s,staff=%s,status_ifca=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_ifca =%s"
-            cur.execute(sql,(cWo,cIfca,getTglBuat,cWorkReq,cStaff.upper(),cStatus,getTglDone,jamdone,cWorkAct,cIfca))
+            cur.execute(sql,(cWo,cIfca,getTglBuat,cWorkReq.strip(),cStaff.upper(),cStatus,getTglDone,jamdone,cWorkAct.strip(),cIfca))
             messagebox.showinfo(title="Informasi", \
                     message="Data sudah di terupdate.")
             con.commit()
