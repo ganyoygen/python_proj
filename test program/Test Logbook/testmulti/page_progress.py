@@ -66,7 +66,7 @@ class PageProg(tk.Frame):
         self.progWorkReq.grid(row=3, column=1,sticky=W)
         
         ttk.Label(self.topFrame, text='     ').grid(row=3,column=2,sticky=W,pady=5,padx=10)
-        self.commitDetail = ScrolledText(self.topFrame,height=8,width=40)
+        self.commitDetail = ScrolledText(self.topFrame,height=8,width=50)
         self.commitDetail.grid(row=3, column=3,sticky=W)
 
         entLeft = ttk.Frame(self.topFrame)
@@ -121,7 +121,7 @@ class PageProg(tk.Frame):
         self.rstswo = ttk.Radiobutton(btnselect,text="RETURN",variable=self.statwosel,value="RETU",command=self.progress_refresh)
         ttk.Label(btnselect, text="     ").grid(row=1,column=4,sticky=E)
         self.rstswo.grid(row=1, column=5,sticky=W)
-        self.rstswo = ttk.Radiobutton(btnselect,text="TAKE",variable=self.statwosel,value="TAKE",command=self.progress_refresh)
+        self.rstswo = ttk.Radiobutton(btnselect,text="TAKEN",variable=self.statwosel,value="TAKE",command=self.progress_refresh)
         ttk.Label(btnselect, text="     ").grid(row=1,column=6,sticky=E)
         self.rstswo.grid(row=1, column=7,sticky=W)
         ttk.Label(btnselect, text="     ").grid(row=1,column=8,sticky=E)
@@ -269,7 +269,6 @@ class PageProg(tk.Frame):
             self.tabelcomm.column("DEPT", width=80,anchor="w")
             
             i=0
-            # fullcom = ""
             for dat in results: 
                 if(i%2):
                     baris="genap"
@@ -277,19 +276,7 @@ class PageProg(tk.Frame):
                     baris="ganjil"
                 #tampilkan mulai dari tanggal
                 self.tabelcomm.insert('', 'end', values=dat[2:], tags=baris)
-                # nantinya kumpulkan dulu data progres selanjutnya store ke sql
-                self.commitDetail.insert(END, dat[2:])
-                self.commitDetail.insert(END, "\r\n")
-                # getcom = dat[2:]
-                # delspace = getcom.rstrip('\n')
-                # fullcom = (fullcom,"\r\n",getcom)
                 i+=1
-            getcom = self.commitDetail.get(1.0,END)
-            # getcom = getcom.rstrip('\r\n')
-            self.commitDetail.delete('1.0', 'end')
-            print(getcom)
-            # print(fullcom)
-            # self.commitDetail.insert(END,fullcom)
             self.tabelcomm.tag_configure("ganjil", background="gainsboro")
             self.tabelcomm.tag_configure("genap", background="floral white")
             cur.close()
@@ -399,19 +386,19 @@ class PageProg(tk.Frame):
             getTime = datetime.now()
             
             if len(getUsrUpd.strip()) == 0: # .strip memastikan space/tab termasuk len 0
-                    messagebox.showwarning(title="Peringatan",message="Siapa yang update commit?")
-                    self.commitby.focus_set()
-                    self.commitby.delete(0, END)
+                messagebox.showwarning(title="Peringatan",message="Siapa yang update commit?")
+                self.commitby.focus_set()
+                self.commitby.delete(0, END)
             elif len(getcommit.strip()) == 0: # .strip memastikan space/tab termasuk len 0
-                    messagebox.showwarning(title="Peringatan",message="Silahkan isi perubahan terlebih dahulu")
-                    self.commitDetail.focus_set()
-                    self.commitDetail.delete('1.0','end')
+                messagebox.showwarning(title="Peringatan",message="Silahkan isi perubahan terlebih dahulu")
+                self.commitDetail.focus_set()
+                self.commitDetail.delete('1.0','end')
             else:
-                    sql = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
-                    "VALUES(%s,%s,%s,%s,%s)"
-                    cur.execute(sql,(getIfca,getTime,getcommit.strip(),getUsrUpd.upper(),""))
-                    messagebox.showinfo(title="Informasi",message="Update telah tersimpan oleh {}.".format(getUsrUpd))
-                    self.progress_detail(self)
+                sql = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
+                "VALUES(%s,%s,%s,%s,%s)"
+                cur.execute(sql,(getIfca,getTime,getcommit.strip(),getUsrUpd.upper(),""))
+                messagebox.showinfo(title="Informasi",message="Update telah tersimpan oleh {}.".format(getUsrUpd))
+                self.progress_detail(self)
             con.commit()
             cur.close()
             con.close()
@@ -529,23 +516,41 @@ class PageProg(tk.Frame):
             cur = con.cursor()
             getIfca = self.progIfca.get()
             getAccBy = self.commitby.get()
+            getcommit = self.commitDetail.get(1.0,END) # ('1.0', 'end')
             from datetime import datetime
-            getTimeAcc = datetime.now()
-            autocom = "Status wo DONE oleh {}.".format(getAccBy)
+            getRealTime = datetime.now()
+            # autocom = "Status wo DONE oleh {}.".format(getAccBy)
             setStatus = "DONE"
 
             if len(getAccBy.strip()) == 0:
                 messagebox.showwarning(title="Peringatan",message="Siapa staff yang handle WO?")
                 self.commitby.focus_set()
                 self.commitby.delete(0, END)
+            elif len(getcommit.strip()) == 0: # .strip memastikan space/tab termasuk len 0
+                    messagebox.showwarning(title="Peringatan",message="Silahkan isi perubahan terlebih dahulu")
+                    self.commitDetail.focus_set()
+                    self.commitDetail.delete('1.0','end')
             else: 
                 setdate = PopupDateTime(self.parent)
                 setdate.parent.wait_window(setdate.top)
                 if len(setdate.value.strip()) > 0: 
                     # output <tanggal> <jam>, lanjutkan perintah DONE
-                    print("setdate.value =",setdate.value)
-                    print("tgl",setdate.value[0:10])
-                    print("jam",setdate.value[11:])
+                    getdate, gettime = setdate.value.split() #pisah tanggal dan jam
+                    # print("setdate.value =",setdate.value)
+                    # print("tgl",getdate)
+                    # print("jam",gettime)
+
+                    sqllastcom = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
+                    "VALUES(%s,%s,%s,%s,%s)"
+                    cur.execute(sqllastcom,(getIfca,getRealTime,getcommit.strip(),getAccBy.upper(),""))
+
+                    storedata = self.getDataComm(getIfca)
+
+                    sqlmain = "UPDATE logbook SET staff=%s,status_ifca=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_ifca =%s"
+                    cur.execute(sqlmain,(getAccBy.upper(),setStatus,self.checktgl(getdate),gettime,storedata.strip(),getIfca))
+
+                    messagebox.showinfo(title="Informasi",message="Update telah tersimpan oleh {}.".format(getAccBy))
+                    self.progress_refresh()
                 else: 
                     # output kosong, batalkan perintah DONE
                     print("batalkan done")
@@ -555,3 +560,42 @@ class PageProg(tk.Frame):
         except mysql.connector.Error as err:
             messagebox.showerror(title="Error", \
                 message="SQL Log: {}".format(err)) 
+
+    def getDataComm(self,data):
+        try:
+            db_config = read_db_config()
+            con = mysql.connector.connect(**db_config)
+            cur = con.cursor()
+            sql = "SELECT * FROM onprogress WHERE no_ifca LIKE %s"
+        #     data = "TN10020352"
+            val = ("%{}%".format(data),)
+            cur.execute(sql, val)
+            results = cur.fetchall()
+            
+            i=0
+            self.commitDetail.delete('1.0', 'end')
+            for dat in results: 
+                #tampilkan mulai dari tanggal
+                # nantinya kumpulkan dulu data progres selanjutnya store ke sql
+                self.commitDetail.insert(END, dat[2:])
+                self.commitDetail.insert(END, "\r\n")
+                i+=1
+            getcom = self.commitDetail.get(1.0,END)
+            self.commitDetail.delete('1.0', 'end')
+            cur.close()
+            con.close()
+            return getcom
+        
+        except mysql.connector.Error as err:
+            messagebox.showerror(title="Error", \
+                message="SQL Log: {}".format(err))
+
+    def checktgl(self,data):
+        if len(str(data)) == 10:
+            cHari = str(data)[0:2]
+            cBulan = str(data)[3:5]
+            cTahun = str(data)[6:]
+            return datetime.date(int(cTahun),int(cBulan),int(cHari))
+        else:
+            return None
+
