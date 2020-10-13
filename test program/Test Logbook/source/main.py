@@ -31,8 +31,9 @@ class WindowDraggable():
             root.geometry("+%s+%s" % (x, y))
 
 class MainLog:
-    def __init__(self, parent):
+    def __init__(self,parent,user):
         self.parent = parent
+        self.user = user
         self.parent.protocol("WM_DELETE_WINDOWS", self.keluar)
         lebar=950
         tinggi=680
@@ -47,6 +48,7 @@ class MainLog:
         frameWin.pack(fill=X,side=TOP)
         WindowDraggable(frameWin)
         Label(frameWin, text='Work Order Logbook Record',bg="#898",fg="white").pack(side=LEFT,padx=20)
+        Label(frameWin, text=("Login:",self.user),bg="#898",fg="white").pack(side=RIGHT,padx=20)
         '''
         # Menghilangkan Frame windows
         buttonx = Button(frameWin, text="X",fg="white", bg="#FA8072", width=6, height=2,bd=0,\
@@ -55,23 +57,25 @@ class MainLog:
         buttonx.pack(side=RIGHT)
         '''
 
-        self.notebook = ttk.Notebook(root)
+        self.notebook = ttk.Notebook(self.parent) # lihat, self.parent = root
         self.notebook.pack(fill="both", expand=True)
 
         page1 = PageMain(self.notebook)
-        page2 = Pending(self.notebook)
-        page3 = PageProg(self.notebook)
+        page2 = PageProg(self.notebook)
+        page3 = Pending(self.notebook)
         self.notebook.add(page1, text="Main")
-        self.notebook.add(page2, text="Pending")
-        self.notebook.add(page3, text="Progress")
+        self.notebook.add(page2, text="Progress")
+        self.notebook.add(page3, text="Pending")
 
     def keluar(self,event=None):
         self.parent.destroy()
 
-def main():
+def start(user):
     os.system("cls")
     root.title("Project Logbook by GanyoyGen")
     root.iconbitmap(str(os.getcwd()+"\\"+"icon-icons.com_main.ico"))
-    MainLog(root)
+    MainLog(root,user)
+
+if __name__ == "__main__":
+    start("UkikLodom")
     root.mainloop()
-main()
