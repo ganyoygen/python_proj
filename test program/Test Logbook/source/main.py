@@ -62,8 +62,8 @@ class MainLog:
         self.notebook = ttk.Notebook(self.parent) # lihat, self.parent = root
         self.notebook.pack(fill="both", expand=True)
 
-        page1 = PageMain(self.notebook)
-        page2 = PageProg(self.notebook)
+        page1 = PageMain(self.notebook,self.dept)
+        page2 = PageProg(self.notebook,self.dept)
         page3 = Pending(self.notebook)
         self.notebook.add(page1, text="Main")
         self.notebook.add(page2, text="Progress")
@@ -79,5 +79,5 @@ def start(user,dept):
     MainLog(root,user,dept)
 
 if __name__ == "__main__":
-    start("UkikLodom","ROOT")
+    start("UkikLodom","ENG")
     root.mainloop()

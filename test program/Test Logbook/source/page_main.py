@@ -14,9 +14,10 @@ from tkinter.scrolledtext import ScrolledText
 judul_kolom = ("WO","IFCA","Tanggal","UNIT","Work Request","Staff","Work Action","Tanggal Done","Jam Done","Received")
 
 class PageMain(tk.Frame):
-    def __init__(self,parent):
+    def __init__(self,parent,dept):
         tk.Frame.__init__(self,parent)
         self.parent = parent
+        self.dept = dept
         imgdateset = tk.PhotoImage(file = str(os.getcwd()+"\\"+"icon-icons.com_date.png"))
         self.imgdateget = imgdateset.subsample(2, 2) # Resizing image by.subsample to fit on button
         self.btnselect = StringVar(parent,value="TN")
@@ -131,23 +132,23 @@ class PageMain(tk.Frame):
 
     def komponenTengah(self):
         #panel button
+        self.btnClear = Button(self.midFrame, text='New',\
+            command=self.onClear, width=10,\
+            relief=RAISED, bd=2, bg="#666", fg="white",\
+            activebackground="#444",activeforeground="white")
+        self.btnClear.grid(row=1, column=1,pady=10,padx=5)
+
         self.btnSave = Button(self.midFrame, text='Save',\
             command=self.onSave, width=10,\
             relief=RAISED, bd=2, bg="#666", fg="white",\
             activebackground="#444",activeforeground="white" )
-        self.btnSave.grid(row=1, column=1,pady=10,padx=5)
+        self.btnSave.grid(row=1,column=2,pady=10,padx=5)
 
         self.btnUpdate = Button(self.midFrame, text='Update',\
             command=self.onUpdate,state="disable", width=10,\
             relief=RAISED, bd=2, bg="#666", fg="white",\
             activebackground="#444",activeforeground="white")
-        self.btnUpdate.grid(row=1,column=2,pady=10,padx=5)
-                
-        self.btnClear = Button(self.midFrame, text='Clear',\
-            command=self.onClear, width=10,\
-            relief=RAISED, bd=2, bg="#666", fg="white",\
-            activebackground="#444",activeforeground="white")
-        self.btnClear.grid(row=1,column=3,pady=10,padx=5)
+        self.btnUpdate.grid(row=1,column=3,pady=10,padx=5)
 
         self.btnDelete = Button(self.midFrame, text='Delete',\
             command=self.onDelete,state="disable", width=10,\
@@ -230,6 +231,8 @@ class PageMain(tk.Frame):
             self.entRecDate.delete(0, END)
             self.entRecBy.config(state="normal")
             self.entRecDate.config(state="normal")
+            self.btnDelete.config(state="disable")
+            self.btnReceived.config(state="disable")
 
             # A. readonly aja, input pake popup
             self.entTglbuat.config(state="readonly")
@@ -243,8 +246,6 @@ class PageMain(tk.Frame):
             self.btnDateDone.config(state="disable")
             self.btnSave.config(state="disable")
             self.btnUpdate.config(state="disable")
-            self.btnDelete.config(state="disable")
-            self.btnReceived.config(state="disable")
             self.rbtnBM.config(state="disable")
             self.rbtnTN.config(state="disable")
         elif opsi == "mainreadifca":
@@ -525,6 +526,7 @@ class PageMain(tk.Frame):
             ifca_value = curItem['values'][1]  
             self.entrySet("mainclear")
             self.entrySet("disablebtn")
+            if self.dept == "ROOT": self.btnDelete.config(state="normal")
             self.entTglbuat.config(state="normal")
             self.entJambuat.config(state="normal")
             self.entTgldone.config(state="normal")
@@ -599,12 +601,15 @@ class PageMain(tk.Frame):
             cur = con.cursor()
             self.entWo.config(state="normal")
             cIfca = self.entIfca.get()
-            sql = "DELETE FROM logbook WHERE no_ifca =%s"
-            cur.execute(sql,(cIfca,))
-            self.onClear()
-            messagebox.showinfo(title="Informasi", \
-                                message="Data sudah di hapus.")
-            
+            if messagebox.askokcancel('Delete Data','WO dengan no {} akan dihapus?'.format(cIfca)) == True:
+                sqlmain = "DELETE FROM logbook WHERE no_ifca =%s"
+                cur.execute(sqlmain,(cIfca,))
+                sqlprog = "DELETE FROM onprogress WHERE no_ifca =%s"
+                cur.execute(sqlprog,(cIfca,))
+                self.onSearch() #update received sesuai tabel yg dicari
+                messagebox.showinfo(title="Delete {}".format(cIfca), \
+                                    message="Data sudah di hapus.")
+            else: pass
             con.commit()
             cur.close()
             con.close()
