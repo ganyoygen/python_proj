@@ -1,9 +1,18 @@
 import os
 import tkinter as tk
 from tkinter import ttk, Toplevel
-from entryDate import CustomDateEntry # input tgl pake kalender
+from tkcalendar import DateEntry
 import sys
 
+class CustomDateEntry(DateEntry):
+    def _select(self, event=None):
+        date = self._calendar.selection_get()
+        if date is not None:
+            self._set_text(date.strftime('%d-%m-%Y'))
+            self.event_generate('<<DateEntrySelected>>')
+        self._top_cal.withdraw()
+        if 'readonly' not in self.state():
+            self.focus_set()
 
 class PopupDateTime(object):
     def __init__(self,master):

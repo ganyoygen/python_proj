@@ -6,7 +6,6 @@ import time
 import datetime
 
 from mysqlcon import read_db_config
-from entryDate import CustomDateEntry # input tgl pake kalender
 from popup_date import PopupDateTime # popup set tgl jam
 from tkinter import *
 from tkinter import ttk, messagebox, filedialog
