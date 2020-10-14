@@ -497,27 +497,33 @@ class PageMain(tk.Frame):
                 message="SQL Log: {}".format(err))
 
     def onReceived(self):
-        cIfca = self.entIfca.get()
-        if len(cIfca.strip()) == 0:
+        # try:
+        ifca = self.entIfca.get()
+        dept = self.entRecBy.get().split(".")
+        if len(dept) <= 1: dept = [self.user,"ROOT"]
+        if len(ifca.strip()) == 0:
             messagebox.showwarning(title="Peringatan",message="No IFCA Kosong.")
             self.entIfca.focus_set()
-        elif (cIfca[:2] == "TN"):
+        elif (ifca[:2] == "TN"):
             if (self.dept == "CS") or (self.dept == "RCP"):
-                self.doReceive(cIfca)
-            else:
-                messagebox.showerror(title="Receive WO {}".format(cIfca), \
-                                message="ERROR. WO TN hanya bisa diterima oleh RCP/CS")
-        elif (cIfca[:2] == "BM"):
+                if messagebox.askokcancel('Receive WO {}'.format(ifca),'WO sudah diterima?') == True: 
+                    self.doReceive(ifca)
+            else: messagebox.showerror(title="Receive WO {}".format(ifca), \
+                                message="WO TN hanya bisa diterima oleh RCP/CS")
+        elif (ifca[:2] == "BM"):
             if (self.dept == "DOCON") or (self.dept == "ENG"):
-                self.doReceive(cIfca)
-            else:
-                messagebox.showerror(title="Receive WO {}".format(cIfca), \
-                                message="ERROR. WO BM hanya bisa diterima oleh DOCON/ENG")
+                # antisipasi duplikasi receive
+                if (dept[1] == self.dept):
+                    messagebox.showerror(title="Replacing !", \
+                                message="WO Sudah diterima oleh {}".format(self.entRecBy.get()))
+                elif messagebox.askokcancel('Receive WO {}'.format(ifca),'WO sudah diterima?') == True: 
+                    self.doReceive(ifca)
+            else: messagebox.showerror(title="Receive WO {}".format(ifca), \
+                                message="WO BM hanya bisa diterima oleh DOCON/ENG")
         else: pass
 
     def doReceive(self,data):
-        # PR: masih belum  bisa digabung
-        # recuser = "{1}.{2}".format(*self.user,**self.dept)
+        receiver = self.user + "." + self.dept
         try:
             db_config = read_db_config()
             con = mysql.connector.connect(**db_config)
@@ -526,10 +532,10 @@ class PageMain(tk.Frame):
             from datetime import datetime
             tsekarang = datetime.now()
             sql = "UPDATE logbook SET date_received=%s,received=%s,wo_receiver=%s WHERE no_ifca =%s"
-            cur.execute(sql,(tsekarang,setreceived,self.user,data))
+            cur.execute(sql,(tsekarang,setreceived,receiver,data))
             self.onSearch() #update received sesuai tabel yg dicari
-            messagebox.showinfo(title="Informasi", \
-                        message="Wo {} sudah diterima.".format(data))
+            # messagebox.showinfo(title="Informasi", \
+            #             message="Wo {} sudah diterima.".format(data))
             con.commit()
             cur.close()
             con.close()
