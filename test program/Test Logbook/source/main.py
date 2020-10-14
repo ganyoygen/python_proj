@@ -50,7 +50,7 @@ class MainLog:
         WindowDraggable(frameWin)
         Label(frameWin, text='Work Order Logbook Record',bg="#898",fg="white").pack(side=LEFT,padx=20)
         # Label(frameWin, text=("Login:",self.user),bg="#898",fg="white").pack(side=RIGHT,padx=20)
-        Label(frameWin, text=("Login: {0}@{1}".format(self.user,self.dept)),bg="#898",fg="white").pack(side=RIGHT,padx=20)
+        Label(frameWin, text=("Login: {0}.{1}".format(self.user,self.dept)),bg="#898",fg="white").pack(side=RIGHT,padx=20)
         '''
         # Menghilangkan Frame windows
         buttonx = Button(frameWin, text="X",fg="white", bg="#FA8072", width=6, height=2,bd=0,\
@@ -62,8 +62,8 @@ class MainLog:
         self.notebook = ttk.Notebook(self.parent) # lihat, self.parent = root
         self.notebook.pack(fill="both", expand=True)
 
-        page1 = PageMain(self.notebook,self.dept)
-        page2 = PageProg(self.notebook,self.dept)
+        page1 = PageMain(self.notebook,self.user,self.dept)
+        page2 = PageProg(self.notebook,self.user,self.dept)
         page3 = Pending(self.notebook)
         self.notebook.add(page1, text="Main")
         self.notebook.add(page2, text="Progress")

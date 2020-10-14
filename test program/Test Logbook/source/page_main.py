@@ -14,9 +14,10 @@ from tkinter.scrolledtext import ScrolledText
 judul_kolom = ("WO","IFCA","Tanggal","UNIT","Work Request","Staff","Work Action","Tanggal Done","Jam Done","Received")
 
 class PageMain(tk.Frame):
-    def __init__(self,parent,dept):
+    def __init__(self,parent,user,dept):
         tk.Frame.__init__(self,parent)
         self.parent = parent
+        self.user = user
         self.dept = dept
         imgdateset = tk.PhotoImage(file = str(os.getcwd()+"\\"+"icon-icons.com_date.png"))
         self.imgdateget = imgdateset.subsample(2, 2) # Resizing image by.subsample to fit on button
@@ -500,25 +501,41 @@ class PageMain(tk.Frame):
         if len(cIfca.strip()) == 0:
             messagebox.showwarning(title="Peringatan",message="No IFCA Kosong.")
             self.entIfca.focus_set()
-        else:
-            try:
-                db_config = read_db_config()
-                con = mysql.connector.connect(**db_config)
-                cur = con.cursor()
-                setreceived = True
-                from datetime import datetime
-                tsekarang = datetime.now()
-                sql = "UPDATE logbook SET date_received=%s,received=%s WHERE no_ifca =%s"
-                cur.execute(sql,(tsekarang,setreceived,cIfca))
-                self.onSearch() #update received sesuai tabel yg dicari
-                messagebox.showinfo(title="Informasi", \
-                            message="Wo {} sudah diterima.".format(cIfca))
-                con.commit()
-                cur.close()
-                con.close()
-            except mysql.connector.Error as err:
-                messagebox.showerror(title="Error", \
-                    message="SQL Log: {}".format(err))          
+        elif (cIfca[:2] == "TN"):
+            if (self.dept == "CS") or (self.dept == "RCP"):
+                self.doReceive(cIfca)
+            else:
+                messagebox.showerror(title="Receive WO {}".format(cIfca), \
+                                message="ERROR. WO TN hanya bisa diterima oleh RCP/CS")
+        elif (cIfca[:2] == "BM"):
+            if (self.dept == "DOCON") or (self.dept == "ENG"):
+                self.doReceive(cIfca)
+            else:
+                messagebox.showerror(title="Receive WO {}".format(cIfca), \
+                                message="ERROR. WO BM hanya bisa diterima oleh DOCON/ENG")
+        else: pass
+
+    def doReceive(self,data):
+        # PR: masih belum  bisa digabung
+        # recuser = "{1}.{2}".format(*self.user,**self.dept)
+        try:
+            db_config = read_db_config()
+            con = mysql.connector.connect(**db_config)
+            cur = con.cursor()
+            setreceived = True
+            from datetime import datetime
+            tsekarang = datetime.now()
+            sql = "UPDATE logbook SET date_received=%s,received=%s,wo_receiver=%s WHERE no_ifca =%s"
+            cur.execute(sql,(tsekarang,setreceived,self.user,data))
+            self.onSearch() #update received sesuai tabel yg dicari
+            messagebox.showinfo(title="Informasi", \
+                        message="Wo {} sudah diterima.".format(data))
+            con.commit()
+            cur.close()
+            con.close()
+        except mysql.connector.Error as err:
+            messagebox.showerror(title="Error", \
+                message="SQL Log: {}".format(err))
 
     def mainlog_detail(self, event):
         try:
@@ -703,7 +720,11 @@ class PageMain(tk.Frame):
             jamdone = self.entJamdone.get()
             getTglDone = self.checktgl(self.entTgldone.get()) #check tgl dulu
             #eksekusi sql
-            # 2 update commit for pending
+            if len(cWorkReq.strip()) <= 0:
+                messagebox.showwarning(title="Peringatan",message="Work Request harus diisi.")
+                self.entWorkReq.focus_set()
+                self.entWorkReq.delete('1.0', 'end')
+                return # stop aja karena cWorkAct tidak diisi
             if cStatus == "DONE":
                 if len(cStaff.strip()) <= 0: 
                     messagebox.showwarning(title="Peringatan",message="Staff ENG harus diisi.")
@@ -736,14 +757,15 @@ class PageMain(tk.Frame):
                     sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
                     "VALUES(%s,%s,%s,%s,%s)"
                     cur.execute(sql1,(cIfca,getTimeAcc,cWorkAct.strip(),cStaff.upper(),""))
-            # 2 #
             elif cStatus == "CANCEL":
+                getTglDone = None
+                jamdone = None
                 if len(cWorkAct.strip()) <= 0: 
                     messagebox.showwarning(title="Peringatan",message="Work Action harus diisi.")
                     self.entWorkAct.focus_set()
                     self.entWorkAct.delete('1.0', 'end')
                     return # stop aja karena cWorkAct tidak diisi
-            else : # UPDATE / CANCEL tidak perlu tanggal
+            else : # UPDATE tidak perlu tanggal
                 getTglDone = None
                 jamdone = None
             sql = "UPDATE logbook SET no_wo=%s,no_ifca=%s,date_create=%s,work_req=%s,staff=%s,status_ifca=%s,date_done=%s,time_done=%s,work_act=%s WHERE no_ifca =%s"
