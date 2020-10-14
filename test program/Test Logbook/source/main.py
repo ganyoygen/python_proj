@@ -31,9 +31,10 @@ class WindowDraggable():
             root.geometry("+%s+%s" % (x, y))
 
 class MainLog:
-    def __init__(self,parent,user):
+    def __init__(self,parent,user,dept):
         self.parent = parent
         self.user = user
+        self.dept = dept
         self.parent.protocol("WM_DELETE_WINDOWS", self.keluar)
         lebar=950
         tinggi=680
@@ -48,7 +49,8 @@ class MainLog:
         frameWin.pack(fill=X,side=TOP)
         WindowDraggable(frameWin)
         Label(frameWin, text='Work Order Logbook Record',bg="#898",fg="white").pack(side=LEFT,padx=20)
-        Label(frameWin, text=("Login:",self.user),bg="#898",fg="white").pack(side=RIGHT,padx=20)
+        # Label(frameWin, text=("Login:",self.user),bg="#898",fg="white").pack(side=RIGHT,padx=20)
+        Label(frameWin, text=("Login: {0}@{1}".format(self.user,self.dept)),bg="#898",fg="white").pack(side=RIGHT,padx=20)
         '''
         # Menghilangkan Frame windows
         buttonx = Button(frameWin, text="X",fg="white", bg="#FA8072", width=6, height=2,bd=0,\
@@ -70,12 +72,12 @@ class MainLog:
     def keluar(self,event=None):
         self.parent.destroy()
 
-def start(user):
+def start(user,dept):
     os.system("cls")
     root.title("Project Logbook by GanyoyGen")
     root.iconbitmap(str(os.getcwd()+"\\"+"icon-icons.com_main.ico"))
-    MainLog(root,user)
+    MainLog(root,user,dept)
 
 if __name__ == "__main__":
-    start("UkikLodom")
+    start("UkikLodom","ROOT")
     root.mainloop()

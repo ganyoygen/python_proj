@@ -1,11 +1,12 @@
 import mysql.connector
 import tkinter
+from mysqlcon import read_db_config
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from ttkthemes import ThemedTk # make sure to pip install ttkthemes
 
 
-root = ThemedTk(theme='blue')
+root = ThemedTk(theme='aquativo')
 
 class Login:
     def __init__(self,parent,title):
@@ -20,23 +21,20 @@ class Login:
         self.aturKomponen()
         
     def aturKomponen(self):
-        frameUtama = ttk.Frame(root)
-        frameUtama.pack(side=TOP,fill=BOTH)
+        ttk.Label(self.parent, text="Username").grid(row=0, column=0, sticky=W,padx=6)
+        ttk.Label(self.parent, text="Password").grid(row=1, column=0, sticky=W,padx=6)
 
-        ttk.Label(frameUtama, text="Username").grid(row=1, column=1, sticky=W,padx=6)
-        ttk.Label(frameUtama, text="Password").grid(row=2, column=1, sticky=W,padx=6)
-
-        self.entryUsername = ttk.Entry(frameUtama,width=17)
-        self.entryUsername.grid(row=1, column=2,sticky=W)
+        self.entryUsername = ttk.Entry(self.parent,width=17)
+        self.entryUsername.grid(row=0, column=1,sticky=W)
         self.entryUsername.bind('<Return>', self.letEntryPass)
 
-        self.entryPassword = ttk.Entry(frameUtama,show='+',width=17)
-        self.entryPassword.grid(row=2, column=2,sticky=W)
+        self.entryPassword = ttk.Entry(self.parent,show='+',width=17)
+        self.entryPassword.grid(row=1, column=1,sticky=W)
         self.entryPassword.bind('<Return>', self.proses)
 
-        self.buttonLogin = ttk.Button(frameUtama, text="Login", command=self.proses,\
+        self.buttonLogin = ttk.Button(self.parent, text="Login", command=self.proses,\
                              width=10)
-        self.buttonLogin.grid(row=3, column=2)
+        self.buttonLogin.grid(row=2, column=1)
 
         self.entryUsername.focus_set()
 
@@ -48,18 +46,34 @@ class Login:
 
     #proses cek user dan pass
     def proses(self,event=None):
-        user = str("admin")
-        password = str("admin")
-    
-        if (str(self.entryUsername.get()) == user) and (str(self.entryPassword.get()) == password):
-            root.destroy()
-            # import main
-            from main import start
-            start(user)
-        elif (user==""):
-            self.entryUsername.focus_set()
-        elif (password==""):
-            self.entryPassword.focus_set()
+        try:
+            db_config = read_db_config()
+            con = mysql.connector.connect(**db_config)
+            cur = con.cursor()
+            sql = "SELECT * FROM acct WHERE username = %s"
+            cur.execute(sql,(self.entryUsername.get(),))
+            data = cur.fetchone()
+        except mysql.connector.Error as err:
+            messagebox.showerror(title="Error",message="SQL Log: {}".format(err))
+        print(data)
+        if data != None : 
+            user = data[1]
+            password = data[2]
+            dept = data[3]
+            # login username samakan saja menjadi lower
+            if (str(self.entryUsername.get()).lower().strip() == user.lower()) \
+                and (str(self.entryPassword.get()) == password):
+                root.destroy()
+                # import main
+                from main import start
+                start(user,dept)
+            elif (user==""):
+                self.entryUsername.focus_set()
+            elif (password==""):
+                self.entryPassword.focus_set()
+            else: #untuk salah password
+                self.entryPassword.delete(0, END)
+                self.entryPassword.focus_set()
         else:
             self.entryUsername.delete(0, END)
             self.entryPassword.delete(0, END)
