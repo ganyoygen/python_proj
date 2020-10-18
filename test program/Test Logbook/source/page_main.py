@@ -600,7 +600,7 @@ class PageMain(tk.Frame):
                 self.btnReceived.config(state="normal")
             elif data[14] == "PENDING":
                 self.opsiStatus.current(3)
-            elif data[14] == "ONPROGRESS" or data[14] == "RETURNEDCS" or data[14] == "TAKENBYENG":
+            elif data[14] == "ONPROGRESS" or data[14] == "RETURNED" or data[14] == "TAKEN":
                 self.opsiStatus.current(0)
             else:
                 self.btnUpdate.config(state="normal")

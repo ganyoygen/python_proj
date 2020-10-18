@@ -75,7 +75,7 @@ class PageProg(tk.Frame):
         self.commitdate = ttk.Entry(entLeft, width=20)
         self.commitdate.grid(row=1, column=0,sticky=W)
         ttk.Label(entLeft, text='By :').grid(row=1, column=1, sticky=W,pady=5,padx=5)
-        self.commitby = ttk.Entry(entLeft, width=15)
+        self.commitby = ttk.Entry(entLeft, width=20)
         self.commitby.grid(row=1, column=2,sticky=W)
 
         self.btnPendAccp = Button(entLeft, text='Accept',\
@@ -251,12 +251,14 @@ class PageProg(tk.Frame):
                 message="SQL Log: {}".format(err))                           
 
     def commited_table(self,data):
+        # data = "no_ifca"
         try:
             db_config = read_db_config()
             con = mysql.connector.connect(**db_config)
             cur = con.cursor()
-            sql = "SELECT * FROM onprogress WHERE no_ifca LIKE %s"
-        #     data = "TN10020352"
+            # sql = "SELECT * FROM onprogress WHERE no_ifca LIKE %s"
+            sql = "SELECT date_update,commit_update,auth_by,auth_dept \
+                    FROM onprogress WHERE no_ifca LIKE %s"
             val = ("%{}%".format(data),)
             cur.execute(sql, val)
             results = cur.fetchall()
@@ -266,8 +268,8 @@ class PageProg(tk.Frame):
             # self.tabelcomm.column("No", width=10,anchor="w")
             self.tabelcomm.column("TANGGAL", width=110,anchor="w")
             self.tabelcomm.column("UPDATE", width=300,anchor="w")
-            self.tabelcomm.column("OLEH", width=80,anchor="w")
-            self.tabelcomm.column("DEPT", width=80,anchor="w")
+            self.tabelcomm.column("OLEH", width=110,anchor="w")
+            self.tabelcomm.column("DEPT", width=60,anchor="w")
             
             i=0
             for dat in results: 
@@ -275,8 +277,7 @@ class PageProg(tk.Frame):
                     baris="genap"
                 else:
                     baris="ganjil"
-                #tampilkan mulai dari tanggal
-                self.tabelcomm.insert('', 'end', values=dat[2:], tags=baris)
+                self.tabelcomm.insert('', 'end', values=dat, tags=baris)
                 i+=1
             self.tabelcomm.tag_configure("ganjil", background="gainsboro")
             self.tabelcomm.tag_configure("genap", background="floral white")
@@ -297,8 +298,9 @@ class PageProg(tk.Frame):
             db_config = read_db_config()
             con = mysql.connector.connect(**db_config)
             cur = con.cursor()
-            # sql = "SELECT no_wo, no_ifca, date_create, time_create, unit, work_req, staff, work_act, FROM logbook WHERE no_ifca = %s"
-            sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, work_act, time_create, status_ifca FROM logbook WHERE no_ifca = %s"
+            # sql = "SELECT no_wo, no_ifca, date_create, unit, work_req, staff, work_act, time_create, status_ifca FROM logbook WHERE no_ifca = %s"
+            sql = "SELECT no_wo,no_ifca,date_create,time_create,unit,\
+                work_req,staff,status_ifca FROM logbook WHERE no_ifca = %s"
             cur.execute(sql,(ifca_value,))
             data = cur.fetchone()
             self.progWo.insert(END, data[0])
@@ -309,23 +311,25 @@ class PageProg(tk.Frame):
             showtgl = str(getTgl)[8:] + '-' + str(getTgl)[5:7] +'-' + str(getTgl)[:4]
             self.progTgl.delete(0, END)
             self.progTgl.insert(END, showtgl)
-            self.progJam.insert(END, data[7])
-            self.progUnit.insert(END, data[3])
-            self.progWorkReq.insert(END, data[4])
-            self.progStaff.insert(END, data[5])
+            self.progJam.insert(END, data[3])
+            self.progUnit.insert(END, data[4])
+            self.progWorkReq.insert(END, data[5])
+            self.progStaff.insert(END, data[6])
             self.entrySet("progread")
             self.commitdate.config(state="disable")
-            if data[8] == "PENDING": 
-                self.btnCommUpdate.config(state="disable")
-                self.btnPendAccp.config(state="normal")
-            elif data[8] == "ONPROGRESS": 
-                self.btnCommUpdate.config(state="normal")
-                self.btnCommReturn.config(state="normal")
-            elif data[8] == "RETURNEDCS": 
-                self.btnCommTake.config(state="normal")
-            elif data[8] == "TAKENBYENG": 
-                self.btnCommDone.config(state="normal")
-            else : pass
+            if (self.dept == "ENG") or (self.dept == "CS"):
+                if data[7] == "PENDING": 
+                    self.btnCommUpdate.config(state="disable")
+                    self.btnPendAccp.config(state="normal")
+                elif data[7] == "ONPROGRESS": 
+                    self.btnCommUpdate.config(state="normal")
+                    self.btnCommReturn.config(state="normal")
+                elif (data[7] == "RETURNED") and (self.dept == "ENG"): 
+                    self.btnCommTake.config(state="normal")
+                elif (data[7] == "TAKEN") and (self.dept == "ENG"): 
+                    self.btnCommDone.config(state="normal")
+                else : pass
+            else : pass #fungsi diatas hanya untuk cs-eng
             self.commitby.focus_set()
             cur.close()
             con.close()            
@@ -370,8 +374,8 @@ class PageProg(tk.Frame):
         tipe = str(self.statwosel.get())
         if tipe == "PEND": self.progress_table("PENDING")
         elif tipe == "PROG": self.progress_table("ONPROGRESS")
-        elif tipe == "RETU": self.progress_table("RETURNEDCS")
-        elif tipe == "TAKE": self.progress_table("TAKENBYENG")
+        elif tipe == "RETU": self.progress_table("RETURNED")
+        elif tipe == "TAKE": self.progress_table("TAKEN")
         else : pass
         #########
 
@@ -383,6 +387,7 @@ class PageProg(tk.Frame):
             getIfca = self.progIfca.get()
             getUsrUpd = self.commitby.get()
             getcommit = self.commitDetail.get(1.0,END) # ('1.0', 'end')
+            accandusr = getUsrUpd.upper().strip()+"@"+self.user
             from datetime import datetime
             getTime = datetime.now()
             
@@ -395,9 +400,9 @@ class PageProg(tk.Frame):
                 self.commitDetail.focus_set()
                 self.commitDetail.delete('1.0','end')
             else:
-                sql = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
-                "VALUES(%s,%s,%s,%s,%s)"
-                cur.execute(sql,(getIfca,getTime,getcommit.strip(),getUsrUpd.upper(),""))
+                sql = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login,auth_dept)"+\
+                "VALUES(%s,%s,%s,%s,%s,%s)"
+                cur.execute(sql,(getIfca,getTime,getcommit.strip(),accandusr,self.user,self.dept))
                 messagebox.showinfo(title="Informasi",message="Update telah tersimpan oleh {}.".format(getUsrUpd))
                 self.progress_detail(self)
             con.commit()
@@ -414,18 +419,19 @@ class PageProg(tk.Frame):
             cur = con.cursor()
             getIfca = self.progIfca.get()
             getAccBy = self.commitby.get()
+            accandusr = getAccBy.upper().strip()+"@"+self.user
             from datetime import datetime
             getTimeAcc = datetime.now()
-            autocom = "WO Sudah diterima oleh {}.".format(getAccBy)
+            autocom = "[WO OnProgress] diterima oleh {}.".format(getAccBy.upper())
             setStatus = "ONPROGRESS"
             if len(getAccBy.strip()) == 0:
                 messagebox.showwarning(title="Peringatan",message="Siapa yang menerima WO?")
                 self.commitby.focus_set()
                 self.commitby.delete(0, END)
             else:
-                sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
-                "VALUES(%s,%s,%s,%s,%s)"
-                cur.execute(sql1,(getIfca,getTimeAcc,autocom,getAccBy.upper(),""))
+                sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login,auth_dept)"+\
+                "VALUES(%s,%s,%s,%s,%s,%s)"
+                cur.execute(sql1,(getIfca,getTimeAcc,autocom,accandusr,self.user,self.dept))
                 sql2 = "UPDATE logbook SET status_ifca=%s WHERE no_ifca =%s"
                 cur.execute(sql2,(setStatus,getIfca))
                 messagebox.showinfo(title="Informasi",message="WO sudah diterima oleh {}.".format(getAccBy))
@@ -447,22 +453,31 @@ class PageProg(tk.Frame):
             cur = con.cursor()
             getIfca = self.progIfca.get()
             getAccBy = self.commitby.get()
+            accandusr = getAccBy.upper().strip()+"@"+self.user
             from datetime import datetime
             getTimeAcc = datetime.now()
-            autocom = "WO Sudah dikembalikan ke ENG oleh {}.".format(getAccBy)
-            setStatus = "RETURNEDCS"
+            autocom = "[WO Return] dikembalikan oleh {}.".format(getAccBy.upper())
+            setStatus = "RETURNED"
+
+            cekaccp = "SELECT auth_dept FROM onprogress \
+                WHERE no_ifca = %s AND `commit_update` LIKE '%[WO OnProgress] diterima oleh%'"
+            cur.execute(cekaccp,(getIfca,))
+            data = cur.fetchone()
 
             if len(getAccBy.strip()) == 0:
                 messagebox.showwarning(title="Peringatan",message="Siapa yang mengembalikan WO?")
                 self.commitby.focus_set()
                 self.commitby.delete(0, END)
-            elif messagebox.askokcancel('Return WO','WO akan dikembalikan ke ENG?') == True: 
-                sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
-                "VALUES(%s,%s,%s,%s,%s)"
-                cur.execute(sql1,(getIfca,getTimeAcc,autocom,getAccBy.upper(),""))
+            elif self.dept != data[0]:
+                messagebox.showerror(title="Error",message="WO yang diterima oleh Dept. {0}, Tidak bisa dikembalikan oleh Dept. {1}.\r\n \
+                    \r\nWO Hanya bisa dikembalikan oleh Dept. yang sama saat WO diterima.".format(data[0],self.dept))
+            elif messagebox.askokcancel('Return WO','WO akan dikembalikan?') == True: 
+                sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login,auth_dept)"+\
+                "VALUES(%s,%s,%s,%s,%s,%s)"
+                cur.execute(sql1,(getIfca,getTimeAcc,autocom,accandusr,self.user,self.dept))
                 sql2 = "UPDATE logbook SET status_ifca=%s WHERE no_ifca =%s"
                 cur.execute(sql2,(setStatus,getIfca))
-                messagebox.showinfo(title="Informasi",message="WO Sudah dikembalikan ke ENG oleh {}.".format(getAccBy))
+                messagebox.showinfo(title="Informasi",message="WO Sudah dikembalikan oleh {}.".format(getAccBy))
                 self.progress_refresh()
             else: pass
             con.commit()
@@ -482,22 +497,23 @@ class PageProg(tk.Frame):
             cur = con.cursor()
             getIfca = self.progIfca.get()
             getAccBy = self.commitby.get()
+            accandusr = getAccBy.upper().strip()+"@"+self.user
             from datetime import datetime
             getTimeAcc = datetime.now()
-            autocom = "WO Sudah diterima dari CS ke ENG oleh {}.".format(getAccBy)
-            setStatus = "TAKENBYENG"
+            autocom = "[WO Taken] diterima oleh {}.".format(getAccBy.upper())
+            setStatus = "TAKEN"
 
             if len(getAccBy.strip()) == 0:
                 messagebox.showwarning(title="Peringatan",message="Siapa yang menerima WO?")
                 self.commitby.focus_set()
                 self.commitby.delete(0, END)
-            elif messagebox.askokcancel('Take WO','WO sudah diterima dari CS?') == True: 
-                sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
-                "VALUES(%s,%s,%s,%s,%s)"
-                cur.execute(sql1,(getIfca,getTimeAcc,autocom,getAccBy.upper(),""))
+            elif messagebox.askokcancel('Take WO','WO sudah diterima?') == True: 
+                sql1 = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login,auth_dept)"+\
+                "VALUES(%s,%s,%s,%s,%s,%s)"
+                cur.execute(sql1,(getIfca,getTimeAcc,autocom,accandusr,self.user,self.dept))
                 sql2 = "UPDATE logbook SET status_ifca=%s WHERE no_ifca =%s"
                 cur.execute(sql2,(setStatus,getIfca))
-                messagebox.showinfo(title="Informasi",message="WO Sudah diterima dari CS ke ENG oleh {}.".format(getAccBy))
+                messagebox.showinfo(title="Informasi",message="WO Sudah diterima oleh {}.".format(getAccBy))
                 self.progress_refresh()
             else: pass
             con.commit()
@@ -517,6 +533,7 @@ class PageProg(tk.Frame):
             cur = con.cursor()
             getIfca = self.progIfca.get()
             getAccBy = self.commitby.get()
+            accandusr = getAccBy.upper().strip()+"@"+self.user
             getcommit = self.commitDetail.get(1.0,END) # ('1.0', 'end')
             from datetime import datetime
             getRealTime = datetime.now()
@@ -535,15 +552,11 @@ class PageProg(tk.Frame):
                 setdate = PopupDateTime(self.parent)
                 setdate.parent.wait_window(setdate.top)
                 if len(setdate.value.strip()) > 0: 
-                    # output <tanggal> <jam>, lanjutkan perintah DONE
                     getdate, gettime = setdate.value.split() #pisah tanggal dan jam
-                    # print("setdate.value =",setdate.value)
-                    # print("tgl",getdate)
-                    # print("jam",gettime)
 
-                    sqllastcom = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login)"+\
-                    "VALUES(%s,%s,%s,%s,%s)"
-                    cur.execute(sqllastcom,(getIfca,getRealTime,getcommit.strip(),getAccBy.upper(),""))
+                    sqllastcom = "INSERT INTO onprogress (no_ifca,date_update,commit_update,auth_by,auth_login,auth_dept)"+\
+                    "VALUES(%s,%s,%s,%s,%s,%s)"
+                    cur.execute(sqllastcom,(getIfca,getRealTime,getcommit.strip(),accandusr,self.user,self.dept))
 
                     storedata = self.getDataComm(getIfca)
 
@@ -562,7 +575,7 @@ class PageProg(tk.Frame):
             messagebox.showerror(title="Error", \
                 message="SQL Log: {}".format(err)) 
 
-    def getDataComm(self,data):
+    def getDataComm(self,data): #PR: RAMPINGKAN DATA
         try:
             db_config = read_db_config()
             con = mysql.connector.connect(**db_config)

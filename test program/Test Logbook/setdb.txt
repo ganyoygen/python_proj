@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS `onprogress` (
   `commit_update` varchar(512) NOT NULL,
   `auth_by` varchar(16) NOT NULL,
   `auth_login` varchar(16) NOT NULL,
+  `auth_dept` varchar(32) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
