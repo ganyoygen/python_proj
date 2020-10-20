@@ -6,7 +6,7 @@ import time
 import datetime
 
 from mysqlcon import read_db_config
-from popup_date import PopupDateTime # popup set tgl jam
+from popup_date import PopupDateTime, CustomDateEntry # custom date module
 from tkinter import *
 from tkinter import ttk, messagebox, filedialog
 from tkinter.scrolledtext import ScrolledText
@@ -137,62 +137,71 @@ class PageMain(tk.Frame):
             command=self.onClear, width=10,\
             relief=RAISED, bd=2, bg="#666", fg="white",\
             activebackground="#444",activeforeground="white")
-        self.btnClear.grid(row=1, column=1,pady=10,padx=5)
+        self.btnClear.grid(row=1, column=1,pady=0,padx=5)
 
         self.btnSave = Button(self.midFrame, text='Save',\
             command=self.onSave, width=10,\
             relief=RAISED, bd=2, bg="#666", fg="white",\
             activebackground="#444",activeforeground="white" )
-        self.btnSave.grid(row=1,column=2,pady=10,padx=5)
+        self.btnSave.grid(row=1,column=2,pady=0,padx=5)
 
         self.btnUpdate = Button(self.midFrame, text='Update',\
             command=self.onUpdate,state="disable", width=10,\
             relief=RAISED, bd=2, bg="#666", fg="white",\
             activebackground="#444",activeforeground="white")
-        self.btnUpdate.grid(row=1,column=3,pady=10,padx=5)
+        self.btnUpdate.grid(row=1,column=3,pady=0,padx=5)
 
         self.btnDelete = Button(self.midFrame, text='Delete',\
             command=self.onDelete,state="disable", width=10,\
             relief=RAISED, bd=2, bg="#FC6042", fg="white",\
             activebackground="#444",activeforeground="white")
-        self.btnDelete.grid(row=1,column=4,pady=10,padx=5)
+        self.btnDelete.grid(row=1,column=4,pady=0,padx=5)
 
         self.btnReceived = Button(self.midFrame, text='Received',\
             command=self.onReceived,state="disable", width=10,\
             relief=RAISED, bd=2, bg="#667", fg="white",\
             activebackground="#444",activeforeground="white")
-        self.btnReceived.grid(row=1,column=5,pady=10,padx=5)
+        self.btnReceived.grid(row=1,column=5,pady=0,padx=5)
 
-        # Label(self.midFrame, text="Search :").grid(row=1, column=1, sticky=E,padx=20)
-        self.opsicari = ttk.Combobox(self.midFrame, \
+    def komponenBawah(self):
+        # search and export
+        row1 = ttk.Frame(self.botFrame)
+        row1.grid(row=0,column=1,sticky=W,padx=10)
+        self.opsicari = ttk.Combobox(row1, \
             values = ["IFCA","Tanggal", "Unit", "Work Req."], \
             state="readonly", width=10)
         self.opsicari.current(1)
         self.opsicari.grid(row=2, column=1,sticky=W)
+        self.opsicari.bind('<<ComboboxSelected>>',self.boxsearchsel)
 
-        self.entCari = ttk.Entry(self.midFrame, width=20)
-        self.entCari.grid(row=2, column=2,sticky=W)
+        self.entCari = ttk.Entry(row1, width=20)
+        self.entCari.grid(row=2, column=2)
+        self.dateStart = CustomDateEntry(row1,width=10,locale='en_UK')
+        self.dateEnd = CustomDateEntry(row1,width=10,locale='en_UK')
+        # self.dateStart.grid(row=2,column=2)
+        ttk.Label(row1, text='~').grid(row=2,column=3)
+        # self.dateEnd.grid(row=2,column=4)
+
         # self.entCari.bind('<KeyRelease>',self.onSearch) #cari saat input apapun
         
-        self.btnSearch = Button(self.midFrame, text='Search',\
+        self.btnSearch = Button(row1, text='Search',\
             command=self.onSearch,\
             state="normal", width=10,\
             relief=RAISED, bd=2, bg="#667", fg="white",\
             activebackground="#444",activeforeground="white")
-        self.btnSearch.grid(row=2,column=3,pady=10,padx=5)
+        self.btnSearch.grid(row=2,column=6,pady=10,padx=5)
 
-        self.btnMainExp = Button(self.midFrame, text='Export',\
+        self.btnMainExp = Button(row1, text='Export',\
             command=self.onMainExport,\
             state="normal", width=10,\
             relief=RAISED, bd=2, \
             bg="#558", fg="white", \
             activebackground="#444",activeforeground="white")
-        self.btnMainExp.grid(row=2,column=4,pady=10,padx=5)
+        self.btnMainExp.grid(row=2,column=7,pady=10,padx=5)
 
-    def komponenBawah(self):
         #tabel
         listifca = ttk.Frame(self.botFrame)
-        listifca.grid(row=1,column=1)
+        listifca.grid(row=2,column=1,sticky=W,padx=10)
         self.tabelIfca = ttk.Treeview(listifca, columns=judul_kolom,show='headings')
         self.tabelIfca.bind("<Double-1>", self.mainlog_detail)
         sbVer = ttk.Scrollbar(listifca, orient='vertical',command=self.tabelIfca.yview)
@@ -311,6 +320,16 @@ class PageMain(tk.Frame):
         else:
                 return None
 
+    def boxsearchsel(self,event):
+        if self.opsicari.get() == "Tanggal":
+            self.entCari.grid_forget()
+            self.dateStart.grid(row=2,column=2)
+            self.dateEnd.grid(row=2,column=4)
+        else:
+            self.dateStart.grid_forget()
+            self.dateEnd.grid_forget()
+            self.entCari.grid(row=2, column=2,sticky=W)
+
     def search_data(self,opsi,data):
         try:
             db_config = read_db_config()
@@ -332,22 +351,25 @@ class PageMain(tk.Frame):
         self.entrySet("mainclear")
         self.opsiStatus.current(0)
         if opsi == "Tanggal":
-                cari = self.checktgl(cari)
+            if self.dateStart.get() == self.dateEnd.get():
+                cari = self.checktgl(self.dateStart.get())
                 sql = "SELECT * FROM logbook WHERE date_create LIKE %s ORDER BY date_create DESC"
+                # sql2 = "SELECT * FROM `logbook` WHERE (date_create BETWEEN '2019-12-01 00:00:00' AND '2019-12-05 00:00:00')"
                 val = ("%{}%".format(cari),)
                 self.search_data(sql,val)
+            else: pass #part jika search between date
         elif opsi == "IFCA":
-                sql = "SELECT * FROM logbook WHERE no_ifca LIKE %s ORDER BY no_ifca DESC"
-                val = ("%{}%".format(cari),)
-                self.search_data(sql,val)
+            sql = "SELECT * FROM logbook WHERE no_ifca LIKE %s ORDER BY no_ifca DESC"
+            val = ("%{}%".format(cari),)
+            self.search_data(sql,val)
         elif opsi == "Unit":
-                sql = "SELECT * FROM logbook WHERE unit LIKE %s ORDER BY date_create DESC"
-                val = ("%{}%".format(cari),)
-                self.search_data(sql,val)
+            sql = "SELECT * FROM logbook WHERE unit LIKE %s ORDER BY date_create DESC"
+            val = ("%{}%".format(cari),)
+            self.search_data(sql,val)
         elif opsi == "Work Req.":
-                sql = "SELECT * FROM logbook WHERE work_req LIKE %s ORDER BY date_create DESC"
-                val = ("%{}%".format(cari),)
-                self.search_data(sql,val)
+            sql = "SELECT * FROM logbook WHERE work_req LIKE %s ORDER BY date_create DESC"
+            val = ("%{}%".format(cari),)
+            self.search_data(sql,val)
 
     def auto_wo(self):
         try:
@@ -650,12 +672,16 @@ class PageMain(tk.Frame):
         self.rbtnTN.config(state="normal")
         self.tabelIfca.delete(*self.tabelIfca.get_children())
         self.entCari.delete(0, END)
+        self.dateStart.delete(0, END)
+        self.dateEnd.delete(0, END)
         self.opsiStatus.current(0)
         # list wo hari ini
         self.opsicari.current(1)
+        self.boxsearchsel(None)
         from datetime import date
         today = date.today()
-        self.entCari.insert(END,today.strftime("%d-%m-%Y"))
+        self.dateStart.insert(END,today.strftime("%d-%m-%Y"))
+        self.dateEnd.insert(END,today.strftime("%d-%m-%Y"))
         self.onSearch()
         self.auto_wo()
         self.entUnit.focus_set()
