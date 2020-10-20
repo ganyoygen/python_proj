@@ -580,20 +580,20 @@ class PageProg(tk.Frame):
             db_config = read_db_config()
             con = mysql.connector.connect(**db_config)
             cur = con.cursor()
-            sql = "SELECT * FROM onprogress WHERE no_ifca LIKE %s"
+            sql = "SELECT date_update,commit_update,auth_by,auth_dept \
+                    FROM onprogress WHERE no_ifca LIKE %s"
         #     data = "TN10020352"
             val = ("%{}%".format(data),)
             cur.execute(sql, val)
             results = cur.fetchall()
             
-            i=0
             self.commitDetail.delete('1.0', 'end')
             for dat in results: 
                 #tampilkan mulai dari tanggal
                 # nantinya kumpulkan dulu data progres selanjutnya store ke sql
-                self.commitDetail.insert(END, dat[2:])
+                self.commitDetail.insert(END, dat)
                 self.commitDetail.insert(END, "\r\n")
-                i+=1
+
             getcom = self.commitDetail.get(1.0,END)
             self.commitDetail.delete('1.0', 'end')
             cur.close()
