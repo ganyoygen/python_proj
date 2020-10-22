@@ -322,10 +322,12 @@ class PageMain(tk.Frame):
 
     def boxsearchsel(self,event):
         if self.opsicari.get() == "Tanggal":
+            self.entCari.delete(0, END)
             self.entCari.grid_forget()
             self.dateStart.grid(row=2,column=2)
             self.dateEnd.grid(row=2,column=4)
         else:
+            self.entCari.delete(0, END)
             self.dateStart.grid_forget()
             self.dateEnd.grid_forget()
             self.entCari.grid(row=2, column=2,sticky=W)
@@ -346,30 +348,36 @@ class PageMain(tk.Frame):
                 message="SQL Log: {}".format(err)) 
 
     def onSearch(self):
+        self.entrySet("mainclear")
+        self.opsiStatus.current(0)
+        self.querySearch() # set dulu variabel self.sql dan self.val
+        self.search_data(self.sql,self.val)
+
+    def querySearch(self):
         opsi = self.opsicari.get()
         cari = self.entCari.get()
         self.entrySet("mainclear")
-        self.opsiStatus.current(0)
         if opsi == "Tanggal":
             if self.dateStart.get() == self.dateEnd.get():
                 cari = self.checktgl(self.dateStart.get())
-                sql = "SELECT * FROM logbook WHERE date_create LIKE %s ORDER BY date_create DESC"
-                # sql2 = "SELECT * FROM `logbook` WHERE (date_create BETWEEN '2019-12-01 00:00:00' AND '2019-12-05 00:00:00')"
-                val = ("%{}%".format(cari),)
-                self.search_data(sql,val)
-            else: pass #part jika search between date
+                self.sql = "SELECT * FROM logbook WHERE date_create LIKE %s ORDER BY date_create DESC"
+                self.val = ("%{}%".format(cari),)
+            else: #part jika search between date
+                # self.sql = "SELECT * FROM logbook WHERE (date_create BETWEEN '2019-12-31 00:00:00' AND '2020-10-31 00:00:00')"
+                sdate = self.checktgl(self.dateStart.get())
+                edate = self.checktgl(self.dateEnd.get())
+                self.sql = "SELECT * FROM logbook WHERE (date_create BETWEEN %s AND %s)"
+                self.val = ('{}'.format(sdate),'{}'.format(edate))
         elif opsi == "IFCA":
-            sql = "SELECT * FROM logbook WHERE no_ifca LIKE %s ORDER BY no_ifca DESC"
-            val = ("%{}%".format(cari),)
-            self.search_data(sql,val)
+            self.sql = "SELECT * FROM logbook WHERE no_ifca LIKE %s ORDER BY no_ifca DESC"
+            self.val = ("%{}%".format(cari),)
         elif opsi == "Unit":
-            sql = "SELECT * FROM logbook WHERE unit LIKE %s ORDER BY date_create DESC"
-            val = ("%{}%".format(cari),)
-            self.search_data(sql,val)
+            self.sql = "SELECT * FROM logbook WHERE unit LIKE %s ORDER BY date_create DESC"
+            self.val = ("%{}%".format(cari),)
         elif opsi == "Work Req.":
-            sql = "SELECT * FROM logbook WHERE work_req LIKE %s ORDER BY date_create DESC"
-            val = ("%{}%".format(cari),)
-            self.search_data(sql,val)
+            self.sql = "SELECT * FROM logbook WHERE work_req LIKE %s ORDER BY date_create DESC"
+            self.val = ("%{}%".format(cari),)
+        else: pass
 
     def auto_wo(self):
         try:
@@ -459,35 +467,20 @@ class PageMain(tk.Frame):
         self.tabelIfca.tag_configure("genap", background="floral white")                              
 
     def onMainExport(self):
-        opsi = self.opsicari.get()
-        cari = self.entCari.get()
-        if opsi == "Tanggal":
-                cari = self.checktgl(cari)
-                sql = "SELECT * FROM logbook WHERE date_create LIKE %s"
-                val = ("%{}%".format(cari),)
-        elif opsi == "IFCA":
-                sql = "SELECT * FROM logbook WHERE no_ifca LIKE %s"
-                val = ("%{}%".format(cari),)
-        elif opsi == "Unit":
-                sql = "SELECT * FROM logbook WHERE unit LIKE %s"
-                val = ("%{}%".format(cari),)
-        elif opsi == "Work Req.":
-                sql = "SELECT * FROM logbook WHERE work_req LIKE %s"
-                val = ("%{}%".format(cari),)
-                
+        self.querySearch() # set dulu variabel sql dan val
         try:
             db_config = read_db_config()
             con = mysql.connector.connect(**db_config)
             cur = con.cursor()
-            cur.execute(sql,val)
+            cur.execute(self.sql,self.val)
             results = cur.fetchall()
             if len(results) <= 0:
-                    cur.close()
-                    con.close()
-                    return # stop aja karena kosong
+                cur.close()
+                con.close()
+                return # stop aja karena kosong
         
             directory = filedialog.asksaveasfilename(initialdir = os.getcwd(), \
-                initialfile = cari, \
+                initialfile = self.entCari.get(), \
                 defaultextension='.csv', \
                 title="Save file Export", \
                 filetypes=[("Excel CSV", "*.csv"),("All", "*.*")])
@@ -512,7 +505,7 @@ class PageMain(tk.Frame):
             cur.close()
             con.close()
             messagebox.showinfo(title="Export File", \
-                    message="Sudah tersimpan di: {}".format(directory))
+                message="Sudah tersimpan di: {}".format(directory))
 
         except mysql.connector.Error as err:
             messagebox.showerror(title="Error", \
