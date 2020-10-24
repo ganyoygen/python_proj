@@ -243,6 +243,7 @@ class PageMain(tk.Frame):
             self.entRecDate.config(state="normal")
             self.btnDelete.config(state="disable")
             self.btnReceived.config(state="disable")
+            self.btnUpdate.config(state="disable")
 
             # A. readonly aja, input pake popup
             self.entTglbuat.config(state="readonly")
@@ -255,7 +256,6 @@ class PageMain(tk.Frame):
             self.btnDateCreate.config(state="disable")
             self.btnDateDone.config(state="disable")
             self.btnSave.config(state="disable")
-            self.btnUpdate.config(state="disable")
             self.rbtnBM.config(state="disable")
             self.rbtnTN.config(state="disable")
         elif opsi == "mainreadifca":
@@ -356,7 +356,6 @@ class PageMain(tk.Frame):
     def querySearch(self):
         opsi = self.opsicari.get()
         cari = self.entCari.get()
-        self.entrySet("mainclear")
         if opsi == "Tanggal":
             if self.dateStart.get() == self.dateEnd.get():
                 cari = self.checktgl(self.dateStart.get())
@@ -618,8 +617,9 @@ class PageMain(tk.Frame):
             elif data[14] == "ONPROGRESS" or data[14] == "RETURNED" or data[14] == "TAKEN":
                 self.opsiStatus.current(0)
             else:
-                self.btnUpdate.config(state="normal")
-                self.btnDateDone.config(state="normal")
+                if self.dept == "ENG": # khusus class ENG
+                    self.btnUpdate.config(state="normal")
+                    self.btnDateDone.config(state="normal")
                 self.opsiStatus.current(0)
             if data[10] == True and ifca_value[:2] == "TN":
                 # tidak dapat receive wo TN karena sudah direceive
@@ -656,13 +656,13 @@ class PageMain(tk.Frame):
                 message="SQL Log: {}".format(err))
 
     def onClear(self):
-        self.entrySet("mainclear")
         self.entrySet("disablebtn")
-        self.btnDateCreate.config(state="normal")
-        self.btnDateDone.config(state="normal")
-        self.btnSave.config(state="normal")
-        self.rbtnBM.config(state="normal")
-        self.rbtnTN.config(state="normal")
+        if self.dept == "ENG": # khusus class ENG
+            self.btnDateCreate.config(state="normal")
+            self.btnDateDone.config(state="normal")
+            self.btnSave.config(state="normal")
+            self.rbtnBM.config(state="normal")
+            self.rbtnTN.config(state="normal")
         self.tabelIfca.delete(*self.tabelIfca.get_children())
         self.entCari.delete(0, END)
         self.dateStart.delete(0, END)
