@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS `acct` (
   `passhash` varchar(20) NOT NULL,
   `dept` varchar(20) NOT NULL,
   `date_create` datetime NOT NULL,
+  `activated` tinyint(1) NOT NULL,
   `lock` tinyint(1) default NULL,
   `date_lock` datetime NOT NULL,
   `last_login` datetime NOT NULL,

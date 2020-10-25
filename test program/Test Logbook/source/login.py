@@ -4,7 +4,7 @@ from mysqlcon import read_db_config
 from tkinter import *
 from tkinter import ttk, messagebox
 from ttkthemes import ThemedTk # make sure to pip install ttkthemes
-
+from regacct import RegisterAcct
 
 root = ThemedTk(theme='aquativo')
 
@@ -35,6 +35,10 @@ class Login:
         self.buttonLogin = ttk.Button(self.parent, text="Login", command=self.proses,\
                              width=10)
         self.buttonLogin.grid(row=2, column=1)
+
+        self.btnRegAcct = ttk.Button(self.parent, text="Register", command=self.regacct,\
+                             width=10)
+        self.btnRegAcct.grid(row=2, column=2)
 
         self.entryUsername.focus_set()
 
@@ -78,6 +82,10 @@ class Login:
             self.entryUsername.delete(0, END)
             self.entryPassword.delete(0, END)
             self.entryUsername.focus_set()
+
+    def regacct(self):
+        regacct = RegisterAcct(self.parent)
+        regacct.parent.wait_window(regacct.top)
 
 def main():
     Login(root, "Login Program")
