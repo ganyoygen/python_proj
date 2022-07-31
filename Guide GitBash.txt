@@ -1,5 +1,10 @@
+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
+
 git config --global user.name "ganyoygen"
 git config --global user.email "ganyoy.gen@gmail.com"
+
+git clone https://github.com/ganyoygen/wo-logbook.git
+
 git init
 git remote add origin https://github.com/ganyoygen/python_proj.git
 git pull origin master
